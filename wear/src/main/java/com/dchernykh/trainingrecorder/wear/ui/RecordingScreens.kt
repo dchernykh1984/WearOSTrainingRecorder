@@ -79,7 +79,13 @@ fun DataScreen(
 ) {
     val slots = screen.slots
     when (shape) {
-        ScreenShape.ROUND -> RoundBands(bands = LayoutPlanner.planRound(slots.size), slots = slots, values = values, modifier = modifier)
+        ScreenShape.ROUND ->
+            RoundBands(
+                bands = LayoutPlanner.planRound(slots.size),
+                slots = slots,
+                values = values,
+                modifier = modifier,
+            )
         ScreenShape.SQUARE -> SquareGrid(slots = slots, values = values, modifier = modifier)
     }
 }
