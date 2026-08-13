@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Declares that the companion does not need watch hardware. This alone does
-         NOT keep it off watches - it only makes the APK eligible on both form
-         factors. Watches get the wear APK because Play's form-factor targeting
-         prefers the one declaring android.hardware.type.watch as required.
-         The gap: a Wear OS 2 watch (API 26-29) is below the wear module's
-         minSdk 30, so it can still match this APK. Exclude those in the Play
-         Console device rules if it ever matters. -->
-    <uses-feature
-        android:name="android.hardware.type.watch"
-        android:required="false" />
+    <!-- This manifest deliberately does NOT declare
+         <uses-feature android:name="android.hardware.type.watch">. Android Lint
+         rejects android:required="false" on it outright
+         (InvalidWearFeatureAttribute: "A single APK for Wear and non-Wear devices
+         is not supported"), and required="true" would restrict the companion to
+         watches. Simply omitting it is how a handheld APK declares itself: Play
+         routes watches to the wear APK, which declares the feature as required. -->
 
     <!-- See the comment in the wear manifest: no automatic Google Drive backup of
          third-party OAuth tokens or workout data. -->
