@@ -11,9 +11,11 @@ complexity:
     ignoreAnnotated: ['Composable']
   TooManyFunctions:
     # Immutable configuration types expose the same operation once per tier
-    # (default / discipline / sport), so a coherent class lands just past the
-    # default of 11 without being complex.
+    # (default / discipline / sport), and a formatter has one small function per
+    # unit it renders. Both land just past the default of 11 while staying
+    # simple; splitting them would scatter closely related code.
     thresholdInClasses: 15
+    thresholdInObjects: 15
 
 naming:
   FunctionNaming:
