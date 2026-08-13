@@ -1,8 +1,11 @@
 package com.dchernykh.trainingrecorder.wear.sync
 
 import android.content.Context
+import com.dchernykh.trainingrecorder.core.connector.CredentialContract
 import com.dchernykh.trainingrecorder.core.datalayer.SyncContract
 import com.dchernykh.trainingrecorder.core.datalayer.WatchSettings
+import com.dchernykh.trainingrecorder.wear.upload.CredentialStore
+import com.dchernykh.trainingrecorder.wear.upload.UploadWorker
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.Wearable
@@ -19,13 +22,21 @@ import java.io.File
  */
 class SettingsListener : WearableListenerService() {
     override fun onDataChanged(events: com.google.android.gms.wearable.DataEventBuffer) {
-        events
-            .filter { it.type == DataEvent.TYPE_CHANGED && it.dataItem.uri.path == WatchSettings.PATH }
-            .forEach { event ->
-                val payload =
-                    DataMapItem.fromDataItem(event.dataItem).dataMap.getString(SettingsStore.KEY_PAYLOAD)
-                if (payload != null) SettingsStore(this).write(payload)
+        events.filter { it.type == DataEvent.TYPE_CHANGED }.forEach { event ->
+            val dataMap = DataMapItem.fromDataItem(event.dataItem).dataMap
+            when (event.dataItem.uri.path) {
+                WatchSettings.PATH ->
+                    dataMap.getString(SettingsStore.KEY_PAYLOAD)?.let { SettingsStore(this).write(it) }
+                CredentialContract.PATH ->
+                    dataMap.getString(CredentialContract.KEY_PAYLOAD)?.let {
+                        CredentialStore(this).write(it)
+                        // A service the rider just connected has a backlog
+                        // waiting for it: everything recorded before they got
+                        // round to setting it up.
+                        UploadWorker.schedule(this)
+                    }
             }
+        }
     }
 }
 
