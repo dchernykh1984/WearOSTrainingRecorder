@@ -135,4 +135,7 @@
     <string name="config_level_discipline">Van discipline</string>
     <string name="config_level_sport_type">Eigen instellingen</string>
     <string name="screen_count">%d schermen</string>
+
+    <string name="recording_notification_title">Training wordt opgenomen</string>
+    <string name="recording_channel_name">Opname</string>
 </resources>

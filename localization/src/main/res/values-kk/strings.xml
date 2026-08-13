@@ -135,4 +135,7 @@
     <string name="config_level_discipline">Бағыттан</string>
     <string name="config_level_sport_type">Жеке баптау</string>
     <string name="screen_count">экран: %d</string>
+
+    <string name="recording_notification_title">Жаттығу жазылуда</string>
+    <string name="recording_channel_name">Жазу</string>
 </resources>

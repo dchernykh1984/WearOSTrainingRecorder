@@ -162,7 +162,7 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":localization"))
 
-    implementation(libs.androidx.core.ktx)
+
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -174,6 +174,7 @@ dependencies {
     implementation(libs.androidx.wear.compose.navigation)
     implementation(libs.androidx.wear.tooling.preview)
     implementation(libs.androidx.wear.ongoing)
+
 
     implementation(libs.androidx.health.services.client)
     implementation(libs.kotlinx.coroutines.android)
