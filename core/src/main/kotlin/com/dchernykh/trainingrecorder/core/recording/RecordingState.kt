@@ -113,10 +113,17 @@ data class RecordingState(
 
     fun discard(): RecordingState = RecordingState()
 
-    /** Wall-clock time since the rider tapped start, pauses included. */
+    /**
+     * Wall-clock time since the rider tapped start, pauses included.
+     *
+     * Frozen once the recording is finished: it is what the FIT session reports
+     * as total elapsed time, and a value that keeps growing after the ride would
+     * put an ever-lengthening workout into the file.
+     */
     fun elapsedMillisAt(nowEpochMs: Long): Long {
         val start = startedAtEpochMs ?: return 0
-        return (nowEpochMs - start).coerceAtLeast(0)
+        val end = if (phase == RecordingPhase.FINISHED) lastTransitionAtEpochMs ?: nowEpochMs else nowEpochMs
+        return (end - start).coerceAtLeast(0)
     }
 
     /** Time the recording was actually running, which is what a session reports. */

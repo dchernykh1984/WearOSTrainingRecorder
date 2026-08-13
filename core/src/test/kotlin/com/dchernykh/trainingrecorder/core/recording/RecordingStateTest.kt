@@ -71,6 +71,15 @@ class RecordingStateTest {
     }
 
     @Test
+    fun finishingFreezesElapsedTimeToo() {
+        // Elapsed time is what the FIT session reports; if it kept running the
+        // recorded workout would grow for as long as the app stayed open.
+        val finished = running().finish(t0 + 65_000)
+        assertEquals(65_000, finished.elapsedMillisAt(t0 + 65_000))
+        assertEquals(65_000, finished.elapsedMillisAt(t0 + 999_000))
+    }
+
+    @Test
     fun finishingFreezesMovingTime() {
         val finished = running().finish(t0 + 65_000)
         assertEquals(RecordingPhase.FINISHED, finished.phase)
