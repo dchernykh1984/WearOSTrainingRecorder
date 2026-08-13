@@ -200,4 +200,9 @@
     <string name="profile_csc">Каденс және жылдамдық</string>
     <string name="profile_cps">Қуат</string>
     <string name="profile_rsc">Жүгіру сенсоры</string>
+    <string name="connect_in_progress">Қосылуда...</string>
+    <string name="connect_done">Қосылды</string>
+    <string name="connect_failed">Қосылу мүмкін болмады. Деректерді тексеріп, қайталаңыз.</string>
+    <string name="connect_needs_application">Алдымен қолданбаңыздың Client ID және Secret мәнін енгізіңіз.</string>
+    <string name="connect_garmin_token_hint">Garmin Connect токенін қойыңыз. Автоматты кіру әзірге қолжетімсіз.</string>
 </resources>

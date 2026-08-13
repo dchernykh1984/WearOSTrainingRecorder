@@ -200,4 +200,9 @@
     <string name="profile_csc">Kadence a rychlost</string>
     <string name="profile_cps">Výkon</string>
     <string name="profile_rsc">Běžecký senzor</string>
+    <string name="connect_in_progress">Pripojovani...</string>
+    <string name="connect_done">Pripojeno</string>
+    <string name="connect_failed">Pripojeni se nezdarilo. Zkontrolujte udaje a zkuste to znovu.</string>
+    <string name="connect_needs_application">Nejprve zadejte Client ID a Secret sve aplikace.</string>
+    <string name="connect_garmin_token_hint">Vlozte token z Garmin Connect. Automaticke prihlaseni zatim neni k dispozici.</string>
 </resources>

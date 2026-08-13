@@ -200,4 +200,9 @@
     <string name="profile_csc">Cadência e velocidade</string>
     <string name="profile_cps">Potência</string>
     <string name="profile_rsc">Sensor de corrida</string>
+    <string name="connect_in_progress">Conectando...</string>
+    <string name="connect_done">Conectado</string>
+    <string name="connect_failed">Nao foi possivel conectar. Verifique os dados e tente novamente.</string>
+    <string name="connect_needs_application">Informe primeiro o Client ID e o Secret do seu aplicativo.</string>
+    <string name="connect_garmin_token_hint">Cole um token do Garmin Connect. O login automatico ainda nao esta disponivel.</string>
 </resources>

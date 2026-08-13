@@ -193,4 +193,9 @@
     <string name="profile_csc">踏频和速度</string>
     <string name="profile_cps">功率</string>
     <string name="profile_rsc">跑步传感器</string>
+    <string name="connect_in_progress">正在连接...</string>
+    <string name="connect_done">已连接</string>
+    <string name="connect_failed">无法连接。请检查信息后重试。</string>
+    <string name="connect_needs_application">请先填写应用的 Client ID 和 Secret。</string>
+    <string name="connect_garmin_token_hint">请粘贴 Garmin Connect 的令牌。暂不支持自动登录。</string>
 </resources>
