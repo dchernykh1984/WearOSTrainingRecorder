@@ -71,10 +71,18 @@ class WorkoutRepository(
         workoutId: String,
         connectorId: String,
         state: UploadState,
+        attempts: Int,
     ) {
         writeIndex(
             loadIndex().map {
-                if (it.id == workoutId) it.copy(uploads = it.uploads + (connectorId to state)) else it
+                if (it.id != workoutId) {
+                    it
+                } else {
+                    it.copy(
+                        uploads = it.uploads + (connectorId to state),
+                        uploadAttempts = it.uploadAttempts + (connectorId to attempts),
+                    )
+                }
             },
         )
     }
@@ -113,6 +121,12 @@ class WorkoutRepository(
                 distanceMeters = number(node, "distance") ?: 0.0,
                 fileSizeBytes = number(node, "bytes")?.toLong() ?: 0,
                 uploads = uploads,
+                uploadAttempts =
+                    (node["attempts"] as? JsonObject)
+                        ?.mapNotNull { (key, value) ->
+                            (value as? JsonPrimitive)?.content?.toIntOrNull()?.let { key to it }
+                        }?.toMap()
+                        .orEmpty(),
             )
         }.getOrNull()
     }
@@ -132,6 +146,10 @@ class WorkoutRepository(
                             put(
                                 "uploads",
                                 buildJsonObject { summary.uploads.forEach { (k, v) -> put(k, v.id) } },
+                            )
+                            put(
+                                "attempts",
+                                buildJsonObject { summary.uploadAttempts.forEach { (k, v) -> put(k, v) } },
                             )
                         },
                     )
