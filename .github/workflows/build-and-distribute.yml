@@ -110,8 +110,14 @@ jobs:
             echo "::warning::'$tag' is not a vX.Y.Z tag; using version code base 1."
             code=1
           fi
+          # On the workflow_dispatch path the "version" is a branch name, which
+          # may contain slashes ("feat/signing-test"). Those would turn the staged
+          # artifact path into a non-existent subdirectory and break the one flow
+          # that trigger exists for, so filenames use a sanitized slug.
+          slug="$(printf '%s' "$name" | tr -c 'A-Za-z0-9._-' '-')"
           echo "tag=${tag}" >> "$GITHUB_OUTPUT"
           echo "name=${name}" >> "$GITHUB_OUTPUT"
+          echo "slug=${slug}" >> "$GITHUB_OUTPUT"
           echo "code=${code}" >> "$GITHUB_OUTPUT"
         env:
           # inputs.tag is set on workflow_call; otherwise use the pushed tag.
@@ -135,9 +141,9 @@ jobs:
         run: |
           mkdir -p dist
           cp wear/build/outputs/apk/release/wear-release.apk \
-            "dist/trainingrecorder-wear-${{ steps.version.outputs.name }}.apk"
+            "dist/trainingrecorder-wear-${{ steps.version.outputs.slug }}.apk"
           cp mobile/build/outputs/apk/release/mobile-release.apk \
-            "dist/trainingrecorder-mobile-${{ steps.version.outputs.name }}.apk"
+            "dist/trainingrecorder-mobile-${{ steps.version.outputs.slug }}.apk"
 
       # R8 is on for release builds, so a crash report from a published APK is
       # unreadable without the mapping file for that exact build. It lives only in
@@ -151,7 +157,7 @@ jobs:
               echo "::error::${src} is missing but R8 minification is enabled."
               exit 1
             fi
-            cp "$src" "dist/trainingrecorder-${module}-${{ steps.version.outputs.name }}-mapping.txt"
+            cp "$src" "dist/trainingrecorder-${module}-${{ steps.version.outputs.slug }}-mapping.txt"
           done
 
       - name: Verify APK signatures
