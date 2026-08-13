@@ -139,4 +139,10 @@
     <string name="action_resume">Resume</string>
     <string name="action_finish">Finish</string>
     <string name="action_discard">Discard</string>
+
+    <!-- Screen configuration -->
+    <string name="config_level_default">Default</string>
+    <string name="config_level_discipline">From discipline</string>
+    <string name="config_level_sport_type">Own settings</string>
+    <string name="screen_count">%d screens</string>
 </resources>
