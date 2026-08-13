@@ -38,6 +38,7 @@ object FieldFormatter {
     private const val SHORT_DISTANCE_METERS = 1000.0
     private const val PRECISE_DISTANCE_KM = 100.0
     private const val FEET_PER_MILE = 5280
+    private const val SWIM_UNIT_METERS = 100.0
 
     /** A pace slower than this is a stop, not a pace worth showing. */
     private const val SLOWEST_MEANINGFUL_PACE_SECONDS = 3599.0
@@ -105,13 +106,28 @@ object FieldFormatter {
         metersPerSecond: Double?,
         units: UnitSystem = UnitSystem.METRIC,
     ): String {
-        if (metersPerSecond == null || metersPerSecond <= 0) return empty
         val unitMeters = if (units == UnitSystem.METRIC) METERS_PER_KM else METERS_PER_MILE
+        val suffix = if (units == UnitSystem.METRIC) "/km" else "/mi"
+        return paceOver(metersPerSecond, unitMeters, suffix)
+    }
+
+    /**
+     * Swimming pace, per 100 m regardless of the unit system: every pool in the
+     * world is measured in metres, and a swimmer who reads miles per hour on the
+     * bike still wants 1:45 /100m in the water.
+     */
+    fun pacePer100m(metersPerSecond: Double?): String = paceOver(metersPerSecond, SWIM_UNIT_METERS, "/100m")
+
+    private fun paceOver(
+        metersPerSecond: Double?,
+        unitMeters: Double,
+        suffix: String,
+    ): String {
+        if (metersPerSecond == null || metersPerSecond <= 0) return empty
         val secondsPerUnit = unitMeters / metersPerSecond
         if (secondsPerUnit > SLOWEST_MEANINGFUL_PACE_SECONDS) return empty
         val minutes = (secondsPerUnit / SECONDS_PER_MINUTE).toInt()
         val seconds = (secondsPerUnit % SECONDS_PER_MINUTE).roundToInt()
-        val suffix = if (units == UnitSystem.METRIC) "/km" else "/mi"
         return if (seconds == SECONDS_PER_MINUTE) {
             "${minutes + 1}:00$suffix"
         } else {
@@ -139,6 +155,15 @@ object FieldFormatter {
     }
 
     fun percent(value: Double?): String = if (value == null) empty else "${value.roundToInt()}%"
+
+    /**
+     * For ratios that live below one - intensity factor, watts per kilogram -
+     * where rounding to a whole number throws the field away entirely.
+     */
+    fun decimal(
+        value: Double?,
+        decimals: Int = 2,
+    ): String = if (value == null) empty else trim(value, decimals)
 
     /** Signed, because a gradient reads very differently up and down. */
     fun grade(percentValue: Double?): String {
