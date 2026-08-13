@@ -92,10 +92,25 @@ class WorkoutRetentionTest {
     }
 
     @Test
-    fun aSingleWorkoutLargerThanTheBudgetIsStillEvictedRatherThanLoopingForever() {
+    fun evictionIsOldestFirstRatherThanBestFit() {
+        // A big recent ride must not be dropped in favour of small old ones - that
+        // reads as the watch deleting what the rider just finished.
+        val workouts =
+            listOf(
+                workout("newest_big", 3, bytes = 90L * 1024 * 1024),
+                workout("middle_small", 2, bytes = 1024),
+                workout("oldest_small", 1, bytes = 1024),
+            )
+        val evicted = RetentionPolicy.evictable(workouts, connectors, maxTotalBytes = 50L * 1024 * 1024)
+        assertEquals(listOf("oldest_small", "middle_small"), evicted)
+    }
+
+    @Test
+    fun theNewestWorkoutIsKeptEvenWhenItAloneExceedsTheBudget() {
+        // Being over budget is a better outcome than deleting the ride that was
+        // just recorded.
         val huge = workout("huge", 1, bytes = 500L * 1024 * 1024)
-        val evicted = RetentionPolicy.evictable(listOf(huge), connectors, maxTotalBytes = 1024)
-        assertEquals(listOf("huge"), evicted)
+        assertTrue(RetentionPolicy.evictable(listOf(huge), connectors, maxTotalBytes = 1024).isEmpty())
     }
 
     @Test
