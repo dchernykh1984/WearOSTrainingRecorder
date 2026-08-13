@@ -124,34 +124,40 @@ class SensorConnection(
         val now = System.currentTimeMillis()
 
         fun reading(value: Double) = SensorReading(value, SensorOrigin.EXTERNAL, now)
-        return when (profile) {
-            SensorProfile.HEART_RATE ->
-                HeartRateMeasurement.parse(data)?.let { mapOf("hr" to reading(it.heartRateBpm.toDouble())) }
-            SensorProfile.CYCLING_POWER ->
-                CyclingPowerMeasurement.parse(data)?.let { measurement ->
-                    buildMap {
-                        put("power", reading(measurement.instantaneousPowerWatts.toDouble()))
-                        measurement.pedalPowerBalancePercent?.let { put("power_balance", reading(it)) }
-                        cadenceFrom(
-                            measurement.cumulativeCrankRevolutions,
-                            measurement.lastCrankEventTime,
-                        )?.let { put("cadence", reading(it)) }
+
+        val parsed: Map<String, SensorReading>? =
+            when (profile) {
+                SensorProfile.HEART_RATE ->
+                    HeartRateMeasurement.parse(data)?.let {
+                        mapOf("hr" to reading(it.heartRateBpm.toDouble()))
                     }
-                }
-            SensorProfile.CYCLING_SPEED_CADENCE ->
-                CscMeasurement.parse(data)?.let { measurement ->
-                    cadenceFrom(measurement.cumulativeCrankRevolutions, measurement.lastCrankEventTime)
-                        ?.let { mapOf("cadence" to reading(it)) }
-                }
-            SensorProfile.RUNNING_SPEED_CADENCE ->
-                RscMeasurement.parse(data)?.let {
-                    mapOf(
-                        "speed_current" to reading(it.speedMps),
-                        "cadence" to reading(it.cadenceSpm.toDouble()),
-                    )
-                }
-            else -> null
-        }.orEmpty()
+                SensorProfile.CYCLING_POWER ->
+                    CyclingPowerMeasurement.parse(data)?.let { measurement ->
+                        buildMap<String, SensorReading> {
+                            put("power", reading(measurement.instantaneousPowerWatts.toDouble()))
+                            measurement.pedalPowerBalancePercent?.let { put("power_balance", reading(it)) }
+                            cadenceFrom(
+                                measurement.cumulativeCrankRevolutions,
+                                measurement.lastCrankEventTime,
+                            )?.let { put("cadence", reading(it)) }
+                        }
+                    }
+                SensorProfile.CYCLING_SPEED_CADENCE ->
+                    CscMeasurement.parse(data)?.let { measurement ->
+                        cadenceFrom(measurement.cumulativeCrankRevolutions, measurement.lastCrankEventTime)
+                            ?.let { mapOf("cadence" to reading(it)) }
+                    }
+                SensorProfile.RUNNING_SPEED_CADENCE ->
+                    RscMeasurement.parse(data)?.let {
+                        mapOf(
+                            "speed_current" to reading(it.speedMps),
+                            "cadence" to reading(it.cadenceSpm.toDouble()),
+                        )
+                    }
+
+                else -> null
+            }
+        return parsed.orEmpty()
     }
 
     /** Needs two samples, so the first notification after connecting yields nothing. */
