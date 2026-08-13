@@ -3,7 +3,8 @@
   "packages": {
     ".": {
       "release-type": "simple",
-      "package-name": "wearos-training-recorder"
+      "package-name": "wearos-training-recorder",
+      "include-component-in-tag": false
     }
   }
 }
