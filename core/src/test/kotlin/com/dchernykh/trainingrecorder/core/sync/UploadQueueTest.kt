@@ -25,8 +25,25 @@ class UploadQueueTest {
         // Rebuilt from zero the backoff would restart on every launch, the queue
         // would never give up, and the workout would stay undeletable forever.
         val tried = workout("w1", attempts = mapOf("strava" to 4))
-        val entry = UploadQueue.from(listOf(tried), setOf("strava")).single()
+        val entry = UploadQueue.from(listOf(tried), setOf("strava"), now).single()
         assertEquals(4, entry.attempts)
+    }
+
+    @Test
+    fun aRebuiltEntryStillWaitsOutItsBackoff() {
+        // Due immediately, a device restarting a few times during an outage would
+        // burn all ten attempts in seconds and give up for good.
+        val tried = workout("w1", attempts = mapOf("strava" to 4))
+        val entry = UploadQueue.from(listOf(tried), setOf("strava"), now).single()
+        assertEquals(now + UploadQueue.backoffMs(4), entry.nextAttemptAtEpochMs)
+        assertTrue(UploadQueue.due(listOf(entry), now).isEmpty())
+    }
+
+    @Test
+    fun anUntriedEntryIsStillDueImmediately() {
+        val entry = UploadQueue.from(listOf(workout("w1")), setOf("strava"), now).single()
+        assertEquals(now, entry.nextAttemptAtEpochMs)
+        assertEquals(1, UploadQueue.due(listOf(entry), now).size)
     }
 
     @Test
