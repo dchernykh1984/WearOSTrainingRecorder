@@ -163,4 +163,10 @@
     <string name="connect_strava_callback">Authorization Callback Domain өрісіне localhost деп жазыңыз</string>
     <string name="connect_garmin_explanation">Өз Garmin Connect тіркелгіңізбен кіріңіз. Құпия сөз телефонда шифрланып сақталады.</string>
     <string name="connect_action">Қосу</string>
+
+    <string name="history_empty">Әзірге жаттығулар жоқ.</string>
+    <string name="history_pending">Жіберуді күтуде</string>
+    <string name="history_uploaded">Жіберілді</string>
+    <string name="history_failed">Жіберу қабылданбады</string>
+    <string name="history_not_sent">Ешқайда жіберілмеген</string>
 </resources>

@@ -156,4 +156,10 @@
     <string name="connect_strava_callback">Authorization Callback Domain を localhost に設定してください</string>
     <string name="connect_garmin_explanation">ご自身の Garmin Connect アカウントでサインインしてください。パスワードはこの端末に暗号化して保存されます。</string>
     <string name="connect_action">接続</string>
+
+    <string name="history_empty">まだトレーニングがありません。</string>
+    <string name="history_pending">アップロード待ち</string>
+    <string name="history_uploaded">アップロード済み</string>
+    <string name="history_failed">アップロード拒否</string>
+    <string name="history_not_sent">未送信</string>
 </resources>

@@ -163,4 +163,10 @@
     <string name="connect_strava_callback">Stel Authorization Callback Domain in op localhost</string>
     <string name="connect_garmin_explanation">Meld je aan met je eigen Garmin Connect-account. Het wachtwoord blijft versleuteld op deze telefoon.</string>
     <string name="connect_action">Verbinden</string>
+
+    <string name="history_empty">Nog geen trainingen.</string>
+    <string name="history_pending">Wacht op upload</string>
+    <string name="history_uploaded">Geupload</string>
+    <string name="history_failed">Upload geweigerd</string>
+    <string name="history_not_sent">Nergens verzonden</string>
 </resources>
