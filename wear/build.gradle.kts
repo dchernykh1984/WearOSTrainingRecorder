@@ -183,6 +183,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.work.runtime)
     implementation(libs.play.services.wearable)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
