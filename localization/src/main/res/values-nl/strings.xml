@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Race stats, lifted from the Amazfit app so the three watches agree -->
+    <string name="field_place_abs">Plaats abs</string>
+    <string name="field_place_group">Plaats gr</string>
+    <string name="field_gap_prev_abs">Gat ah abs</string>
+    <string name="field_gap_next_abs">Gat bh abs</string>
+    <string name="field_gap_leader_abs">Gat ld abs</string>
+    <string name="field_gap_prev_abs_delta">Dynam ah abs</string>
+    <string name="field_gap_next_abs_delta">Dynam bh abs</string>
+    <string name="field_gap_leader_abs_delta">Dynam ld abs</string>
+    <string name="field_gap_prev_group">Gat ah gr</string>
+    <string name="field_gap_next_group">Gat bh gr</string>
+    <string name="field_gap_leader_group">Gat ld gr</string>
+    <string name="field_gap_prev_group_delta">Dynam ah gr</string>
+    <string name="field_gap_next_group_delta">Dynam bh gr</string>
+    <string name="field_gap_leader_group_delta">Dynam ld gr</string>
+    <string name="field_laps">Ronden</string>
+</resources>
