@@ -19,6 +19,9 @@
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
+    <!-- Wear OS 6 supersedes BODY_SENSORS with the granular health permissions;
+         both are declared so one build serves watches on either side of it. -->
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
 
     <!-- External sensors. BLUETOOTH_SCAN carries neverForLocation because the
          app scans for fitness sensors, not to infer where the rider is. -->
