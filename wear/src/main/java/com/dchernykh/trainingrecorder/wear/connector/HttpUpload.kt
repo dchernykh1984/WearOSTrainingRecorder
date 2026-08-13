@@ -59,7 +59,7 @@ object HttpUpload {
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
             connection.outputStream.use { it.write(body.toByteArray()) }
             val stream =
-                if (connection.responseCode in SUCCESS_RANGE) {
+                if (connection.responseCode in SUCCESS) {
                     connection.inputStream
                 } else {
                     connection.errorStream
@@ -127,6 +127,4 @@ object HttpUpload {
     }
 
     private val SUCCESS = 200..299
-
-    private val SUCCESS_RANGE = 200..299
 }
