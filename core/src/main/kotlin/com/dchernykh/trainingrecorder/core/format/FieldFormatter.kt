@@ -57,7 +57,12 @@ object FieldFormatter {
         }
     }
 
-    /** Kilometres or miles, with a metre-level reading until the first unit. */
+    /**
+     * Kilometres or miles, with a small-unit reading until the first whole one.
+     *
+     * Guard clauses: absent, negative, and below one unit in each system.
+     */
+    @Suppress("ReturnCount")
     fun distance(
         meters: Double?,
         units: UnitSystem = UnitSystem.METRIC,
