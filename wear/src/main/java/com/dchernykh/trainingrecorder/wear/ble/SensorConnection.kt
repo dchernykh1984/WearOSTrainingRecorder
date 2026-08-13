@@ -59,6 +59,10 @@ class SensorConnection(
     @SuppressLint("MissingPermission")
     fun events(): Flow<SensorEvent> =
         callbackFlow {
+            if (profile !in supportedProfiles) {
+                close(IllegalArgumentException("no measurement characteristic for ${profile.id}"))
+                return@callbackFlow
+            }
             val device =
                 BluetoothAdapter.getDefaultAdapter()?.getRemoteDevice(address)
                     ?: run {
@@ -89,10 +93,11 @@ class SensorConnection(
                         gatt: BluetoothGatt,
                         status: Int,
                     ) {
+                        val measurement = measurementUuid(profile) ?: return
                         val characteristic =
                             gatt
                                 .getService(serviceUuid(profile))
-                                ?.getCharacteristic(measurementUuid(profile)) ?: return
+                                ?.getCharacteristic(measurement) ?: return
                         gatt.setCharacteristicNotification(characteristic, true)
                         // Notifications only start once the client configuration
                         // descriptor is written; setCharacteristicNotification
@@ -198,13 +203,26 @@ class SensorConnection(
 
         fun serviceUuid(profile: SensorProfile): UUID = uuid(requireNotNull(profile.serviceUuid))
 
-        fun measurementUuid(profile: SensorProfile): UUID =
+        /**
+         * Null for a profile this class cannot read. Silently falling back to the
+         * heart-rate characteristic would subscribe to the wrong thing and then
+         * report nothing, which looks identical to a flat battery.
+         */
+        fun measurementUuid(profile: SensorProfile): UUID? =
             when (profile) {
                 SensorProfile.HEART_RATE -> uuid("2A37")
                 SensorProfile.CYCLING_SPEED_CADENCE -> uuid("2A5B")
                 SensorProfile.CYCLING_POWER -> uuid("2A63")
                 SensorProfile.RUNNING_SPEED_CADENCE -> uuid("2A53")
-                else -> uuid("2A37")
+                else -> null
             }
+
+        val supportedProfiles =
+            setOf(
+                SensorProfile.HEART_RATE,
+                SensorProfile.CYCLING_SPEED_CADENCE,
+                SensorProfile.CYCLING_POWER,
+                SensorProfile.RUNNING_SPEED_CADENCE,
+            )
     }
 }
