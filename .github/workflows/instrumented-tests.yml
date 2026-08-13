@@ -61,6 +61,12 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - uses: gradle/actions/setup-gradle@v6
+      # The build inside the emulator runner has repeatedly failed to resolve the
+      # Kotlin plugin from the portal. Resolving the plugin classpath here, in a
+      # step that can be retried on its own and whose output is cached, keeps that
+      # network hop out of the emulator's critical path.
+      - name: Warm the Gradle plugin classpath
+        run: ./gradlew --quiet help
       - name: ${{ matrix.name }} instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
