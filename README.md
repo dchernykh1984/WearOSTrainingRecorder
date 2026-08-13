@@ -138,3 +138,9 @@ To run all checks manually across every file:
 ```bash
 pre-commit run --all-files
 ```
+
+## Contributing
+
+Before requesting a review, make sure the CI pipeline passes on your pull
+request. Once the pipeline is green, request a review from
+[@dchernykh1984](https://github.com/dchernykh1984).
