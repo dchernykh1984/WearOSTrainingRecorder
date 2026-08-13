@@ -33,6 +33,11 @@ import com.dchernykh.trainingrecorder.localization.R
  * SecurityException rather than failing quietly.
  */
 object RecordingPermissions {
+    /** Wear OS 6. Named rather than referenced so the app still builds on 36. */
+    const val API_36 = 36
+
+    const val READ_HEART_RATE = "android.permission.health.READ_HEART_RATE"
+
     val required: List<String>
         get() =
             buildList {
@@ -49,6 +54,13 @@ object RecordingPermissions {
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     add(Manifest.permission.POST_NOTIFICATIONS)
+                }
+                // Wear OS 6 replaces BODY_SENSORS with the granular health
+                // permissions. Both are requested: the old one is still what
+                // older watches understand, and the new one is what API 36 will
+                // actually check before handing over a heart rate.
+                if (Build.VERSION.SDK_INT >= API_36) {
+                    add(READ_HEART_RATE)
                 }
             }
 }
