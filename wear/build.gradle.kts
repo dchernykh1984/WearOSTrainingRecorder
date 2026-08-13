@@ -39,7 +39,7 @@ android {
         // versionCode must increase monotonically for over-the-top installs.
         // versionName is the human-readable release tag.
         versionCode = versionCodeBase * 10 + wearVersionCodeOffset
-        versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
+        versionName = System.getenv("VERSION_NAME") ?: rootProject.extra["releasedVersion"] as String
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
