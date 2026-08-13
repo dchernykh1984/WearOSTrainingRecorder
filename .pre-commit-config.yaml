@@ -12,6 +12,12 @@ repos:
         args: [--fix=lf]
         exclude: '\.bat$'
 
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.16.4
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+
   - repo: local
     hooks:
       - id: no-non-ascii
