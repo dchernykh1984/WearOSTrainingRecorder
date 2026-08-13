@@ -160,6 +160,12 @@ class RecordingViewModel(
         // window where a second tap would start a second session.
         if (busy || _state.value.phase.isActive || _state.value.phase == RecordingPhase.PREPARING) return
         applySettings()
+        // Cleared with the samples: these are cumulative totals, and a second
+        // ride that started by showing the first one's distance would also save
+        // it if Health Services had not sent a fresh batch by the finish.
+        builtIn.clear()
+        samples.clear()
+        sensors.value = SensorSnapshot()
         _state.update { it.prepare(sport.id, now()) }
         RecordingService.start(getApplication())
         // Started with the workout, not held open between rides: a GATT link to
@@ -268,12 +274,17 @@ class RecordingViewModel(
         apply: (RecordingState) -> RecordingState,
     ) {
         busy = true
+        val before = _state.value.phase
         viewModelScope.launch {
             try {
                 // The transition is only applied if the platform accepted it, so
                 // a refused pause leaves the screens saying RECORDING - which is
                 // what the watch is actually doing.
-                if (runCatching { call() }.isSuccess) _state.update(apply)
+                if (!runCatching { call() }.isSuccess) return@launch
+                // And only if the recording is still where it was. A discard
+                // while the platform was answering leaves a state the transition
+                // refuses, and refusal here means a crash rather than a no-op.
+                _state.update { if (it.phase == before) apply(it) else it }
             } finally {
                 busy = false
             }
@@ -282,11 +293,16 @@ class RecordingViewModel(
 
     private suspend fun finish() {
         try {
+            // Captured before the platform is asked: a discard racing this would
+            // otherwise leave finish() applying a transition the state machine
+            // refuses outright.
+            if (!_state.value.phase.isActive) return
             // Flushed before ending: Health Services batches samples, and without
             // this the last minutes of the ride are still in the buffer.
             runCatching { recorder.flush() }
             runCatching { recorder.end() }
             stopCollecting()
+            if (!_state.value.phase.isActive) return
             _state.update { it.finish(now()) }
             save(_state.value)
             RecordingService.stop(getApplication())
