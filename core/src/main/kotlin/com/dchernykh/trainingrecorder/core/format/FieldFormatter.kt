@@ -63,7 +63,12 @@ object FieldFormatter {
         units: UnitSystem = UnitSystem.METRIC,
     ): String {
         if (meters == null || meters < 0) return empty
+        // Below the first whole unit a decimal reading is useless - "0.06 mi"
+        // tells a runner nothing - so both systems fall back to their small unit.
         if (units == UnitSystem.METRIC && meters < SHORT_DISTANCE_METERS) return "${meters.roundToInt()} m"
+        if (units == UnitSystem.IMPERIAL && meters < METERS_PER_MILE) {
+            return "${(meters / METERS_PER_FOOT).roundToInt()} ft"
+        }
         val value = if (units == UnitSystem.METRIC) meters / METERS_PER_KM else meters / METERS_PER_MILE
         val suffix = if (units == UnitSystem.METRIC) "km" else "mi"
         val decimals = if (value >= PRECISE_DISTANCE_KM) 1 else 2
