@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Race stats, lifted from the Amazfit app so the three watches agree -->
+    <string name="field_place_abs">Place abs</string>
+    <string name="field_place_group">Place gr</string>
+    <string name="field_gap_prev_abs">Écart ah abs</string>
+    <string name="field_gap_next_abs">Écart bh abs</string>
+    <string name="field_gap_leader_abs">Écart ld abs</string>
+    <string name="field_gap_prev_abs_delta">Dynam ah abs</string>
+    <string name="field_gap_next_abs_delta">Dynam bh abs</string>
+    <string name="field_gap_leader_abs_delta">Dynam ld abs</string>
+    <string name="field_gap_prev_group">Écart ah gr</string>
+    <string name="field_gap_next_group">Écart bh gr</string>
+    <string name="field_gap_leader_group">Écart ld gr</string>
+    <string name="field_gap_prev_group_delta">Dynam ah gr</string>
+    <string name="field_gap_next_group_delta">Dynam bh gr</string>
+    <string name="field_gap_leader_group_delta">Dynam ld gr</string>
+    <string name="field_laps">Tours</string>
+</resources>
