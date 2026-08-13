@@ -32,6 +32,16 @@ repos:
         # comments; it is upstream code we do not edit.
         exclude: '^gradlew$'
 
+      # An unescaped apostrophe inside a <string> is an aapt2 error, not a
+      # warning, and it only surfaces when a module that consumes the resources
+      # is built - which on an arm64 machine means not until CI. Catching it at
+      # commit time turns a ten-minute round trip into an instant one.
+      - id: unescaped-apostrophe
+        name: apostrophes in string resources are escaped
+        language: pygrep
+        entry: '<string[^>]*>[^<]*(?<!\\)'''
+        files: 'src/main/res/values.*/strings\.xml$'
+
   # Kotlin linting and static analysis run through Gradle, so they require the
   # JDK + Android SDK. They are staged at pre-push (not every commit) to keep
   # local commits fast; CI also runs them as a dedicated Gradle job.
