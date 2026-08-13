@@ -78,6 +78,7 @@ class SensorConnection(
                         close(IllegalStateException("no bluetooth adapter"))
                         return@callbackFlow
                     }
+            val baseline = CrankBaseline()
             val callback =
                 object : BluetoothGattCallback() {
                     override fun onConnectionStateChange(
@@ -135,12 +136,6 @@ class SensorConnection(
                         trySend(SensorEvent(profile, readingsFrom(value, baseline)))
                     }
                 }
-            // Cleared here as well as on disconnect: awaitClose runs when the
-            // collector goes away, and onConnectionStateChange never fires after
-            // close(), so without this a re-collection would compute its first
-            // cadence against a minutes-old sample.
-            previousCrankRevolutions = null
-            previousCrankEventTime = null
             val connection = device.connectGatt(context, true, callback)
             awaitClose {
                 connection?.close()
@@ -170,6 +165,7 @@ class SensorConnection(
                             cadenceFrom(
                                 measurement.cumulativeCrankRevolutions,
                                 measurement.lastCrankEventTime,
+                                baseline,
                             )?.let { put("cadence", reading(it)) }
                         }
                     }
