@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Application -->
+    <string name="screen_title_start">Start</string>
+    <string name="app_name">Training Recorder</string>
+
+    <!-- Disciplines -->
+    <string name="discipline_cycling">Cycling</string>
+    <string name="discipline_running">Running</string>
+    <string name="discipline_swimming">Swimming</string>
+    <string name="discipline_xc_skiing">XC Skiing</string>
+
+    <!-- Sports -->
+    <string name="sport_cycling_road">Road Ride</string>
+    <string name="sport_cycling_gravel">Gravel Ride</string>
+    <string name="sport_cycling_mtb">Mountain Bike</string>
+    <string name="sport_cycling_cyclocross">Cyclocross</string>
+    <string name="sport_cycling_indoor">Indoor Ride</string>
+    <string name="sport_cycling_virtual">Virtual Ride</string>
+    <string name="sport_cycling_commute">Commute</string>
+    <string name="sport_cycling_ebike">E-Bike Ride</string>
+    <string name="sport_cycling_ebike_mtb">E-Mountain Bike</string>
+    <string name="sport_cycling_track">Track Cycling</string>
+    <string name="sport_run_road">Road Run</string>
+    <string name="sport_run_trail">Trail Run</string>
+    <string name="sport_run_treadmill">Treadmill Run</string>
+    <string name="sport_run_track">Track Run</string>
+    <string name="sport_run_virtual">Virtual Run</string>
+    <string name="sport_run_indoor">Indoor Run</string>
+    <string name="sport_run_ultra">Ultra Run</string>
+    <string name="sport_walk">Walk</string>
+    <string name="sport_hike">Hike</string>
+    <string name="sport_ruck">Rucking</string>
+    <string name="sport_swim_pool">Pool Swim</string>
+    <string name="sport_swim_open_water">Open Water Swim</string>
+    <string name="sport_swim_generic">Swim</string>
+    <string name="sport_xc_classic">Classic XC Ski</string>
+    <string name="sport_xc_skate">Skate XC Ski</string>
+    <string name="sport_xc_generic">XC Ski</string>
+    <string name="sport_xc_backcountry">Backcountry Ski</string>
+    <string name="sport_xc_rollerski_classic">Roller Ski (Classic)</string>
+    <string name="sport_xc_rollerski_skate">Roller Ski (Skate)</string>
+    <string name="sport_snowshoe">Snowshoe</string>
+    <string name="sport_alpine_ski">Alpine Ski</string>
+
+    <!-- Field categories -->
+    <string name="category_time">Time</string>
+    <string name="category_distance">Distance</string>
+    <string name="category_speed">Speed</string>
+    <string name="category_heart_rate">Heart Rate</string>
+    <string name="category_cadence">Cadence</string>
+    <string name="category_power">Power</string>
+    <string name="category_elevation">Elevation</string>
+    <string name="category_energy">Energy</string>
+    <string name="category_swimming">Swimming</string>
+    <string name="category_laps">Laps</string>
+    <string name="category_sensors">Sensors</string>
+    <string name="category_race_stats">Race Stats</string>
+
+    <!-- Data fields -->
+    <string name="field_timer_elapsed">Timer</string>
+    <string name="field_timer_moving">Moving Time</string>
+    <string name="field_timer_paused">Paused Time</string>
+    <string name="field_time_of_day">Time of Day</string>
+    <string name="field_lap_time">Lap Time</string>
+    <string name="field_lap_time_last">Last Lap Time</string>
+    <string name="field_distance_total">Distance</string>
+    <string name="field_distance_lap">Lap Distance</string>
+    <string name="field_distance_lap_last">Last Lap Distance</string>
+    <string name="field_speed_current">Speed</string>
+    <string name="field_speed_avg">Avg Speed</string>
+    <string name="field_speed_max">Max Speed</string>
+    <string name="field_speed_lap">Lap Speed</string>
+    <string name="field_pace_current">Pace</string>
+    <string name="field_pace_avg">Avg Pace</string>
+    <string name="field_pace_lap">Lap Pace</string>
+    <string name="field_hr">Heart Rate</string>
+    <string name="field_hr_avg">Avg HR</string>
+    <string name="field_hr_max">Max HR</string>
+    <string name="field_hr_lap">Lap HR</string>
+    <string name="field_hr_zone">HR Zone</string>
+    <string name="field_hr_pct_max">% Max HR</string>
+    <string name="field_hr_pct_hrr">% HR Reserve</string>
+    <string name="field_cadence">Cadence</string>
+    <string name="field_cadence_avg">Avg Cadence</string>
+    <string name="field_cadence_max">Max Cadence</string>
+    <string name="field_cadence_lap">Lap Cadence</string>
+    <string name="field_power">Power</string>
+    <string name="field_power_3s">Power 3s</string>
+    <string name="field_power_10s">Power 10s</string>
+    <string name="field_power_30s">Power 30s</string>
+    <string name="field_power_avg">Avg Power</string>
+    <string name="field_power_max">Max Power</string>
+    <string name="field_power_lap">Lap Power</string>
+    <string name="field_power_normalized">Normalized Power</string>
+    <string name="field_power_per_kg">Power per kg</string>
+    <string name="field_power_balance">L/R Balance</string>
+    <string name="field_torque_effectiveness">Torque Effectiveness</string>
+    <string name="field_pedal_smoothness">Pedal Smoothness</string>
+    <string name="field_intensity_factor">Intensity Factor</string>
+    <string name="field_training_stress_score">Training Stress Score</string>
+    <string name="field_altitude">Altitude</string>
+    <string name="field_ascent_total">Total Ascent</string>
+    <string name="field_descent_total">Total Descent</string>
+    <string name="field_grade">Grade</string>
+    <string name="field_vertical_speed">Vertical Speed</string>
+    <string name="field_calories">Calories</string>
+    <string name="field_swolf">SWOLF</string>
+    <string name="field_stroke_rate">Stroke Rate</string>
+    <string name="field_stroke_count">Strokes</string>
+    <string name="field_lengths">Lengths</string>
+    <string name="field_pace_100">Pace per 100</string>
+    <string name="field_lap_number">Lap</string>
+    <string name="field_lap_count">Laps</string>
+    <string name="field_sensor_hr_battery">HR Sensor Battery</string>
+    <string name="field_sensor_cadence_battery">Cadence Sensor Battery</string>
+    <string name="field_sensor_power_battery">Power Meter Battery</string>
+    <string name="field_temperature">Temperature</string>
+    <string name="field_place_abs">Place abs</string>
+    <string name="field_place_group">Place gr</string>
+    <string name="field_gap_prev_abs">Gap ahd abs</string>
+    <string name="field_gap_next_abs">Gap bhd abs</string>
+    <string name="field_gap_leader_abs">Gap ldr abs</string>
+    <string name="field_gap_prev_abs_delta">Dynam ah abs</string>
+    <string name="field_gap_next_abs_delta">Dynam bh abs</string>
+    <string name="field_gap_leader_abs_delta">Dynam ld abs</string>
+    <string name="field_gap_prev_group">Gap ahd gr</string>
+    <string name="field_gap_next_group">Gap bhd gr</string>
+    <string name="field_gap_leader_group">Gap ldr gr</string>
+    <string name="field_gap_prev_group_delta">Dynam ah gr</string>
+    <string name="field_gap_next_group_delta">Dynam bh gr</string>
+    <string name="field_gap_leader_group_delta">Dynam ld gr</string>
+    <string name="field_laps">Laps</string>
+</resources>
