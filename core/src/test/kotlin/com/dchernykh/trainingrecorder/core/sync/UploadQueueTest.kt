@@ -1,5 +1,6 @@
 package com.dchernykh.trainingrecorder.core.sync
 
+import com.dchernykh.trainingrecorder.core.connector.UploadResult
 import com.dchernykh.trainingrecorder.core.workout.UploadState
 import com.dchernykh.trainingrecorder.core.workout.WorkoutSummary
 import kotlin.test.Test
@@ -67,6 +68,28 @@ class UploadQueueTest {
         repeat(UploadQueue.MAX_ATTEMPTS) { pending = UploadQueue.afterFailure(pending, now) }
         assertTrue(UploadQueue.hasGivenUp(pending))
         assertFalse(UploadQueue.hasGivenUp(PendingUpload("w1", "strava", attempts = 1)))
+    }
+
+    @Test
+    fun aQueueEntryThatGaveUpIsRecordedAsFailedSoStorageCanStillBeReclaimed() {
+        // Left as PENDING the workout would never count as synced, the retention
+        // policy would never evict it, and the watch would fill up because a
+        // service was down.
+        val exhausted = PendingUpload("w1", "strava", attempts = UploadQueue.MAX_ATTEMPTS - 1)
+        assertEquals(UploadState.FAILED, UploadQueue.stateAfter(exhausted, UploadResult.Retryable("no network")))
+    }
+
+    @Test
+    fun aRetryableFailureWithAttemptsLeftStaysPending() {
+        val fresh = PendingUpload("w1", "strava")
+        assertEquals(UploadState.PENDING, UploadQueue.stateAfter(fresh, UploadResult.Retryable("no network")))
+    }
+
+    @Test
+    fun successAndRejectionKeepTheirOwnStates() {
+        val fresh = PendingUpload("w1", "strava")
+        assertEquals(UploadState.UPLOADED, UploadQueue.stateAfter(fresh, UploadResult.Success()))
+        assertEquals(UploadState.FAILED, UploadQueue.stateAfter(fresh, UploadResult.Rejected("duplicate")))
     }
 
     @Test
