@@ -36,6 +36,10 @@ object RecordingPermissions {
     val required: List<String>
         get() =
             buildList {
+                // Both, always. Asking for the fine permission alone is ignored
+                // outright from API 31, which leaves the app with no location at
+                // all rather than with an approximate one.
+                add(Manifest.permission.ACCESS_COARSE_LOCATION)
                 add(Manifest.permission.ACCESS_FINE_LOCATION)
                 add(Manifest.permission.BODY_SENSORS)
                 add(Manifest.permission.ACTIVITY_RECOGNITION)
