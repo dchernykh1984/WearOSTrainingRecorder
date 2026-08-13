@@ -94,7 +94,13 @@ class UploadWorker(
             }.getOrElse { UploadResult.Retryable(it.javaClass.simpleName) }
 
         val attempts = if (result is UploadResult.Success) pending.attempts else pending.attempts + 1
-        repository.markUploaded(pending.workoutId, connector.id, UploadQueue.stateAfter(pending, result), attempts)
+        repository.markUploaded(
+            workoutId = pending.workoutId,
+            connectorId = connector.id,
+            state = UploadQueue.stateAfter(pending, result),
+            attempts = attempts,
+            attemptedAtEpochMs = now(),
+        )
         return result is UploadResult.Retryable && !UploadQueue.hasGivenUp(pending.copy(attempts = attempts))
     }
 
