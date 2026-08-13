@@ -5,7 +5,6 @@ import com.dchernykh.trainingrecorder.core.connector.StorageConnector
 import com.dchernykh.trainingrecorder.core.connector.StravaProtocol
 import com.dchernykh.trainingrecorder.core.connector.UploadResult
 import com.dchernykh.trainingrecorder.core.connector.WorkoutUpload
-import com.dchernykh.trainingrecorder.wear.connector.HttpUpload.Part
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
