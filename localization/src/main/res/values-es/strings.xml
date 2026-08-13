@@ -149,4 +149,7 @@
     <string name="editor_field_count">Campos</string>
     <string name="editor_add_screen">Anadir pantalla</string>
     <string name="editor_remove_screen">Quitar</string>
+
+    <string name="permissions_explanation">La grabacion necesita ubicacion, sensores y Bluetooth.</string>
+    <string name="permissions_grant">Permitir</string>
 </resources>

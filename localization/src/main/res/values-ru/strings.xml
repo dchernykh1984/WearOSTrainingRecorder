@@ -149,4 +149,7 @@
     <string name="editor_field_count">Полей</string>
     <string name="editor_add_screen">Добавить экран</string>
     <string name="editor_remove_screen">Удалить</string>
+
+    <string name="permissions_explanation">Для записи нужны геолокация, датчики и Bluetooth.</string>
+    <string name="permissions_grant">Разрешить</string>
 </resources>

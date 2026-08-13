@@ -149,4 +149,7 @@
     <string name="editor_field_count">Felder</string>
     <string name="editor_add_screen">Seite hinzufuegen</string>
     <string name="editor_remove_screen">Entfernen</string>
+
+    <string name="permissions_explanation">Aufzeichnung braucht Standort, Sensoren und Bluetooth.</string>
+    <string name="permissions_grant">Zulassen</string>
 </resources>

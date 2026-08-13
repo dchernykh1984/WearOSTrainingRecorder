@@ -149,4 +149,7 @@
     <string name="editor_field_count">Pola</string>
     <string name="editor_add_screen">Dodaj ekran</string>
     <string name="editor_remove_screen">Usun</string>
+
+    <string name="permissions_explanation">Nagrywanie wymaga lokalizacji, czujnikow i Bluetooth.</string>
+    <string name="permissions_grant">Zezwol</string>
 </resources>

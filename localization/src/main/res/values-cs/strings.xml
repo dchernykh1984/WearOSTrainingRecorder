@@ -149,4 +149,7 @@
     <string name="editor_field_count">Pole</string>
     <string name="editor_add_screen">Pridat obrazovku</string>
     <string name="editor_remove_screen">Odebrat</string>
+
+    <string name="permissions_explanation">Nahravani vyzaduje polohu, senzory a Bluetooth.</string>
+    <string name="permissions_grant">Povolit</string>
 </resources>

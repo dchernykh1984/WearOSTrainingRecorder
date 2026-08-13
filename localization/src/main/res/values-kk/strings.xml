@@ -149,4 +149,7 @@
     <string name="editor_field_count">Өрістер</string>
     <string name="editor_add_screen">Экран қосу</string>
     <string name="editor_remove_screen">Жою</string>
+
+    <string name="permissions_explanation">Жазу үшін геолокация, датчиктер және Bluetooth қажет.</string>
+    <string name="permissions_grant">Рұқсат ету</string>
 </resources>

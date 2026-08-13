@@ -161,4 +161,8 @@
     <string name="editor_field_count">Fields</string>
     <string name="editor_add_screen">Add screen</string>
     <string name="editor_remove_screen">Remove</string>
+
+    <!-- Permissions -->
+    <string name="permissions_explanation">Recording needs location, sensors and Bluetooth.</string>
+    <string name="permissions_grant">Allow</string>
 </resources>
