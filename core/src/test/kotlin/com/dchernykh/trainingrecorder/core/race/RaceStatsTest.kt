@@ -60,6 +60,14 @@ class RaceStatsTest {
     }
 
     @Test
+    fun riderTypedValuesAreEncodedIntoThePath() {
+        // A stray space or slash would otherwise build a malformed URL, or point
+        // at a different endpoint entirely.
+        val messy = config(competition = "2 59", bib = "a/b")
+        assertEquals("https://universalbicycle.team/api/v1/live-stats/2%2059/a%2Fb", RaceStatsUrl.build(messy))
+    }
+
+    @Test
     fun anIncompleteOrNonHttpConfigYieldsNoUrl() {
         assertNull(RaceStatsUrl.build(RaceStatsConfig()))
         assertNull(RaceStatsUrl.build(config(site = "ftp://example.org")))
