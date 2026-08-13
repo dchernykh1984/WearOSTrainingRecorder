@@ -163,4 +163,10 @@
     <string name="connect_strava_callback">Imposta Authorization Callback Domain su localhost</string>
     <string name="connect_garmin_explanation">Accedi con il tuo account Garmin Connect. La password resta cifrata su questo telefono.</string>
     <string name="connect_action">Connetti</string>
+
+    <string name="history_empty">Nessun allenamento.</string>
+    <string name="history_pending">In attesa di invio</string>
+    <string name="history_uploaded">Inviato</string>
+    <string name="history_failed">Invio rifiutato</string>
+    <string name="history_not_sent">Non inviato</string>
 </resources>

@@ -163,4 +163,10 @@
     <string name="connect_strava_callback">Definissez Authorization Callback Domain sur localhost</string>
     <string name="connect_garmin_explanation">Connectez-vous avec votre compte Garmin Connect. Le mot de passe reste chiffre sur ce telephone.</string>
     <string name="connect_action">Connecter</string>
+
+    <string name="history_empty">Aucune seance pour l\'instant.</string>
+    <string name="history_pending">En attente d\'envoi</string>
+    <string name="history_uploaded">Envoye</string>
+    <string name="history_failed">Envoi refuse</string>
+    <string name="history_not_sent">Non envoye</string>
 </resources>

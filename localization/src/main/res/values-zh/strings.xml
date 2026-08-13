@@ -156,4 +156,10 @@
     <string name="connect_strava_callback">将 Authorization Callback Domain 设为 localhost</string>
     <string name="connect_garmin_explanation">使用你自己的 Garmin Connect 账号登录。密码以加密方式保存在本手机上。</string>
     <string name="connect_action">连接</string>
+
+    <string name="history_empty">还没有训练记录。</string>
+    <string name="history_pending">等待上传</string>
+    <string name="history_uploaded">已上传</string>
+    <string name="history_failed">上传被拒绝</string>
+    <string name="history_not_sent">尚未发送</string>
 </resources>
