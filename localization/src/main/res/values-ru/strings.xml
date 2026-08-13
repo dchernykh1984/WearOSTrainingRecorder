@@ -169,4 +169,26 @@
     <string name="history_uploaded">Отправлено</string>
     <string name="history_failed">Отправка отклонена</string>
     <string name="history_not_sent">Никуда не отправлено</string>
+    <string name="settings_language">Язык</string>
+    <string name="language_system">Язык системы</string>
+    <string name="language_en">English</string>
+    <string name="language_ru">Русский</string>
+    <string name="language_kk">Қазақша</string>
+    <string name="language_es">Español</string>
+    <string name="language_zh">中文</string>
+    <string name="language_hi">हिन्दी</string>
+    <string name="language_pt">Português</string>
+    <string name="language_fr">Français</string>
+    <string name="language_de">Deutsch</string>
+    <string name="language_ja">日本語</string>
+    <string name="language_it">Italiano</string>
+    <string name="language_tr">Türkçe</string>
+    <string name="language_pl">Polski</string>
+    <string name="language_nl">Nederlands</string>
+    <string name="language_cs">Čeština</string>
+    <string name="nav_sports">Спорт</string>
+    <string name="nav_race">Гонка</string>
+    <string name="nav_connections">Сервисы</string>
+    <string name="nav_history">История</string>
+    <string name="nav_settings">Настройки</string>
 </resources>

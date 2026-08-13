@@ -162,4 +162,26 @@
     <string name="history_uploaded">Yuklendi</string>
     <string name="history_failed">Yukleme reddedildi</string>
     <string name="history_not_sent">Hicbir yere gonderilmedi</string>
+    <string name="settings_language">Dil</string>
+    <string name="language_system">Sistem dili</string>
+    <string name="language_en">English</string>
+    <string name="language_ru">Русский</string>
+    <string name="language_kk">Қазақша</string>
+    <string name="language_es">Español</string>
+    <string name="language_zh">中文</string>
+    <string name="language_hi">हिन्दी</string>
+    <string name="language_pt">Português</string>
+    <string name="language_fr">Français</string>
+    <string name="language_de">Deutsch</string>
+    <string name="language_ja">日本語</string>
+    <string name="language_it">Italiano</string>
+    <string name="language_tr">Türkçe</string>
+    <string name="language_pl">Polski</string>
+    <string name="language_nl">Nederlands</string>
+    <string name="language_cs">Čeština</string>
+    <string name="nav_sports">Sporlar</string>
+    <string name="nav_race">Yarış</string>
+    <string name="nav_connections">Servisler</string>
+    <string name="nav_history">Geçmiş</string>
+    <string name="nav_settings">Ayarlar</string>
 </resources>
