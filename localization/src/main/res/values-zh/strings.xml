@@ -145,4 +145,10 @@
     <string name="editor_remove_screen">移除</string>
     <string name="permissions_explanation">记录需要定位、传感器和蓝牙权限。</string>
     <string name="permissions_grant">允许</string>
+
+    <string name="race_site">网站地址</string>
+    <string name="race_competition">比赛 ID</string>
+    <string name="race_bib">号码布</string>
+    <string name="race_refresh">每 %1$d 秒刷新</string>
+    <string name="race_refresh_hint">长距离比赛省电，短距离比赛数据要新。</string>
 </resources>

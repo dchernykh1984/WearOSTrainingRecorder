@@ -152,4 +152,10 @@
 
     <string name="permissions_explanation">Nahravani vyzaduje polohu, senzory a Bluetooth.</string>
     <string name="permissions_grant">Povolit</string>
+
+    <string name="race_site">Adresa webu</string>
+    <string name="race_competition">ID zavodu</string>
+    <string name="race_bib">Startovni cislo</string>
+    <string name="race_refresh">Obnovovat kazdych %1$d s</string>
+    <string name="race_refresh_hint">Dlouhy zavod: setrete baterii. Kratky: cerstva data.</string>
 </resources>

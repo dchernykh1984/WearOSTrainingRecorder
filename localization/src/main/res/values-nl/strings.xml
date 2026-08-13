@@ -152,4 +152,10 @@
 
     <string name="permissions_explanation">Opnemen vereist locatie, sensoren en Bluetooth.</string>
     <string name="permissions_grant">Toestaan</string>
+
+    <string name="race_site">Website</string>
+    <string name="race_competition">Wedstrijd-ID</string>
+    <string name="race_bib">Startnummer</string>
+    <string name="race_refresh">Elke %1$d s vernieuwen</string>
+    <string name="race_refresh_hint">Lange wedstrijd: spaar de accu. Korte wedstrijd: verse data.</string>
 </resources>

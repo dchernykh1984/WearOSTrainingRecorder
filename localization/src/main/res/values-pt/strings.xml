@@ -152,4 +152,10 @@
 
     <string name="permissions_explanation">A gravacao precisa de localizacao, sensores e Bluetooth.</string>
     <string name="permissions_grant">Permitir</string>
+
+    <string name="race_site">Endereco do site</string>
+    <string name="race_competition">ID da competicao</string>
+    <string name="race_bib">Dorsal</string>
+    <string name="race_refresh">Atualizar a cada %1$d s</string>
+    <string name="race_refresh_hint">Prova longa: poupe bateria. Prova curta: dados frescos.</string>
 </resources>

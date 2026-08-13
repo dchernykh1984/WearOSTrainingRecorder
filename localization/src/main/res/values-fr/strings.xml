@@ -152,4 +152,10 @@
 
     <string name="permissions_explanation">L\'enregistrement necessite position, capteurs et Bluetooth.</string>
     <string name="permissions_grant">Autoriser</string>
+
+    <string name="race_site">Adresse du site</string>
+    <string name="race_competition">ID de competition</string>
+    <string name="race_bib">Dossard</string>
+    <string name="race_refresh">Actualiser toutes les %1$d s</string>
+    <string name="race_refresh_hint">Course longue: economisez la batterie. Course courte: donnees fraiches.</string>
 </resources>

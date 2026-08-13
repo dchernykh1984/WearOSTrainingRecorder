@@ -152,4 +152,10 @@
 
     <string name="permissions_explanation">Nagrywanie wymaga lokalizacji, czujnikow i Bluetooth.</string>
     <string name="permissions_grant">Zezwol</string>
+
+    <string name="race_site">Adres strony</string>
+    <string name="race_competition">ID zawodow</string>
+    <string name="race_bib">Numer startowy</string>
+    <string name="race_refresh">Odswiezaj co %1$d s</string>
+    <string name="race_refresh_hint">Dlugi wyscig: oszczedzaj baterie. Krotki: swieze dane.</string>
 </resources>
