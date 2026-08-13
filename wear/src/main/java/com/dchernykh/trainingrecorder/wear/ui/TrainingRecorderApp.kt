@@ -54,8 +54,9 @@ fun TrainingRecorderApp(
                 if (pairing) {
                     SensorPairingScreen(model = sensorModel, onLeave = { pairing = false })
                 } else {
+                    val sports by model.sports.collectAsStateWithLifecycle()
                     SportPicker(
-                        sports = model.sports,
+                        sports = sports,
                         onSportChosen = model::start,
                         onPairSensors = { pairing = true },
                     )
@@ -109,7 +110,7 @@ private fun SensorPairingScreen(
 private fun sportOf(
     model: RecordingViewModel,
     sportTypeId: String?,
-): SportType? = model.sports.firstOrNull { it.id == sportTypeId } ?: model.sports.firstOrNull()
+): SportType? = model.sports.value.firstOrNull { it.id == sportTypeId } ?: model.sports.value.firstOrNull()
 
 /** Round and square watches want different layouts, and the system knows which. */
 @Composable
