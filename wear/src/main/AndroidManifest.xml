@@ -29,6 +29,15 @@
         android:name="android.permission.BLUETOOTH_SCAN"
         android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- minSdk is 30, and the granular permissions above only exist from 31. On
+         Wear OS 3 the legacy pair is what connectGatt actually checks, so without
+         these every external sensor is dead on those watches. -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
 
     <!-- The recording outlives the screen, so it runs in a foreground service.
          The health type is the one Wear OS expects for an exercise. -->
