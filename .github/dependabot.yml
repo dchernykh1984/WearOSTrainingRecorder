@@ -1,0 +1,41 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    # Dependabot cannot verify build compatibility (it never builds or tests), so
+    # there is no setting that guarantees "only compatible" updates. Two things
+    # keep the noise down instead: (1) the ignore rules below pin out the versions
+    # we already know break the deliberately-pinned toolchain, and (2) grouping
+    # bundles every Gradle bump into a single PR, so the dependency lockfiles only
+    # need regenerating once per cycle instead of once per dependency.
+    groups:
+      gradle-dependencies:
+        patterns:
+          - "*"
+    ignore:
+      # AGP 9 / Gradle 9 have no stable detekt release (only 2.0.0-alpha), and
+      # CodeQL cannot extract Kotlin >= 2.3.30. Both are CI gates, so these
+      # majors break the pipeline. Revisit when the tooling catches up.
+      - dependency-name: "com.android.application"
+        versions: [">=9"]
+      - dependency-name: "com.android.tools.build:gradle"
+        versions: [">=9"]
+      # The Gradle wrapper itself: AGP 8.13.2 and detekt 1.23.8 do not run on
+      # Gradle 9 yet. Dependabot names the wrapper update "gradle".
+      - dependency-name: "gradle"
+        versions: [">=9"]
+      - dependency-name: "org.jetbrains.kotlin.android"
+        versions: [">=2.3"]
+      # Shares the single `kotlin` catalog version with kotlin.android, so it has
+      # to be ignored too or Dependabot bumps `kotlin` through this plugin id.
+      - dependency-name: "org.jetbrains.kotlin.plugin.compose"
+        versions: [">=2.3"]
+      - dependency-name: "org.jetbrains.kotlin:*"
+        versions: [">=2.3"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
