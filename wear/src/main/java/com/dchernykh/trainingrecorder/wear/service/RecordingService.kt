@@ -7,11 +7,13 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 import androidx.wear.ongoing.OngoingActivity
 import androidx.wear.ongoing.Status
 import com.dchernykh.trainingrecorder.localization.R
@@ -34,20 +36,26 @@ class RecordingService : Service() {
         flags: Int,
         startId: Int,
     ): Int {
-        ServiceCompat.startForeground(
-            this,
-            NOTIFICATION_ID,
-            buildNotification(),
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        // From API 34 the health type is only allowed when one of the sensor
+        // permissions is actually granted, and starting without one throws.
+        // Permission is explicitly optional in this app, so a rider who declined
+        // gets a plain foreground service instead of a crash.
+        val type =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && hasSensorPermission()) {
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH
             } else {
                 0
-            },
-        )
+            }
+        ServiceCompat.startForeground(this, NOTIFICATION_ID, buildNotification(), type)
         // Restarted with its last intent if the system does kill it, so a
         // recording survives memory pressure rather than ending silently.
         return START_REDELIVER_INTENT
     }
+
+    private fun hasSensorPermission(): Boolean =
+        SENSOR_PERMISSIONS.any {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+        }
 
     private fun buildNotification(): Notification {
         createChannel()
@@ -91,6 +99,14 @@ class RecordingService : Service() {
     }
 
     companion object {
+        /** Any one of these satisfies the health foreground service type. */
+        private val SENSOR_PERMISSIONS =
+            listOf(
+                android.Manifest.permission.BODY_SENSORS,
+                android.Manifest.permission.ACTIVITY_RECOGNITION,
+                android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS,
+            )
+
         private const val CHANNEL_ID = "recording"
         private const val NOTIFICATION_ID = 1
 
