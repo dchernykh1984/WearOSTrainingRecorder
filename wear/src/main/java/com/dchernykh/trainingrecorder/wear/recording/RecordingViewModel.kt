@@ -16,6 +16,7 @@ import com.dchernykh.trainingrecorder.core.recording.RecordingState
 import com.dchernykh.trainingrecorder.core.sensor.SensorSnapshot
 import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.core.workout.SportOrdering
+import com.dchernykh.trainingrecorder.wear.ble.SensorHub
 import com.dchernykh.trainingrecorder.wear.health.ExerciseRecorder
 import com.dchernykh.trainingrecorder.wear.race.RaceStatsPoller
 import com.dchernykh.trainingrecorder.wear.service.RecordingService
@@ -48,6 +49,7 @@ class RecordingViewModel(
     private val repository: WorkoutRepository = WorkoutRepository(application),
     private val settings: SettingsStore = SettingsStore(application),
     private val poller: RaceStatsPoller = RaceStatsPoller(),
+    private val hub: SensorHub = SensorHub(application),
 ) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(RecordingState())
     val state: StateFlow<RecordingState> = _state.asStateFlow()
@@ -99,6 +101,9 @@ class RecordingViewModel(
         applySettings()
         _state.update { it.prepare(sport.id, now()) }
         RecordingService.start(getApplication())
+        // Started with the workout, not held open between rides: a GATT link to
+        // a power meter kept alive all day is a flat battery on both ends.
+        hub.start(viewModelScope)
         // A ticker rather than only recomputing when a sample lands: the timers
         // have to keep counting through a tunnel, where no sample lands at all.
         tickJob?.cancel()
@@ -133,7 +138,7 @@ class RecordingViewModel(
             val timestamp = now()
             sensors.value =
                 SensorSnapshot.merge(
-                    external = emptyMap(),
+                    external = hub.readings.value,
                     builtIn = sample.readings,
                     nowEpochMs = timestamp,
                 )
@@ -248,6 +253,7 @@ class RecordingViewModel(
     }
 
     private fun stopCollecting() {
+        hub.stop()
         // Cancelled explicitly so the flow's awaitClose runs and Health Services
         // drops the callback; left running, every new workout stacks another
         // collector on top of the last.
