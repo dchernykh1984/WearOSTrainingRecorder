@@ -1,6 +1,7 @@
 package com.dchernykh.trainingrecorder.wear.recording
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.dchernykh.trainingrecorder.core.config.ScreenConfiguration
@@ -13,6 +14,7 @@ import com.dchernykh.trainingrecorder.core.race.RaceStatsSnapshot
 import com.dchernykh.trainingrecorder.core.recording.RecordingAction
 import com.dchernykh.trainingrecorder.core.recording.RecordingPhase
 import com.dchernykh.trainingrecorder.core.recording.RecordingState
+import com.dchernykh.trainingrecorder.core.sensor.SensorReading
 import com.dchernykh.trainingrecorder.core.sensor.SensorSnapshot
 import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.core.workout.SportOrdering
@@ -23,12 +25,18 @@ import com.dchernykh.trainingrecorder.wear.service.RecordingService
 import com.dchernykh.trainingrecorder.wear.storage.WorkoutRepository
 import com.dchernykh.trainingrecorder.wear.sync.SettingsStore
 import com.dchernykh.trainingrecorder.wear.upload.UploadWorker
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -42,7 +50,13 @@ import java.util.TimeZone
  * pulled on demand. Composables cannot observe a function call, so a display
  * that asked the model for each field would render once and then freeze - which
  * on a workout screen looks exactly like a stopped watch.
+ *
+ * Past the function threshold on purpose: this is the one place that owns the
+ * whole recording - the state machine, Health Services, the sensors, the race
+ * poll and the save. Splitting it would only move the coordination elsewhere and
+ * add a seam where those lifecycles have to be kept in step by hand.
  */
+@Suppress("TooManyFunctions")
 class RecordingViewModel(
     application: Application,
     private val recorder: ExerciseRecorder = ExerciseRecorder(application),
@@ -51,6 +65,20 @@ class RecordingViewModel(
     private val poller: RaceStatsPoller = RaceStatsPoller(),
     private val hub: SensorHub = SensorHub(application),
 ) : AndroidViewModel(application) {
+    /**
+     * Kotlin default arguments do not emit a one-argument constructor, and
+     * `viewModel()` reflects for exactly that signature - without this the app
+     * dies on its first frame with "cannot create an instance".
+     */
+    constructor(application: Application) : this(
+        application,
+        ExerciseRecorder(application),
+        WorkoutRepository(application),
+        SettingsStore(application),
+        RaceStatsPoller(),
+        SensorHub(application),
+    )
+
     private val _state = MutableStateFlow(RecordingState())
     val state: StateFlow<RecordingState> = _state.asStateFlow()
 
@@ -61,16 +89,31 @@ class RecordingViewModel(
 
     private val sensors = MutableStateFlow(SensorSnapshot())
     private val raceStats = MutableStateFlow(RaceStatsSnapshot.EMPTY)
-    private val history = MutableStateFlow<List<String>>(emptyList())
+    private val history = MutableStateFlow(settings.readHistory())
 
-    /** The sport picker's order: recency by kind. */
-    val sports: List<SportType> get() = SportOrdering.order(history.value)
+    /**
+     * The sport picker's order: recency by kind.
+     *
+     * Observable rather than a plain getter, so the picker actually reorders
+     * after a workout is saved instead of only on the next launch.
+     */
+    val sports: StateFlow<List<SportType>> =
+        history
+            .map { SportOrdering.order(it) }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, SportOrdering.order(history.value))
 
     private var screens: ScreenConfiguration = ScreenConfiguration.initial()
     private var units: UnitSystem = UnitSystem.METRIC
     private var race: RaceStatsConfig = RaceStatsConfig()
 
     private val samples = mutableListOf<TrackPoint>()
+
+    /**
+     * The last reading seen for each built-in metric, rather than only what the
+     * newest update carried. Health Services batches by data type, so any single
+     * update is a partial picture.
+     */
+    private val builtIn = mutableMapOf<String, SensorReading>()
     private var sampleJob: Job? = null
     private var raceJob: Job? = null
     private var tickJob: Job? = null
@@ -116,14 +159,30 @@ class RecordingViewModel(
             }
         sampleJob =
             viewModelScope.launch {
-                runCatching { recorder.start(sport.id) }
-                    .onSuccess {
-                        _state.update { current ->
-                            if (current.phase == RecordingPhase.PREPARING) current.begin(now()) else current
-                        }
-                        startRacePolling()
-                        collectSamples()
-                    }.onFailure { discard() }
+                try {
+                    recorder.start(sport.id)
+                    _state.update { current ->
+                        if (current.phase == RecordingPhase.PREPARING) current.begin(now()) else current
+                    }
+                    startRacePolling()
+                    // Inside the try, not after it: Health Services reports a
+                    // failed callback registration by closing the flow, and that
+                    // would otherwise reach the scope uncaught and kill the app
+                    // mid-ride rather than end the recording.
+                    collectSamples()
+                } catch (cancellation: CancellationException) {
+                    // The scope is going away, so the exercise has to be ended
+                    // explicitly - discard() would launch that end on the very
+                    // scope being cancelled, and the platform would keep GNSS
+                    // running for a session with no app attached.
+                    endOrphanedExercise()
+                    throw cancellation
+                } catch (
+                    @Suppress("TooGenericExceptionCaught") failure: Exception,
+                ) {
+                    Log.w(TAG, "the recording could not be started", failure)
+                    discard()
+                }
             }
     }
 
@@ -136,11 +195,17 @@ class RecordingViewModel(
     private suspend fun collectSamples() {
         recorder.samples().collect { sample ->
             val timestamp = now()
+            // Folded into what came before rather than replacing it. Health
+            // Services sends whatever that batch happened to carry, so an update
+            // without the distance aggregate would blank the field - and, at the
+            // end of a ride, save a workout that says it covered nothing.
+            builtIn += sample.readings
             sensors.value =
                 SensorSnapshot.merge(
                     external = hub.readings.value,
-                    builtIn = sample.readings,
+                    builtIn = builtIn.toMap(),
                     nowEpochMs = timestamp,
+                    connectedProfiles = hub.connected.value,
                 )
             // Only recorded while running: a paused ride must not lay down a
             // straight line between where the rider stopped and where they
@@ -228,7 +293,11 @@ class RecordingViewModel(
         // an index rewrite; on the main thread that is an ANR at exactly the
         // moment the rider is waiting to see their ride saved.
         val saved =
-            withContext(Dispatchers.IO) {
+            // NonCancellable because this is the last chance the ride has. A
+            // rider who long-presses Finish and immediately swipes the app away
+            // cancels the scope, and without this the FIT file is never written
+            // and the whole workout goes with the view model.
+            withContext(Dispatchers.IO + NonCancellable) {
                 runCatching { repository.save("workout-$start", recorded, CONNECTORS) }
             }
         // The samples are the only copy of the ride until the file exists, so
@@ -240,7 +309,18 @@ class RecordingViewModel(
             // be on its way before they do.
             UploadWorker.schedule(getApplication())
         }
-        history.update { SportOrdering.record(it, sportId) }
+        history.value = SportOrdering.record(history.value, sportId).also(settings::writeHistory)
+    }
+
+    /**
+     * Ends a session the app can no longer own.
+     *
+     * On its own scope, because the reason it is called is that the view model's
+     * scope has been cancelled - launching the end there would simply not run,
+     * and the watch would keep a GNSS session alive for nobody.
+     */
+    private fun endOrphanedExercise() {
+        CoroutineScope(Dispatchers.IO).launch { runCatching { recorder.end() } }
     }
 
     fun discard() {
@@ -288,6 +368,7 @@ class RecordingViewModel(
     private fun now(): Long = System.currentTimeMillis()
 
     private companion object {
+        const val TAG = "RecordingViewModel"
         const val MILLIS_PER_SECOND = 1000.0
         const val MILLIS_PER_MINUTE = 60_000
         const val TICK_MS = 1000L
