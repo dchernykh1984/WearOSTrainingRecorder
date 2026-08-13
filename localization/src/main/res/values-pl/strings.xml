@@ -158,4 +158,9 @@
     <string name="race_bib">Numer startowy</string>
     <string name="race_refresh">Odswiezaj co %1$d s</string>
     <string name="race_refresh_hint">Dlugi wyscig: oszczedzaj baterie. Krotki: swieze dane.</string>
+
+    <string name="connect_strava_explanation">Utworz wlasna aplikacje Strava na strava.com/settings/api i wklej tutaj client id oraz secret. Aplikacja nie zawiera wlasnych danych.</string>
+    <string name="connect_strava_callback">Ustaw Authorization Callback Domain na localhost</string>
+    <string name="connect_garmin_explanation">Zaloguj sie wlasnym kontem Garmin Connect. Haslo pozostaje zaszyfrowane na tym telefonie.</string>
+    <string name="connect_action">Polacz</string>
 </resources>

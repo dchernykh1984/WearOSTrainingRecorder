@@ -158,4 +158,9 @@
     <string name="race_bib">Startnummer</string>
     <string name="race_refresh">Elke %1$d s vernieuwen</string>
     <string name="race_refresh_hint">Lange wedstrijd: spaar de accu. Korte wedstrijd: verse data.</string>
+
+    <string name="connect_strava_explanation">Maak op strava.com/settings/api je eigen Strava-applicatie en plak hier de client id en secret. De app bevat zelf geen gegevens.</string>
+    <string name="connect_strava_callback">Stel Authorization Callback Domain in op localhost</string>
+    <string name="connect_garmin_explanation">Meld je aan met je eigen Garmin Connect-account. Het wachtwoord blijft versleuteld op deze telefoon.</string>
+    <string name="connect_action">Verbinden</string>
 </resources>

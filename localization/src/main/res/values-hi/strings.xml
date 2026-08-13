@@ -151,4 +151,9 @@
     <string name="race_bib">बिब नंबर</string>
     <string name="race_refresh">हर %1$d से ताज़ा करें</string>
     <string name="race_refresh_hint">लंबी रेस में बैटरी बचाएं, छोटी में ताज़ा डेटा लें।</string>
+
+    <string name="connect_strava_explanation">strava.com/settings/api पर अपना Strava एप्लिकेशन बनाएं और उसका client id और secret यहाँ डालें। ऐप में कोई अपनी कुंजी नहीं है।</string>
+    <string name="connect_strava_callback">Authorization Callback Domain को localhost पर सेट करें</string>
+    <string name="connect_garmin_explanation">अपने Garmin Connect खाते से साइन इन करें। पासवर्ड इसी फ़ोन पर एन्क्रिप्टेड रहता है।</string>
+    <string name="connect_action">कनेक्ट करें</string>
 </resources>

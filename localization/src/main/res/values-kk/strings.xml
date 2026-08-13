@@ -158,4 +158,9 @@
     <string name="race_bib">Старт нөмірі</string>
     <string name="race_refresh">Әр %1$d с жаңарту</string>
     <string name="race_refresh_hint">Ұзақ жарыста батареяны үнемдеңіз, қысқасында жаңа деректер маңызды.</string>
+
+    <string name="connect_strava_explanation">strava.com/settings/api сайтында өз Strava қосымшаңызды жасап, client id мен secret осында енгізіңіз. Қосымшада өз кілттері жоқ.</string>
+    <string name="connect_strava_callback">Authorization Callback Domain өрісіне localhost деп жазыңыз</string>
+    <string name="connect_garmin_explanation">Өз Garmin Connect тіркелгіңізбен кіріңіз. Құпия сөз телефонда шифрланып сақталады.</string>
+    <string name="connect_action">Қосу</string>
 </resources>

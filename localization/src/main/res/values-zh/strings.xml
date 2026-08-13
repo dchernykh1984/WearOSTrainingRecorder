@@ -151,4 +151,9 @@
     <string name="race_bib">号码布</string>
     <string name="race_refresh">每 %1$d 秒刷新</string>
     <string name="race_refresh_hint">长距离比赛省电，短距离比赛数据要新。</string>
+
+    <string name="connect_strava_explanation">请在 strava.com/settings/api 创建你自己的 Strava 应用，并将其 client id 和 secret 填在这里。本应用不内置任何凭据。</string>
+    <string name="connect_strava_callback">将 Authorization Callback Domain 设为 localhost</string>
+    <string name="connect_garmin_explanation">使用你自己的 Garmin Connect 账号登录。密码以加密方式保存在本手机上。</string>
+    <string name="connect_action">连接</string>
 </resources>

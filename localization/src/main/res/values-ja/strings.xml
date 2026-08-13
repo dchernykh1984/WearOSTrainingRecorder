@@ -151,4 +151,9 @@
     <string name="race_bib">ゼッケン番号</string>
     <string name="race_refresh">%1$d 秒ごとに更新</string>
     <string name="race_refresh_hint">長いレースは省電力、短いレースは最新データを。</string>
+
+    <string name="connect_strava_explanation">strava.com/settings/api で自分の Strava アプリを作成し、client id と secret をここに貼り付けてください。本アプリは独自の認証情報を含みません。</string>
+    <string name="connect_strava_callback">Authorization Callback Domain を localhost に設定してください</string>
+    <string name="connect_garmin_explanation">ご自身の Garmin Connect アカウントでサインインしてください。パスワードはこの端末に暗号化して保存されます。</string>
+    <string name="connect_action">接続</string>
 </resources>
