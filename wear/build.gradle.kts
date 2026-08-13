@@ -39,6 +39,8 @@ android {
         // versionName is the human-readable release tag.
         versionCode = versionCodeBase * 10 + wearVersionCodeOffset
         versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -140,4 +142,6 @@ listOf(
 
 dependencies {
     testImplementation(libs.junit)
+
+    androidTestImplementation(libs.androidx.test.ext.junit)
 }
