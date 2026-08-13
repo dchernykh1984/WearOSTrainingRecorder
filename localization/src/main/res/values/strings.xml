@@ -80,8 +80,8 @@
     <string name="field_hr_max">Max HR</string>
     <string name="field_hr_lap">Lap HR</string>
     <string name="field_hr_zone">HR Zone</string>
-    <string name="field_hr_pct_max">% Max HR</string>
-    <string name="field_hr_pct_hrr">% HR Reserve</string>
+    <string name="field_hr_pct_max" formatted="false">% Max HR</string>
+    <string name="field_hr_pct_hrr" formatted="false">% HR Reserve</string>
     <string name="field_cadence">Cadence</string>
     <string name="field_cadence_avg">Avg Cadence</string>
     <string name="field_cadence_max">Max Cadence</string>
