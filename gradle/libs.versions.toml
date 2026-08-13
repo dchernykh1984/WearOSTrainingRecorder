@@ -9,10 +9,15 @@ ktlint-gradle = "14.2.0"
 detekt = "1.23.8"
 kover = "0.9.8"
 androidxTestJunit = "1.3.0"
+androidxTestRunner = "1.7.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestJunit" }
+# androidx.test.ext:junit pulls core/monitor/storage but NOT the runner, and the
+# runner is what defaultConfig.testInstrumentationRunner names - without it every
+# connectedAndroidTest fails to start.
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
