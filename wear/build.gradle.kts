@@ -53,7 +53,12 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // Shrink and obfuscate with R8, and strip unused resources. APK size
+            // matters more on a watch than on a phone: watches have far less
+            // storage, and the APK is pushed over Bluetooth when a paired phone
+            // installs it.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
