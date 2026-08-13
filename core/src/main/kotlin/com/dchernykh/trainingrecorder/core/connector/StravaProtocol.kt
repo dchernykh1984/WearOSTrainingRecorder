@@ -1,6 +1,9 @@
 package com.dchernykh.trainingrecorder.core.connector
 
 import com.dchernykh.trainingrecorder.core.sport.SportCatalogue
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 /**
  * How the app talks to Strava, kept away from any HTTP client so the parts worth
@@ -79,6 +82,36 @@ object StravaProtocol {
         if (params["state"] != expectedState) return null
         return params["code"]?.takeIf { it.isNotBlank() }
     }
+
+    /**
+     * The form the token endpoint expects in exchange for an authorization code.
+     *
+     * The code is single-use and short-lived, so this runs on the phone the
+     * moment the browser comes back - never on the watch, which may not see the
+     * network for hours.
+     */
+    fun tokenRequestFields(
+        clientId: String,
+        clientSecret: String,
+        code: String,
+    ): Map<String, String> =
+        mapOf(
+            "client_id" to clientId,
+            "client_secret" to clientSecret,
+            "code" to code,
+            "grant_type" to "authorization_code",
+        )
+
+    /**
+     * The access token out of a token response, or null if the body does not
+     * carry one - which is how a rejected exchange arrives, since Strava answers
+     * with a JSON error rather than an empty body.
+     */
+    fun accessTokenFrom(body: String): String? =
+        runCatching {
+            val root = Json { ignoreUnknownKeys = true }.parseToJsonElement(body) as? JsonObject
+            (root?.get("access_token") as? JsonPrimitive)?.takeIf { it.isString }?.content
+        }.getOrNull()?.takeIf { it.isNotBlank() }
 
     /** Strava names the sport with `sport_type`, and models indoor as a flag. */
     fun uploadFields(
