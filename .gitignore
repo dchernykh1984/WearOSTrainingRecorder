@@ -1,0 +1,120 @@
+# ===== IDEs =====
+
+# Android Studio / IntelliJ / JetBrains
+# Keep the project buildable from a clean checkout; local IDE state is ignored.
+.idea/
+*.iml
+*.ipr
+*.iws
+captures/
+
+# VSCode
+.vscode/
+
+# Zed
+.zed/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim / Neovim
+*.swp
+*.swo
+.vim/
+Session.vim
+
+# Emacs
+\#*\#
+.\#*
+
+# ===== AI agents =====
+
+# Claude Code (Anthropic)
+.claude/
+
+# Cursor
+.cursor/
+
+# Windsurf
+.windsurf/
+
+# Gemini CLI
+.gemini/
+
+# Aider
+.aider*
+
+# Continue
+.continue/
+
+# GitHub Copilot
+.copilot/
+
+# ===== Android / Kotlin / Gradle =====
+
+# Build output
+build/
+.gradle/
+.kotlin/
+wear/release/
+mobile/release/
+
+# Only the per-module gradle.lockfile files are intentionally version-controlled.
+# The settings/version-catalog lockfile that `--write-locks` also emits is not
+# part of that scope, so ignore it to keep the working tree clean instead of
+# tracking an unused artifact.
+settings-gradle.lockfile
+
+# Native build cache
+.cxx/
+
+# Local SDK path and other machine-specific config (never commit).
+local.properties
+
+# Packaged apps and intermediate build artifacts
+*.apk
+*.aab
+*.ap_
+*.aar
+*.dex
+*.class
+
+# Signing material (never commit).
+*.jks
+*.keystore
+keystore.properties
+
+# Third-party API credentials (Strava / Garmin client ids and secrets) are
+# injected at build time from the environment; never commit them.
+secrets.properties
+
+# Android profiling / logs
+*.hprof
+
+# NOTE: gradle/wrapper/gradle-wrapper.jar is intentionally NOT ignored; the
+# Gradle wrapper must be committed so the project builds without a local Gradle.
+
+# ===== Environment variables =====
+
+.env
+.env.*
+
+# ===== Logs =====
+
+*.log
+logs/
+
+# ===== OS =====
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# ===== Temporary files =====
+
+tmp/
+temp/
