@@ -75,6 +75,12 @@ class SensorConnection(
                         if (newState == BluetoothProfile.STATE_CONNECTED) {
                             gatt.discoverServices()
                         } else {
+                            // The counters are meaningless across a gap: rpm
+                            // computed from a minutes-old sample against a timer
+                            // that wraps every 64 seconds is exactly the bogus
+                            // spike this class exists to avoid.
+                            previousCrankRevolutions = null
+                            previousCrankEventTime = null
                             trySend(SensorEvent(profile, emptyMap(), connected = false))
                         }
                     }
