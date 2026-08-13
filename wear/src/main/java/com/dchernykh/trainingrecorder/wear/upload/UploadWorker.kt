@@ -13,10 +13,11 @@ import com.dchernykh.trainingrecorder.core.connector.CredentialContract
 import com.dchernykh.trainingrecorder.core.connector.StravaProtocol
 import com.dchernykh.trainingrecorder.core.connector.UploadResult
 import com.dchernykh.trainingrecorder.core.connector.WorkoutUpload
-import com.dchernykh.trainingrecorder.core.sport.SportCatalogue
 import com.dchernykh.trainingrecorder.core.sync.PendingUpload
 import com.dchernykh.trainingrecorder.core.sync.UploadQueue
+import com.dchernykh.trainingrecorder.core.workout.UploadState
 import com.dchernykh.trainingrecorder.core.workout.WorkoutSummary
+import com.dchernykh.trainingrecorder.localization.Labels
 import com.dchernykh.trainingrecorder.wear.connector.GarminConnector
 import com.dchernykh.trainingrecorder.wear.connector.StravaConnector
 import com.dchernykh.trainingrecorder.wear.storage.WorkoutRepository
@@ -59,8 +60,7 @@ class UploadWorker(
 
     override suspend fun doWork(): Result =
         withContext(Dispatchers.IO) {
-            val stored = credentials.read()
-            val configured = registry.configured(stored).map { it.id }.toSet()
+            val configured = registry.configured(credentials.read()).map { it.id }.toSet()
             // Nothing set up yet is a finished job, not a failed one: rescheduling
             // would spin against a rider who simply has not connected a service.
             if (configured.isEmpty()) return@withContext Result.success()
@@ -72,7 +72,11 @@ class UploadWorker(
 
             var deferred = false
             due.forEach { pending ->
-                if (attempt(pending, workouts[pending.workoutId], stored)) deferred = true
+                // Re-read per attempt: a refresh rotates Strava's token and
+                // writes it back, and a snapshot taken before the drain would
+                // send every later upload of the same pass a token that has
+                // already been spent.
+                if (attempt(pending, workouts[pending.workoutId], credentials.read())) deferred = true
             }
             // Anything the queue has given up on can now be reclaimed.
             repository.prune(configured)
@@ -90,9 +94,20 @@ class UploadWorker(
     ): Boolean {
         val connector = registry.byId(pending.connectorId)
         val file = repository.fileFor(pending.workoutId)
-        // The index outlives the file if a prune was interrupted, and sending a
-        // missing file would be a rejected upload for a reason that is ours.
-        if (connector == null || workout == null || !file.exists()) return false
+        if (connector == null || workout == null) return false
+        if (!file.exists()) {
+            // The index outlives the file if a prune was interrupted. Recorded as
+            // failed rather than skipped: left pending it would never give up,
+            // never be safe to delete, and hold its share of the budget forever.
+            repository.markUploaded(
+                workoutId = pending.workoutId,
+                connectorId = connector.id,
+                state = UploadState.FAILED,
+                attempts = pending.attempts,
+                attemptedAtEpochMs = now(),
+            )
+            return false
+        }
 
         val result =
             runCatching {
@@ -101,7 +116,7 @@ class UploadWorker(
                         workoutId = workout.id,
                         sportTypeId = workout.sportTypeId,
                         fileName = "${workout.id}.fit",
-                        activityName = SportCatalogue.byId(workout.sportTypeId)?.id ?: workout.sportTypeId,
+                        activityName = activityName(workout.sportTypeId),
                         byteCount = file.length(),
                         openStream = { file.inputStream() },
                     ),
@@ -118,6 +133,17 @@ class UploadWorker(
             attemptedAtEpochMs = now(),
         )
         return result is UploadResult.Retryable && !UploadQueue.hasGivenUp(pending.copy(attempts = attempts))
+    }
+
+    /**
+     * What the ride is called on the service: the sport in the rider's language.
+     *
+     * Resolved through the labels rather than passing the catalogue id along -
+     * a feed entry reading "cycling_road" is an internal identifier that escaped.
+     */
+    private fun activityName(sportTypeId: String): String {
+        val label = Labels.sport(sportTypeId)
+        return if (label != 0) applicationContext.getString(label) else sportTypeId
     }
 
     private fun now(): Long = System.currentTimeMillis()
