@@ -138,4 +138,15 @@
 
     <string name="recording_notification_title">Идёт запись тренировки</string>
     <string name="recording_channel_name">Запись</string>
+
+    <string name="editor_inherits_default">Используется раскладка по умолчанию</string>
+    <string name="editor_inherits_discipline">Используется раскладка направления</string>
+    <string name="editor_own_copy">У этого вида спорта своя раскладка</string>
+    <string name="editor_reset">Сбросить</string>
+    <string name="editor_screen_number">Экран %1$d</string>
+    <string name="editor_slot_number">Поле %1$d</string>
+    <string name="editor_empty_slot">Пусто</string>
+    <string name="editor_field_count">Полей</string>
+    <string name="editor_add_screen">Добавить экран</string>
+    <string name="editor_remove_screen">Удалить</string>
 </resources>

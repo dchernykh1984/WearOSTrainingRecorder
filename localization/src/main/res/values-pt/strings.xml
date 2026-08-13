@@ -138,4 +138,15 @@
 
     <string name="recording_notification_title">A gravar treino</string>
     <string name="recording_channel_name">Gravacao</string>
+
+    <string name="editor_inherits_default">A usar o esquema predefinido</string>
+    <string name="editor_inherits_discipline">A usar o esquema da disciplina</string>
+    <string name="editor_own_copy">Este desporto tem esquema proprio</string>
+    <string name="editor_reset">Repor</string>
+    <string name="editor_screen_number">Ecra %1$d</string>
+    <string name="editor_slot_number">Campo %1$d</string>
+    <string name="editor_empty_slot">Vazio</string>
+    <string name="editor_field_count">Campos</string>
+    <string name="editor_add_screen">Adicionar ecra</string>
+    <string name="editor_remove_screen">Remover</string>
 </resources>

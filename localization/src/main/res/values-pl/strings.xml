@@ -138,4 +138,15 @@
 
     <string name="recording_notification_title">Nagrywanie treningu</string>
     <string name="recording_channel_name">Nagrywanie</string>
+
+    <string name="editor_inherits_default">Uzywany uklad domyslny</string>
+    <string name="editor_inherits_discipline">Uzywany uklad dyscypliny</string>
+    <string name="editor_own_copy">Ten sport ma wlasny uklad</string>
+    <string name="editor_reset">Resetuj</string>
+    <string name="editor_screen_number">Ekran %1$d</string>
+    <string name="editor_slot_number">Pole %1$d</string>
+    <string name="editor_empty_slot">Puste</string>
+    <string name="editor_field_count">Pola</string>
+    <string name="editor_add_screen">Dodaj ekran</string>
+    <string name="editor_remove_screen">Usun</string>
 </resources>
