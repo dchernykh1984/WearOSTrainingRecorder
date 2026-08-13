@@ -17,7 +17,17 @@ class UploadQueueTest {
         id: String,
         startedAt: Long = now,
         uploads: Map<String, UploadState> = emptyMap(),
-    ) = WorkoutSummary(id, "cycling_road", startedAt, 60, 100.0, 1024, uploads)
+        attempts: Map<String, Int> = emptyMap(),
+    ) = WorkoutSummary(id, "cycling_road", startedAt, 60, 100.0, 1024, uploads, attempts)
+
+    @Test
+    fun theAttemptCountSurvivesARestart() {
+        // Rebuilt from zero the backoff would restart on every launch, the queue
+        // would never give up, and the workout would stay undeletable forever.
+        val tried = workout("w1", attempts = mapOf("strava" to 4))
+        val entry = UploadQueue.from(listOf(tried), setOf("strava")).single()
+        assertEquals(4, entry.attempts)
+    }
 
     @Test
     fun theFirstAttemptIsImmediate() {

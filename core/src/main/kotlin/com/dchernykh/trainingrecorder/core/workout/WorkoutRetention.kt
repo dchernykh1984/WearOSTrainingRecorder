@@ -26,6 +26,14 @@ data class WorkoutSummary(
     val distanceMeters: Double,
     val fileSizeBytes: Long,
     val uploads: Map<String, UploadState> = emptyMap(),
+    /**
+     * How many times each service has been tried. Persisted with the workout
+     * because the queue is rebuilt from these entries: held only in memory, the
+     * count would reset on every restart, `hasGivenUp` would never fire, and a
+     * service that is down would keep a workout pending - and therefore
+     * undeletable - forever.
+     */
+    val uploadAttempts: Map<String, Int> = emptyMap(),
 ) {
     init {
         require(id.isNotBlank()) { "a workout needs an id" }
