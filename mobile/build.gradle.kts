@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.kover)
 }
 
 // Release signing is driven entirely by environment variables so the keystore
@@ -86,6 +87,24 @@ ktlint {
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                // Generated code is not meaningful to cover.
+                classes("*.BuildConfig", "*.R", "*.R$*")
+            }
+        }
+        verify {
+            rule {
+                // No production logic exists yet, so the bound stays at 0 to keep
+                // the scaffold green. Raise it as real code lands.
+                minBound(0)
+            }
+        }
+    }
 }
 
 dependencies {

@@ -55,5 +55,5 @@ jobs:
         uses: android-actions/setup-android@v4
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
-      - name: Lint, static analysis, unit tests, and build
-        run: ./gradlew ktlintCheck detekt lintDebug testDebugUnitTest assembleDebug assembleRelease
+      - name: Lint, static analysis, unit tests, coverage, and build
+        run: ./gradlew ktlintCheck detekt lintDebug testDebugUnitTest koverVerify assembleDebug assembleRelease
