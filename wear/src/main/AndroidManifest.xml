@@ -7,8 +7,13 @@
         android:name="android.hardware.type.watch"
         android:required="true" />
 
+    <!-- Auto-backup is off: the app will hold OAuth tokens for Strava / Garmin
+         Connect plus raw location and heart-rate tracks, and Android's automatic
+         backup would copy all of it to the user's Google Drive outside our
+         control. Anything that should survive a reinstall gets an explicit,
+         reviewed export path instead. -->
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.DeviceDefault">
 
