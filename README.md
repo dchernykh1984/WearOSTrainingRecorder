@@ -115,3 +115,26 @@ sdkmanager "system-images;android-34;android-wear;x86_64"
 
   To pair a watch over Wi-Fi: on the watch enable **Developer options ->
   Wireless debugging**, then `adb pair <ip>:<port>` and `adb connect <ip>:<port>`.
+
+### 6. Set up pre-commit hooks (contributors)
+
+Install [pre-commit](https://pre-commit.com/) (`brew install pre-commit`, or
+`pipx install pre-commit`), then register the hooks:
+
+```bash
+pre-commit install
+pre-commit install --hook-type commit-msg
+pre-commit install --hook-type pre-push
+```
+
+After that the hooks run automatically:
+
+- **on commit** - file formatting, YAML/TOML checks, and a non-ASCII guard;
+- **on the commit message** - Conventional Commits validation (commitizen);
+- **on push** - `ktlintCheck` and `detekt` (these need the JDK + Android SDK).
+
+To run all checks manually across every file:
+
+```bash
+pre-commit run --all-files
+```
