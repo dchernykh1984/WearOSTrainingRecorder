@@ -18,7 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -41,18 +41,25 @@ import com.dchernykh.trainingrecorder.localization.R
  * deserves, and the editor's back gesture is the only transition worth handling.
  */
 @Composable
-fun CompanionApp(model: CompanionViewModel = viewModel()) {
+fun CompanionApp(
+    onLanguageChanged: () -> Unit = {},
+    model: CompanionViewModel = viewModel(),
+) {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            var section by remember { mutableStateOf(Section.SPORTS) }
-            var editing by remember { mutableStateOf<SportType?>(null) }
-            var picking by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+            // Saveable, so rotating the phone does not throw the rider out of
+            // the editor they were halfway through. The sport is held by id
+            // because SportType is not itself saveable.
+            var section by rememberSaveable { mutableStateOf(Section.SPORTS) }
+            var editingId by rememberSaveable { mutableStateOf<String?>(null) }
+            var picking by rememberSaveable { mutableStateOf<Pair<Int, Int>?>(null) }
+            val editing = editingId?.let { id -> SportCatalogue.byId(id) }
 
             // Leaving the editor with the system back gesture, so the phone
             // behaves like every other phone rather than trapping the rider on
             // a screen whose only way out is a control they have to find.
             BackHandler(enabled = editing != null) {
-                if (picking != null) picking = null else editing = null
+                if (picking != null) picking = null else editingId = null
             }
 
             Scaffold(
@@ -63,7 +70,7 @@ fun CompanionApp(model: CompanionViewModel = viewModel()) {
                                 selected = section == entry && editing == null,
                                 onClick = {
                                     section = entry
-                                    editing = null
+                                    editingId = null
                                     picking = null
                                 },
                                 icon = {},
@@ -78,8 +85,9 @@ fun CompanionApp(model: CompanionViewModel = viewModel()) {
                     section = section,
                     editing = editing,
                     picking = picking,
-                    onEdit = { editing = it },
+                    onEdit = { editingId = it?.id },
                     onPick = { picking = it },
+                    onLanguageChanged = onLanguageChanged,
                     modifier = Modifier.padding(padding),
                 )
             }
@@ -95,6 +103,7 @@ private fun SectionContent(
     picking: Pair<Int, Int>?,
     onEdit: (SportType?) -> Unit,
     onPick: (Pair<Int, Int>?) -> Unit,
+    onLanguageChanged: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val configuration by model.configuration
@@ -129,7 +138,12 @@ private fun SectionContent(
         section == Section.SETTINGS ->
             LanguageSettings(
                 current = model.language.value,
-                onLanguageChosen = model::updateLanguage,
+                onLanguageChosen = {
+                    model.updateLanguage(it)
+                    // Recreated rather than recomposed: the strings come from the
+                    // Activity's resources, which are fixed at attach time.
+                    onLanguageChanged()
+                },
                 modifier = modifier,
             )
     }

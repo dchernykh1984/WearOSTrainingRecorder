@@ -53,6 +53,9 @@ class PhoneSettingsStore(
             temporary.setReadable(false, false)
             temporary.setReadable(true, true)
         }
-        temporary.renameTo(target)
+        // Checked, because a failed rename leaves the stale file in place while
+        // looking like a successful write - and the rider's edit is then quietly
+        // gone on the next launch, which is exactly what this dance prevents.
+        check(temporary.renameTo(target)) { "could not replace ${target.name}" }
     }
 }

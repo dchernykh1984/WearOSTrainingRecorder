@@ -5,6 +5,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.dchernykh.trainingrecorder.core.config.ScreenConfiguration
 import com.dchernykh.trainingrecorder.core.config.ScreenSet
 import com.dchernykh.trainingrecorder.core.connector.CredentialField
@@ -19,6 +20,8 @@ import com.dchernykh.trainingrecorder.localization.AppLanguage
 import com.dchernykh.trainingrecorder.localization.R
 import com.dchernykh.trainingrecorder.mobile.settings.PhoneSettingsStore
 import com.dchernykh.trainingrecorder.mobile.sync.SettingsPublisher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /** The five places the companion app can be. */
 enum class Section(
@@ -50,6 +53,17 @@ class CompanionViewModel(
     private val store: PhoneSettingsStore = PhoneSettingsStore(application),
     private val publisher: SettingsPublisher = SettingsPublisher(application),
 ) : AndroidViewModel(application) {
+    /**
+     * Kotlin default arguments do not emit a one-argument constructor, and
+     * `viewModel()` reflects for exactly that signature - without this the app
+     * dies on its first frame with "cannot create an instance".
+     */
+    constructor(application: Application) : this(
+        application,
+        PhoneSettingsStore(application),
+        SettingsPublisher(application),
+    )
+
     private val _configuration = mutableStateOf(ScreenConfiguration.initial())
     val configuration: State<ScreenConfiguration> = _configuration
 
@@ -91,10 +105,6 @@ class CompanionViewModel(
             _language.value = AppLanguage.byTag(it.languageTag)
         }
         credentials.value = store.readCredentials()
-        // Re-applied on every launch: the framework persists the choice, but a
-        // fresh install restoring a backup would otherwise show the device
-        // language while the settings say something else.
-        AppLanguage.apply(AppLanguage.tagOf(_language.value))
     }
 
     fun credentialsFor(connectorId: String): Map<String, String> = credentials.value[connectorId].orEmpty()
@@ -106,7 +116,7 @@ class CompanionViewModel(
     ) {
         val fields = credentials.value[connectorId].orEmpty() + (key to value)
         credentials.value = credentials.value + (connectorId to fields)
-        store.writeCredentials(credentials.value)
+        save { store.writeCredentials(credentials.value) }
     }
 
     /**
@@ -115,7 +125,7 @@ class CompanionViewModel(
      * every keystroke, and the watch would spend the typing failing to log in.
      */
     fun publishCredentials() {
-        publisher.publishCredentials(credentials.value)
+        save { publisher.publishCredentials(credentials.value) }
     }
 
     fun updateScreens(
@@ -149,9 +159,9 @@ class CompanionViewModel(
         persist()
     }
 
+    /** Persisted here; the Activity applies it by recreating itself. */
     fun updateLanguage(language: AppLanguage) {
         _language.value = language
-        AppLanguage.apply(AppLanguage.tagOf(language))
         persist()
     }
 
@@ -163,7 +173,18 @@ class CompanionViewModel(
                 units = _units.value,
                 languageTag = AppLanguage.tagOf(_language.value),
             )
-        store.writeSettings(settings)
-        publisher.publish(settings)
+        save {
+            store.writeSettings(settings)
+            publisher.publish(settings)
+        }
+    }
+
+    /**
+     * Off the main thread. Every keystroke in a text field lands here, and a
+     * file write plus a Data Layer put per character is jank at best and an ANR
+     * on a slow phone.
+     */
+    private fun save(block: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) { runCatching(block) }
     }
 }
