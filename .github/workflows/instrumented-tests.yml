@@ -17,6 +17,12 @@ on:
 permissions:
   contents: read
 
+# Without this, pushing twice to a pull request leaves two full three-emulator
+# matrices running against each other for many minutes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   connected:
     runs-on: ubuntu-latest
