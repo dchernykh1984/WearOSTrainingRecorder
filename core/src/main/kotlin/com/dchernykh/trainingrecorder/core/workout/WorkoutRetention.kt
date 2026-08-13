@@ -43,11 +43,21 @@ data class WorkoutSummary(
     }
 
     /**
-     * True only when every service the rider enabled has taken it. A workout
-     * that no service has claimed yet is never safe to delete.
+     * True when every enabled service has reached a terminal answer.
+     *
+     * [UploadState.FAILED] counts as terminal on purpose. A service that has
+     * refused a file, or that has been tried until the queue gave up, is never
+     * going to take it - and keeping the workout forever in the hope that it
+     * might both strands the ride and fills the watch. Only [UploadState.PENDING]
+     * and a service that has not been offered the workout at all hold it back.
      */
     fun isSafeToDelete(enabledConnectors: Set<String>): Boolean =
-        enabledConnectors.all { uploads[it] == UploadState.UPLOADED }
+        enabledConnectors.all {
+            when (uploads[it]) {
+                UploadState.UPLOADED, UploadState.FAILED -> true
+                UploadState.PENDING, null -> false
+            }
+        }
 }
 
 /**

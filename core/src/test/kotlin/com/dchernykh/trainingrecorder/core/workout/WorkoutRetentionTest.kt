@@ -53,18 +53,26 @@ class WorkoutRetentionTest {
     }
 
     @Test
-    fun aFailedUploadCountsAsUnsynced() {
-        val failed =
+    fun aWorkoutNoServiceWillEverTakeStopsHoldingSpace() {
+        // Both halves matter: a refused ride is not retried, so keeping it
+        // forever would strand it and fill the watch at the same time.
+        val refused = workout("refused", 1, uploads = connectors.associateWith { UploadState.FAILED })
+        assertTrue(refused.isSafeToDelete(connectors))
+    }
+
+    @Test
+    fun aPartlyFailedUploadStillWaitsOnTheServiceThatHasNotAnswered() {
+        val waiting =
             workout(
-                "failed",
+                "waiting",
                 1,
                 uploads =
                     mapOf(
                         "garmin" to UploadState.FAILED,
-                        "strava" to UploadState.UPLOADED,
+                        "strava" to UploadState.PENDING,
                     ),
             )
-        assertFalse(failed.isSafeToDelete(connectors))
+        assertFalse(waiting.isSafeToDelete(connectors))
     }
 
     @Test
