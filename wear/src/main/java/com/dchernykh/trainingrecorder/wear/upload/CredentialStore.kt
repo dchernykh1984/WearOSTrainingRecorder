@@ -2,6 +2,9 @@ package com.dchernykh.trainingrecorder.wear.upload
 
 import android.content.Context
 import com.dchernykh.trainingrecorder.core.connector.CredentialContract
+import com.google.android.gms.wearable.DataMapItem
+import com.google.android.gms.wearable.Wearable
+import kotlinx.coroutines.tasks.await
 import java.io.File
 
 /**
@@ -40,5 +43,24 @@ class CredentialStore(
 
     fun clear() {
         file.delete()
+    }
+
+    companion object {
+        /**
+         * Pulls whatever the phone last published.
+         *
+         * Needed on a fresh install: the listener only hears *changes*, so a
+         * watch set up after the rider connected their services would otherwise
+         * have no token and quietly upload nothing.
+         */
+        suspend fun fetchExisting(context: Context): String? =
+            runCatching {
+                Wearable
+                    .getDataClient(context)
+                    .dataItems
+                    .await()
+                    .firstOrNull { it.uri.path == CredentialContract.PATH }
+                    ?.let { DataMapItem.fromDataItem(it).dataMap.getString(CredentialContract.KEY_PAYLOAD) }
+            }.getOrNull()
     }
 }
