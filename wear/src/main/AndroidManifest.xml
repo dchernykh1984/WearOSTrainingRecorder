@@ -82,6 +82,18 @@
 
         <!-- The health type is what Wear OS expects for an exercise; anything
              else is refused on API 34+. -->
+        <!-- Receives settings even when the app is not running: a change that
+             only lands while the rider has the app open is a coincidence, not a
+             setting. -->
+        <service
+            android:name=".sync.SettingsListener"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/settings" />
+            </intent-filter>
+        </service>
+
         <service
             android:name=".service.RecordingService"
             android:exported="false"
