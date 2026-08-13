@@ -216,4 +216,9 @@
     <string name="profile_csc">Cadence and speed</string>
     <string name="profile_cps">Power</string>
     <string name="profile_rsc">Running sensor</string>
+    <string name="connect_in_progress">Connecting...</string>
+    <string name="connect_done">Connected</string>
+    <string name="connect_failed">Could not connect. Check the details and try again.</string>
+    <string name="connect_needs_application">Enter your application's Client ID and Secret first.</string>
+    <string name="connect_garmin_token_hint">Paste a token from Garmin Connect. Automatic sign-in is not available yet.</string>
 </resources>

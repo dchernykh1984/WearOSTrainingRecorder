@@ -200,4 +200,9 @@
     <string name="profile_csc">Cadans en snelheid</string>
     <string name="profile_cps">Vermogen</string>
     <string name="profile_rsc">Loopsensor</string>
+    <string name="connect_in_progress">Verbinden...</string>
+    <string name="connect_done">Verbonden</string>
+    <string name="connect_failed">Verbinden mislukt. Controleer de gegevens en probeer opnieuw.</string>
+    <string name="connect_needs_application">Voer eerst de Client ID en Secret van je applicatie in.</string>
+    <string name="connect_garmin_token_hint">Plak een token uit Garmin Connect. Automatisch inloggen is nog niet beschikbaar.</string>
 </resources>

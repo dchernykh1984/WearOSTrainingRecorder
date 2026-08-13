@@ -193,4 +193,9 @@
     <string name="profile_csc">केडेंस और गति</string>
     <string name="profile_cps">पावर</string>
     <string name="profile_rsc">रनिंग सेंसर</string>
+    <string name="connect_in_progress">कनेक्ट हो रहा है...</string>
+    <string name="connect_done">कनेक्ट हो गया</string>
+    <string name="connect_failed">कनेक्ट नहीं हो सका। विवरण जाँचें और फिर से प्रयास करें।</string>
+    <string name="connect_needs_application">पहले अपने ऐप्लिकेशन का Client ID और Secret दर्ज करें।</string>
+    <string name="connect_garmin_token_hint">Garmin Connect से टोकन चिपकाएँ। स्वचालित साइन-इन अभी उपलब्ध नहीं है।</string>
 </resources>

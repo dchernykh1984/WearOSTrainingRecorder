@@ -200,4 +200,9 @@
     <string name="profile_csc">Trittfrequenz und Tempo</string>
     <string name="profile_cps">Leistung</string>
     <string name="profile_rsc">Laufsensor</string>
+    <string name="connect_in_progress">Verbinden...</string>
+    <string name="connect_done">Verbunden</string>
+    <string name="connect_failed">Verbindung fehlgeschlagen. Daten prufen und erneut versuchen.</string>
+    <string name="connect_needs_application">Gib zuerst Client ID und Secret deiner Anwendung ein.</string>
+    <string name="connect_garmin_token_hint">Fuge ein Token aus Garmin Connect ein. Automatische Anmeldung ist noch nicht verfugbar.</string>
 </resources>

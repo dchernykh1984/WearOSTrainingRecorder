@@ -193,4 +193,9 @@
     <string name="profile_csc">ケイデンスと速度</string>
     <string name="profile_cps">パワー</string>
     <string name="profile_rsc">ランニングセンサー</string>
+    <string name="connect_in_progress">接続中...</string>
+    <string name="connect_done">接続済み</string>
+    <string name="connect_failed">接続できませんでした。入力内容を確認して再試行してください。</string>
+    <string name="connect_needs_application">先にアプリケーションの Client ID と Secret を入力してください。</string>
+    <string name="connect_garmin_token_hint">Garmin Connect のトークンを貼り付けてください。自動ログインはまだ利用できません。</string>
 </resources>

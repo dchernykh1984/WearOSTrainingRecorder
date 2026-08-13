@@ -200,4 +200,9 @@
     <string name="profile_csc">Kadencja i prędkość</string>
     <string name="profile_cps">Moc</string>
     <string name="profile_rsc">Czujnik biegowy</string>
+    <string name="connect_in_progress">Laczenie...</string>
+    <string name="connect_done">Polaczono</string>
+    <string name="connect_failed">Nie udalo sie polaczyc. Sprawdz dane i sprobuj ponownie.</string>
+    <string name="connect_needs_application">Najpierw podaj Client ID i Secret swojej aplikacji.</string>
+    <string name="connect_garmin_token_hint">Wklej token z Garmin Connect. Automatyczne logowanie nie jest jeszcze dostepne.</string>
 </resources>
