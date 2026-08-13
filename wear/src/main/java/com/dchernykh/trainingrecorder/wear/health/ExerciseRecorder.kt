@@ -51,7 +51,13 @@ class ExerciseRecorder(
     ) {
         val capabilities = client.getCapabilitiesAsync().await()
         val exerciseType = ExerciseTypes.forSport(sportTypeId)
-        val supported = capabilities.getExerciseTypeCapabilities(exerciseType).supportedDataTypes
+        // getExerciseTypeCapabilities throws for a type the device does not
+        // support, and for UNKNOWN. Degrading to "no data types" starts a bare
+        // session instead, which is what ExerciseTypes promises: a drifted
+        // mapping must not stop the rider recording.
+        val supported =
+            runCatching { capabilities.getExerciseTypeCapabilities(exerciseType).supportedDataTypes }
+                .getOrDefault(emptySet())
         val config =
             ExerciseConfig
                 .Builder(exerciseType)
