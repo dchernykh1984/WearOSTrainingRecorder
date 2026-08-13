@@ -48,13 +48,23 @@ class SensorConnection(
      * [events] flow would otherwise clobber each other's baseline and compute a
      * rate across a gap. The same reasoning keeps the GATT handle local.
      */
-    private class CrankBaseline {
+    private class Counter {
         var revolutions: Long? = null
         var eventTime: Int? = null
 
         fun clear() {
             revolutions = null
             eventTime = null
+        }
+    }
+
+    private class CrankBaseline {
+        val crank = Counter()
+        val wheel = Counter()
+
+        fun clear() {
+            crank.clear()
+            wheel.clear()
         }
     }
 
@@ -151,61 +161,127 @@ class SensorConnection(
 
         fun reading(value: Double) = SensorReading(value, SensorOrigin.EXTERNAL, now)
 
-        val parsed: Map<String, SensorReading>? =
-            when (profile) {
-                SensorProfile.HEART_RATE ->
-                    HeartRateMeasurement.parse(data)?.let {
-                        mapOf("hr" to reading(it.heartRateBpm.toDouble()))
-                    }
-                SensorProfile.CYCLING_POWER ->
-                    CyclingPowerMeasurement.parse(data)?.let { measurement ->
-                        buildMap<String, SensorReading> {
-                            put("power", reading(measurement.instantaneousPowerWatts.toDouble()))
-                            measurement.pedalPowerBalancePercent?.let { put("power_balance", reading(it)) }
-                            cadenceFrom(
-                                measurement.cumulativeCrankRevolutions,
-                                measurement.lastCrankEventTime,
-                                baseline,
-                            )?.let { put("cadence", reading(it)) }
-                        }
-                    }
-                SensorProfile.CYCLING_SPEED_CADENCE ->
-                    CscMeasurement.parse(data)?.let { measurement ->
-                        cadenceFrom(
-                            measurement.cumulativeCrankRevolutions,
-                            measurement.lastCrankEventTime,
-                            baseline,
-                        )?.let { mapOf("cadence" to reading(it)) }
-                    }
-                SensorProfile.RUNNING_SPEED_CADENCE ->
-                    RscMeasurement.parse(data)?.let {
-                        mapOf(
-                            "speed_current" to reading(it.speedMps),
-                            "cadence" to reading(it.cadenceSpm.toDouble()),
-                        )
-                    }
-
-                else -> null
-            }
-        return parsed.orEmpty()
+        return when (profile) {
+            SensorProfile.HEART_RATE -> heartRate(data, ::reading)
+            SensorProfile.CYCLING_POWER -> cyclingPower(data, baseline, ::reading)
+            SensorProfile.CYCLING_SPEED_CADENCE -> speedAndCadence(data, baseline, ::reading)
+            SensorProfile.RUNNING_SPEED_CADENCE -> runningSpeed(data, ::reading)
+            else -> emptyMap()
+        }
     }
+
+    private fun heartRate(
+        data: ByteArray,
+        reading: (Double) -> SensorReading,
+    ): Map<String, SensorReading> =
+        HeartRateMeasurement
+            .parse(data)
+            ?.let {
+                mapOf("hr" to reading(it.heartRateBpm.toDouble()))
+            }.orEmpty()
+
+    private fun cyclingPower(
+        data: ByteArray,
+        baseline: CrankBaseline,
+        reading: (Double) -> SensorReading,
+    ): Map<String, SensorReading> {
+        val measurement = CyclingPowerMeasurement.parse(data) ?: return emptyMap()
+        return buildMap {
+            put("power", reading(measurement.instantaneousPowerWatts.toDouble()))
+            measurement.pedalPowerBalancePercent?.let { put("power_balance", reading(it)) }
+            cadenceFrom(
+                measurement.cumulativeCrankRevolutions,
+                measurement.lastCrankEventTime,
+                baseline,
+            )?.let { put("cadence", reading(it)) }
+        }
+    }
+
+    private fun speedAndCadence(
+        data: ByteArray,
+        baseline: CrankBaseline,
+        reading: (Double) -> SensorReading,
+    ): Map<String, SensorReading> {
+        val measurement = CscMeasurement.parse(data) ?: return emptyMap()
+        return buildMap {
+            cadenceFrom(
+                measurement.cumulativeCrankRevolutions,
+                measurement.lastCrankEventTime,
+                baseline,
+            )?.let { put("cadence", reading(it)) }
+            // A wheel-only speed sensor is the common case, and parsing its
+            // revolutions only to drop them left it pairing successfully and
+            // then reporting nothing at all.
+            wheelSpeedFrom(
+                measurement.cumulativeWheelRevolutions,
+                measurement.lastWheelEventTime,
+                baseline,
+            )?.let { put("speed_current", reading(it)) }
+        }
+    }
+
+    private fun runningSpeed(
+        data: ByteArray,
+        reading: (Double) -> SensorReading,
+    ): Map<String, SensorReading> =
+        RscMeasurement
+            .parse(data)
+            ?.let {
+                mapOf(
+                    "speed_current" to reading(it.speedMps),
+                    "cadence" to reading(it.cadenceSpm.toDouble()),
+                )
+            }.orEmpty()
+
+    /**
+     * Metres per second from the wheel counter and a wheel circumference.
+     *
+     * The circumference is assumed rather than configured: a CSC sensor does not
+     * report it, and 2.096 m is the 700x23c default every head unit ships with.
+     * A rider on different tyres reads a few percent off, which is far better
+     * than the field being empty.
+     */
+    private fun wheelSpeedFrom(
+        revolutions: Long?,
+        eventTime: Int?,
+        baseline: CrankBaseline,
+    ): Double? =
+        rateFrom(revolutions, eventTime, baseline.wheel)
+            ?.times(WHEEL_CIRCUMFERENCE_METERS)
+            ?.div(SECONDS_PER_MINUTE)
 
     /** Needs two samples, so the first notification after connecting yields nothing. */
     private fun cadenceFrom(
         revolutions: Int?,
         eventTime: Int?,
         baseline: CrankBaseline,
+    ): Double? = rateFrom(revolutions?.toLong(), eventTime, baseline.crank)
+
+    /**
+     * Revolutions per minute against the previous sample, which this call then
+     * becomes. Shared by the crank and the wheel: the arithmetic is the same,
+     * only which counter it tracks differs.
+     */
+    private fun rateFrom(
+        revolutions: Long?,
+        eventTime: Int?,
+        counter: Counter,
     ): Double? {
         if (revolutions == null || eventTime == null) return null
-        val previousRevolutions = baseline.revolutions
-        val previousTime = baseline.eventTime
-        baseline.revolutions = revolutions.toLong()
-        baseline.eventTime = eventTime
+        val previousRevolutions = counter.revolutions
+        val previousTime = counter.eventTime
+        counter.revolutions = revolutions
+        counter.eventTime = eventTime
         if (previousRevolutions == null || previousTime == null) return null
-        return RevolutionRate.rpm(previousRevolutions, previousTime, revolutions.toLong(), eventTime)
+        return RevolutionRate.rpm(previousRevolutions, previousTime, revolutions, eventTime)
     }
 
     private companion object {
+        /** The 700x23c default every head unit ships with, in metres. */
+        const val WHEEL_CIRCUMFERENCE_METERS = 2.096
+
+        const val SECONDS_PER_MINUTE = 60.0
+
         /** Client Characteristic Configuration, the descriptor that arms notifications. */
         val CLIENT_CONFIG: UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
 
