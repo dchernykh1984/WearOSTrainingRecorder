@@ -1,5 +1,6 @@
 package com.dchernykh.trainingrecorder.mobile.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,12 +10,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dchernykh.trainingrecorder.core.config.ConfigLevel
 import com.dchernykh.trainingrecorder.core.config.ScreenConfiguration
 import com.dchernykh.trainingrecorder.core.sport.SportCatalogue
@@ -23,22 +32,125 @@ import com.dchernykh.trainingrecorder.localization.Labels
 import com.dchernykh.trainingrecorder.localization.R
 
 /**
- * The phone owns the configuration, so this is where a sport's screens are
- * edited.
+ * The phone companion.
  *
- * Each row says which tier it currently reads from, because that is the thing
- * which is otherwise invisible: a sport following its discipline looks identical
- * to one holding its own copy, right up until the parent changes and only one of
- * them moves.
+ * Everything the watch cannot reasonably ask for is configured here: screen
+ * layouts, race identifiers, service credentials and the language. Sections
+ * rather than a navigation graph, because they are five siblings with one level
+ * of depth below one of them - a graph would be more machinery than the shape
+ * deserves, and the editor's back gesture is the only transition worth handling.
  */
 @Composable
-fun CompanionApp(
-    configuration: ScreenConfiguration = ScreenConfiguration.initial(),
-    onSportSelected: (SportType) -> Unit = {},
-) {
+fun CompanionApp(model: CompanionViewModel = viewModel()) {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            SportConfigurationList(configuration = configuration, onSportSelected = onSportSelected)
+            var section by remember { mutableStateOf(Section.SPORTS) }
+            var editing by remember { mutableStateOf<SportType?>(null) }
+            var picking by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+
+            // Leaving the editor with the system back gesture, so the phone
+            // behaves like every other phone rather than trapping the rider on
+            // a screen whose only way out is a control they have to find.
+            BackHandler(enabled = editing != null) {
+                if (picking != null) picking = null else editing = null
+            }
+
+            Scaffold(
+                bottomBar = {
+                    NavigationBar {
+                        Section.entries.forEach { entry ->
+                            NavigationBarItem(
+                                selected = section == entry && editing == null,
+                                onClick = {
+                                    section = entry
+                                    editing = null
+                                    picking = null
+                                },
+                                icon = {},
+                                label = { Text(stringResource(entry.labelRes)) },
+                            )
+                        }
+                    }
+                },
+            ) { padding ->
+                SectionContent(
+                    model = model,
+                    section = section,
+                    editing = editing,
+                    picking = picking,
+                    onEdit = { editing = it },
+                    onPick = { picking = it },
+                    modifier = Modifier.padding(padding),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SectionContent(
+    model: CompanionViewModel,
+    section: Section,
+    editing: SportType?,
+    picking: Pair<Int, Int>?,
+    onEdit: (SportType?) -> Unit,
+    onPick: (Pair<Int, Int>?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val configuration by model.configuration
+    when {
+        editing != null && picking != null ->
+            FieldPicker(
+                sport = editing,
+                onFieldChosen = { fieldId ->
+                    model.assignField(editing, picking.first, picking.second, fieldId)
+                    onPick(null)
+                },
+                modifier = modifier,
+            )
+        editing != null ->
+            ScreenEditor(
+                sport = editing,
+                screens = configuration.resolve(editing),
+                level = configuration.levelOf(editing),
+                onScreensChanged = { model.updateScreens(editing, it) },
+                onResetToInherited = { model.resetSport(editing) },
+                onPickField = { screenIndex, slotIndex -> onPick(screenIndex to slotIndex) },
+                modifier = modifier,
+            )
+        section == Section.SPORTS ->
+            SportConfigurationList(configuration = configuration, onSportSelected = onEdit, modifier = modifier)
+        section == Section.RACE ->
+            RaceSettings(config = model.race.value, onChanged = model::updateRace, modifier = modifier)
+        section == Section.CONNECTIONS ->
+            ConnectionList(model = model, modifier = modifier)
+        section == Section.HISTORY ->
+            WorkoutHistory(workouts = model.workouts.value, units = model.units.value, modifier = modifier)
+        section == Section.SETTINGS ->
+            LanguageSettings(
+                current = model.language.value,
+                onLanguageChosen = model::updateLanguage,
+                modifier = modifier,
+            )
+    }
+}
+
+/** One setup screen per connector the build knows about. */
+@Composable
+private fun ConnectionList(
+    model: CompanionViewModel,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(modifier = modifier.fillMaxSize()) {
+        items(model.connectors, key = { it.id }) { connector ->
+            ConnectionSetup(
+                connectorId = connector.id,
+                fields = connector.credentialFields,
+                values = model.credentialsFor(connector.id),
+                onValueChanged = { key, value -> model.updateCredential(connector.id, key, value) },
+                onConnect = { model.publishCredentials() },
+            )
+            HorizontalDivider()
         }
     }
 }
@@ -62,6 +174,12 @@ fun SportConfigurationList(
     }
 }
 
+/**
+ * Each row says which tier it currently reads from, because that is the thing
+ * which is otherwise invisible: a sport following its discipline looks identical
+ * to one holding its own copy, right up until the parent changes and only one of
+ * them moves.
+ */
 @Composable
 private fun SportRow(
     sport: SportType,
