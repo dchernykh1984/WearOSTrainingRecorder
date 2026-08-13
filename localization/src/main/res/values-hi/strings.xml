@@ -184,4 +184,13 @@
     <string name="nav_connections">सेवाएँ</string>
     <string name="nav_history">इतिहास</string>
     <string name="nav_settings">सेटिंग्स</string>
+    <string name="sensors_title">सेंसर</string>
+    <string name="sensors_searching">खोज रहे हैं...</string>
+    <string name="sensors_none">कोई सेंसर नहीं मिला</string>
+    <string name="sensors_paired">युग्मित</string>
+    <string name="sensors_forget">भूल जाएँ</string>
+    <string name="profile_heart_rate">हृदय गति</string>
+    <string name="profile_csc">केडेंस और गति</string>
+    <string name="profile_cps">पावर</string>
+    <string name="profile_rsc">रनिंग सेंसर</string>
 </resources>

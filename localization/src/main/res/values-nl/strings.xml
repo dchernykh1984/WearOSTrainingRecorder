@@ -191,4 +191,13 @@
     <string name="nav_connections">Diensten</string>
     <string name="nav_history">Geschiedenis</string>
     <string name="nav_settings">Instellingen</string>
+    <string name="sensors_title">Sensoren</string>
+    <string name="sensors_searching">Zoeken...</string>
+    <string name="sensors_none">Geen sensoren gevonden</string>
+    <string name="sensors_paired">Gekoppeld</string>
+    <string name="sensors_forget">Vergeten</string>
+    <string name="profile_heart_rate">Hartslag</string>
+    <string name="profile_csc">Cadans en snelheid</string>
+    <string name="profile_cps">Vermogen</string>
+    <string name="profile_rsc">Loopsensor</string>
 </resources>

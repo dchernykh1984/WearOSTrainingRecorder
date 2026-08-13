@@ -191,4 +191,13 @@
     <string name="nav_connections">Сервисы</string>
     <string name="nav_history">История</string>
     <string name="nav_settings">Настройки</string>
+    <string name="sensors_title">Датчики</string>
+    <string name="sensors_searching">Идёт поиск...</string>
+    <string name="sensors_none">Датчики не найдены</string>
+    <string name="sensors_paired">Спарен</string>
+    <string name="sensors_forget">Забыть</string>
+    <string name="profile_heart_rate">Пульс</string>
+    <string name="profile_csc">Каденс и скорость</string>
+    <string name="profile_cps">Мощность</string>
+    <string name="profile_rsc">Беговой датчик</string>
 </resources>

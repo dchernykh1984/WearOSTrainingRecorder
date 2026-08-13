@@ -191,4 +191,13 @@
     <string name="nav_connections">Dienste</string>
     <string name="nav_history">Verlauf</string>
     <string name="nav_settings">Einstellungen</string>
+    <string name="sensors_title">Sensoren</string>
+    <string name="sensors_searching">Suche...</string>
+    <string name="sensors_none">Keine Sensoren gefunden</string>
+    <string name="sensors_paired">Gekoppelt</string>
+    <string name="sensors_forget">Entfernen</string>
+    <string name="profile_heart_rate">Herzfrequenz</string>
+    <string name="profile_csc">Trittfrequenz und Tempo</string>
+    <string name="profile_cps">Leistung</string>
+    <string name="profile_rsc">Laufsensor</string>
 </resources>
