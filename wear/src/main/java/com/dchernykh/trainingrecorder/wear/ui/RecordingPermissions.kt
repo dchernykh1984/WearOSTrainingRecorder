@@ -46,8 +46,13 @@ object RecordingPermissions {
                 // all rather than with an approximate one.
                 add(Manifest.permission.ACCESS_COARSE_LOCATION)
                 add(Manifest.permission.ACCESS_FINE_LOCATION)
-                add(Manifest.permission.BODY_SENSORS)
                 add(Manifest.permission.ACTIVITY_RECOGNITION)
+                // Wear OS 6 removed BODY_SENSORS in favour of the granular health
+                // permissions. Asking for it there leaves it permanently ungranted,
+                // and the prompt would reappear on every launch.
+                if (Build.VERSION.SDK_INT < API_36) {
+                    add(Manifest.permission.BODY_SENSORS)
+                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     add(Manifest.permission.BLUETOOTH_SCAN)
                     add(Manifest.permission.BLUETOOTH_CONNECT)
