@@ -184,4 +184,13 @@
     <string name="nav_connections">サービス</string>
     <string name="nav_history">履歴</string>
     <string name="nav_settings">設定</string>
+    <string name="sensors_title">センサー</string>
+    <string name="sensors_searching">検索中...</string>
+    <string name="sensors_none">センサーが見つかりません</string>
+    <string name="sensors_paired">ペアリング済み</string>
+    <string name="sensors_forget">削除</string>
+    <string name="profile_heart_rate">心拍数</string>
+    <string name="profile_csc">ケイデンスと速度</string>
+    <string name="profile_cps">パワー</string>
+    <string name="profile_rsc">ランニングセンサー</string>
 </resources>

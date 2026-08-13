@@ -184,4 +184,13 @@
     <string name="nav_connections">Servisler</string>
     <string name="nav_history">Geçmiş</string>
     <string name="nav_settings">Ayarlar</string>
+    <string name="sensors_title">Sensörler</string>
+    <string name="sensors_searching">Aranıyor...</string>
+    <string name="sensors_none">Sensör bulunamadı</string>
+    <string name="sensors_paired">Eşleştirildi</string>
+    <string name="sensors_forget">Unut</string>
+    <string name="profile_heart_rate">Kalp atış hızı</string>
+    <string name="profile_csc">Kadans ve hız</string>
+    <string name="profile_cps">Güç</string>
+    <string name="profile_rsc">Koşu sensörü</string>
 </resources>

@@ -191,4 +191,13 @@
     <string name="nav_connections">Servizi</string>
     <string name="nav_history">Cronologia</string>
     <string name="nav_settings">Impostazioni</string>
+    <string name="sensors_title">Sensori</string>
+    <string name="sensors_searching">Ricerca...</string>
+    <string name="sensors_none">Nessun sensore trovato</string>
+    <string name="sensors_paired">Associato</string>
+    <string name="sensors_forget">Dimentica</string>
+    <string name="profile_heart_rate">Frequenza cardiaca</string>
+    <string name="profile_csc">Cadenza e velocità</string>
+    <string name="profile_cps">Potenza</string>
+    <string name="profile_rsc">Sensore di corsa</string>
 </resources>
