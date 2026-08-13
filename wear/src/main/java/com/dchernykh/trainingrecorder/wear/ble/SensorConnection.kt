@@ -42,12 +42,21 @@ class SensorConnection(
     private val address: String,
     private val profile: SensorProfile,
 ) {
-    // Cadence needs the previous sample to compute a rate, and the connection
-    // itself is per-collection rather than per-instance: holding the GATT in a
-    // field would let a second collector overwrite the first, leaking one
-    // connection and closing the wrong one on teardown.
-    private var previousCrankRevolutions: Long? = null
-    private var previousCrankEventTime: Int? = null
+    /**
+     * Cadence needs the previous sample to compute a rate, so the state is
+     * per-collection rather than per-instance: two collections of the cold
+     * [events] flow would otherwise clobber each other's baseline and compute a
+     * rate across a gap. The same reasoning keeps the GATT handle local.
+     */
+    private class CrankBaseline {
+        var revolutions: Long? = null
+        var eventTime: Int? = null
+
+        fun clear() {
+            revolutions = null
+            eventTime = null
+        }
+    }
 
     /**
      * Connects and emits until the collector goes away.
@@ -83,8 +92,7 @@ class SensorConnection(
                             // computed from a minutes-old sample against a timer
                             // that wraps every 64 seconds is exactly the bogus
                             // spike this class exists to avoid.
-                            previousCrankRevolutions = null
-                            previousCrankEventTime = null
+                            baseline.clear()
                             trySend(SensorEvent(profile, emptyMap(), connected = false))
                         }
                     }
@@ -116,7 +124,7 @@ class SensorConnection(
                         characteristic: BluetoothGattCharacteristic,
                     ) {
                         @Suppress("DEPRECATION")
-                        characteristic.value?.let { trySend(SensorEvent(profile, readingsFrom(it))) }
+                        characteristic.value?.let { trySend(SensorEvent(profile, readingsFrom(it, baseline))) }
                     }
 
                     override fun onCharacteristicChanged(
@@ -124,7 +132,7 @@ class SensorConnection(
                         characteristic: BluetoothGattCharacteristic,
                         value: ByteArray,
                     ) {
-                        trySend(SensorEvent(profile, readingsFrom(value)))
+                        trySend(SensorEvent(profile, readingsFrom(value, baseline)))
                     }
                 }
             // Cleared here as well as on disconnect: awaitClose runs when the
@@ -136,12 +144,14 @@ class SensorConnection(
             val connection = device.connectGatt(context, true, callback)
             awaitClose {
                 connection?.close()
-                previousCrankRevolutions = null
-                previousCrankEventTime = null
+                baseline.clear()
             }
         }
 
-    private fun readingsFrom(data: ByteArray): Map<String, SensorReading> {
+    private fun readingsFrom(
+        data: ByteArray,
+        baseline: CrankBaseline,
+    ): Map<String, SensorReading> {
         val now = System.currentTimeMillis()
 
         fun reading(value: Double) = SensorReading(value, SensorOrigin.EXTERNAL, now)
@@ -165,8 +175,11 @@ class SensorConnection(
                     }
                 SensorProfile.CYCLING_SPEED_CADENCE ->
                     CscMeasurement.parse(data)?.let { measurement ->
-                        cadenceFrom(measurement.cumulativeCrankRevolutions, measurement.lastCrankEventTime)
-                            ?.let { mapOf("cadence" to reading(it)) }
+                        cadenceFrom(
+                            measurement.cumulativeCrankRevolutions,
+                            measurement.lastCrankEventTime,
+                            baseline,
+                        )?.let { mapOf("cadence" to reading(it)) }
                     }
                 SensorProfile.RUNNING_SPEED_CADENCE ->
                     RscMeasurement.parse(data)?.let {
@@ -185,12 +198,13 @@ class SensorConnection(
     private fun cadenceFrom(
         revolutions: Int?,
         eventTime: Int?,
+        baseline: CrankBaseline,
     ): Double? {
         if (revolutions == null || eventTime == null) return null
-        val previousRevolutions = previousCrankRevolutions
-        val previousTime = previousCrankEventTime
-        previousCrankRevolutions = revolutions.toLong()
-        previousCrankEventTime = eventTime
+        val previousRevolutions = baseline.revolutions
+        val previousTime = baseline.eventTime
+        baseline.revolutions = revolutions.toLong()
+        baseline.eventTime = eventTime
         if (previousRevolutions == null || previousTime == null) return null
         return RevolutionRate.rpm(previousRevolutions, previousTime, revolutions.toLong(), eventTime)
     }
