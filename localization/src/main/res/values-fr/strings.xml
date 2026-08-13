@@ -124,4 +124,10 @@
     <string name="field_sensor_cadence_battery">Batterie cadence</string>
     <string name="field_sensor_power_battery">Batterie puissance</string>
     <string name="field_temperature">Temperature</string>
+
+    <string name="action_start">Demarrer</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_resume">Reprendre</string>
+    <string name="action_finish">Terminer</string>
+    <string name="action_discard">Annuler</string>
 </resources>
