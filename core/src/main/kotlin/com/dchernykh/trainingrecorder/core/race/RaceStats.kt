@@ -59,11 +59,18 @@ data class RaceStatsSnapshot(
 object RaceStatsUrl {
     private const val PATH = "/api/v1/live-stats/"
 
+    private fun encode(segment: String): String =
+        java.net.URLEncoder
+            .encode(segment, Charsets.UTF_8.name())
+            .replace("+", "%20")
+
     fun build(config: RaceStatsConfig): String? {
         if (!config.isComplete) return null
         val base = config.siteUrl.trim().trimEnd('/')
         if (!base.startsWith("http://") && !base.startsWith("https://")) return null
-        return base + PATH + config.competitionId.trim() + "/" + config.bib.trim()
+        // The rider types these, so a stray space or slash would otherwise
+        // build a malformed URL or point at a different endpoint entirely.
+        return base + PATH + encode(config.competitionId.trim()) + "/" + encode(config.bib.trim())
     }
 }
 
