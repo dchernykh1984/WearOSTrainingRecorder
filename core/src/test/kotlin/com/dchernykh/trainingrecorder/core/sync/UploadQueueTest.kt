@@ -18,7 +18,8 @@ class UploadQueueTest {
         startedAt: Long = now,
         uploads: Map<String, UploadState> = emptyMap(),
         attempts: Map<String, Int> = emptyMap(),
-    ) = WorkoutSummary(id, "cycling_road", startedAt, 60, 100.0, 1024, uploads, attempts)
+        attemptedAt: Map<String, Long> = emptyMap(),
+    ) = WorkoutSummary(id, "cycling_road", startedAt, 60, 100.0, 1024, uploads, attempts, attemptedAt)
 
     @Test
     fun theAttemptCountSurvivesARestart() {
@@ -30,13 +31,41 @@ class UploadQueueTest {
     }
 
     @Test
-    fun aRebuiltEntryStillWaitsOutItsBackoff() {
-        // Due immediately, a device restarting a few times during an outage would
-        // burn all ten attempts in seconds and give up for good.
-        val tried = workout("w1", attempts = mapOf("strava" to 4))
+    fun theBackoffIsMeasuredFromTheLastAttemptRatherThanFromNow() {
+        // Re-served from now, the delay has never elapsed by the time the same
+        // pass asks what is due - so one failure would strand the workout for
+        // good: never retried, never FAILED, and therefore never deletable.
+        val tried = workout("w1", attempts = mapOf("strava" to 4), attemptedAt = mapOf("strava" to now))
         val entry = UploadQueue.from(listOf(tried), setOf("strava"), now).single()
         assertEquals(now + UploadQueue.backoffMs(4), entry.nextAttemptAtEpochMs)
         assertTrue(UploadQueue.due(listOf(entry), now).isEmpty())
+    }
+
+    @Test
+    fun anEntryBecomesDueOnceItsBackoffHasActuallyElapsed() {
+        val tried = workout("w1", attempts = mapOf("strava" to 4), attemptedAt = mapOf("strava" to now))
+        val later = now + UploadQueue.backoffMs(4)
+        val entry = UploadQueue.from(listOf(tried), setOf("strava"), later).single()
+        assertEquals(1, UploadQueue.due(listOf(entry), later).size, "the delay has passed, so it is due again")
+    }
+
+    @Test
+    fun aDeviceRestartingDuringAnOutageStillWaits() {
+        // The whole reason the timestamp is persisted: rebuilt from zero, a watch
+        // rebooting a few times would burn all ten attempts in seconds.
+        val tried = workout("w1", attempts = mapOf("strava" to 4), attemptedAt = mapOf("strava" to now))
+        val soonAfter = now + 1_000
+        val entry = UploadQueue.from(listOf(tried), setOf("strava"), soonAfter).single()
+        assertTrue(UploadQueue.due(listOf(entry), soonAfter).isEmpty())
+    }
+
+    @Test
+    fun anAttemptCountWithNoTimestampIsDueRatherThanStranded() {
+        // An index written by an older build carries counts but no timestamps.
+        // Treating that as "wait forever" would strand every workout on it.
+        val legacy = workout("w1", attempts = mapOf("strava" to 4))
+        val entry = UploadQueue.from(listOf(legacy), setOf("strava"), now).single()
+        assertEquals(1, UploadQueue.due(listOf(entry), now).size)
     }
 
     @Test
