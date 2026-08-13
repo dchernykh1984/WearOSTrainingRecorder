@@ -138,4 +138,15 @@
 
     <string name="recording_notification_title">Grabando entrenamiento</string>
     <string name="recording_channel_name">Grabacion</string>
+
+    <string name="editor_inherits_default">Usando el diseno predeterminado</string>
+    <string name="editor_inherits_discipline">Usando el diseno de la disciplina</string>
+    <string name="editor_own_copy">Este deporte tiene su propio diseno</string>
+    <string name="editor_reset">Restablecer</string>
+    <string name="editor_screen_number">Pantalla %1$d</string>
+    <string name="editor_slot_number">Campo %1$d</string>
+    <string name="editor_empty_slot">Vacio</string>
+    <string name="editor_field_count">Campos</string>
+    <string name="editor_add_screen">Anadir pantalla</string>
+    <string name="editor_remove_screen">Quitar</string>
 </resources>

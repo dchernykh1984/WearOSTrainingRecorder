@@ -149,4 +149,16 @@
     <!-- Recording service -->
     <string name="recording_notification_title">Recording workout</string>
     <string name="recording_channel_name">Recording</string>
+
+    <!-- Screen editor -->
+    <string name="editor_inherits_default">Using the default layout</string>
+    <string name="editor_inherits_discipline">Using the layout for this discipline</string>
+    <string name="editor_own_copy">This sport has its own layout</string>
+    <string name="editor_reset">Reset</string>
+    <string name="editor_screen_number">Screen %1$d</string>
+    <string name="editor_slot_number">Slot %1$d</string>
+    <string name="editor_empty_slot">Empty</string>
+    <string name="editor_field_count">Fields</string>
+    <string name="editor_add_screen">Add screen</string>
+    <string name="editor_remove_screen">Remove</string>
 </resources>

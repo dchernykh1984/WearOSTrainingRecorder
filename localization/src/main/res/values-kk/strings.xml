@@ -138,4 +138,15 @@
 
     <string name="recording_notification_title">Жаттығу жазылуда</string>
     <string name="recording_channel_name">Жазу</string>
+
+    <string name="editor_inherits_default">Әдепкі орналасу қолданылады</string>
+    <string name="editor_inherits_discipline">Бағыт орналасуы қолданылады</string>
+    <string name="editor_own_copy">Бұл спорт түрінің жеке орналасуы бар</string>
+    <string name="editor_reset">Қалпына келтіру</string>
+    <string name="editor_screen_number">Экран %1$d</string>
+    <string name="editor_slot_number">Өріс %1$d</string>
+    <string name="editor_empty_slot">Бос</string>
+    <string name="editor_field_count">Өрістер</string>
+    <string name="editor_add_screen">Экран қосу</string>
+    <string name="editor_remove_screen">Жою</string>
 </resources>

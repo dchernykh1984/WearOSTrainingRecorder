@@ -138,4 +138,15 @@
 
     <string name="recording_notification_title">Nahravani treninku</string>
     <string name="recording_channel_name">Nahravani</string>
+
+    <string name="editor_inherits_default">Pouziva se vychozi rozlozeni</string>
+    <string name="editor_inherits_discipline">Pouziva se rozlozeni discipliny</string>
+    <string name="editor_own_copy">Tento sport ma vlastni rozlozeni</string>
+    <string name="editor_reset">Obnovit</string>
+    <string name="editor_screen_number">Obrazovka %1$d</string>
+    <string name="editor_slot_number">Pole %1$d</string>
+    <string name="editor_empty_slot">Prazdne</string>
+    <string name="editor_field_count">Pole</string>
+    <string name="editor_add_screen">Pridat obrazovku</string>
+    <string name="editor_remove_screen">Odebrat</string>
 </resources>
