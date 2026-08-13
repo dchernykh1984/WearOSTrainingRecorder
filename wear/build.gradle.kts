@@ -16,9 +16,9 @@ val keystoreFile: String? = System.getenv("KEYSTORE_FILE")
 
 // Google Play requires a distinct versionCode per APK published under one
 // applicationId. The release workflow derives a monotonic base from the semantic
-// version (major * 10000 + minor * 100 + patch) and each form factor adds a fixed
-// offset, so the two APKs can never collide. The watch offset is the higher one:
-// when an APK could serve both form factors, Play resolves the ambiguity in
+// version (major * 1000000 + minor * 1000 + patch) and each form factor adds a
+// fixed offset, so the two APKs can never collide. The watch offset is the higher
+// one: when an APK could serve both form factors, Play resolves the ambiguity in
 // favour of the higher versionCode, and the watch build must win.
 val versionCodeBase = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
 val wearVersionCodeOffset = 2
