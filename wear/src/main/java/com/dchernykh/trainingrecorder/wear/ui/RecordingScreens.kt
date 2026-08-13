@@ -44,9 +44,9 @@ fun RecordingPager(
     onAction: (RecordingAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // The controls sit to the left, so a swipe from left to right reveals them -
-    // which means the data screens, not the buttons, are what the rider sees when
-    // a recording starts.
+    // The controls sit to the RIGHT of the data screens. Wear OS reserves the
+    // left-to-right swipe for dismissing an app, so putting them on the left
+    // would mean reaching for pause with the same gesture that closes the ride.
     val horizontal = rememberPagerState(initialPage = DATA_PAGE) { PAGE_COUNT_WITH_CONTROLS }
     // Hoisted out of the pager's page content on purpose: created inside, it
     // would be discarded whenever the data page leaves composition, and the
@@ -199,7 +199,7 @@ private fun ControlsPage(
     }
 }
 
-private const val CONTROLS_PAGE = 0
-private const val DATA_PAGE = 1
+private const val DATA_PAGE = 0
+private const val CONTROLS_PAGE = 1
 private const val PAGE_COUNT_WITH_CONTROLS = 2
 private val ROUND_INSET = 16.dp
