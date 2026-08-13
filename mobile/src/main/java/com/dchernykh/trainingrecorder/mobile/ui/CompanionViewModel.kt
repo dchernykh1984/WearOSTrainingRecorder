@@ -101,7 +101,7 @@ class CompanionViewModel(
             // Garmin takes the token itself, because its sign-in is an
             // undocumented SSO exchange this app does not attempt. A pasted
             // token works today; guessing at that flow would not.
-            ConnectorSetup(GarminProtocol.ID, listOf(CredentialField("bearer", secret = true))),
+            ConnectorSetup(GarminProtocol.ID, GarminProtocol.credentialFields),
         )
 
     private val credentials: MutableState<Map<String, Map<String, String>>> = mutableStateOf(emptyMap())
@@ -162,7 +162,10 @@ class CompanionViewModel(
         viewModelScope.launch {
             when (val result = authorization.authorize(clientId, clientSecret)) {
                 is AuthorizationResult.Authorized -> {
-                    updateCredential(connectorId, "access_token", result.accessToken)
+                    // The refresh token and expiry travel with the access token:
+                    // Strava's tokens last hours, and the watch can only renew
+                    // one if it was given something to renew it with.
+                    result.tokens.forEach { (key, value) -> updateCredential(connectorId, key, value) }
                     publisher.publishCredentials(credentials.value)
                     _connectionStatus.value = connectorId to R.string.connect_done
                 }

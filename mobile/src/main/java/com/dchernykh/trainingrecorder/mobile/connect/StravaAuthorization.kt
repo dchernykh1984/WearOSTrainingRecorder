@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
+import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.URL
 import java.net.URLEncoder
@@ -17,7 +18,8 @@ import kotlin.random.Random
 /** How the authorization ended, in terms the setup screen can show. */
 sealed interface AuthorizationResult {
     data class Authorized(
-        val accessToken: String,
+        /** Access token, refresh token and expiry, keyed as the protocol names them. */
+        val tokens: Map<String, String>,
     ) : AuthorizationResult
 
     data class Failed(
@@ -57,7 +59,7 @@ class StravaAuthorization(
             // port, and asking the OS for a free one avoids colliding with
             // whatever else on the phone happens to be listening.
             val server =
-                runCatching { ServerSocket(0) }
+                runCatching { ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")) }
                     .getOrElse { return@withContext AuthorizationResult.Failed("could not open a local port") }
             server.use {
                 val port = it.localPort
@@ -120,10 +122,11 @@ class StravaAuthorization(
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
                 connection.use { it.write(body) }
             }.getOrElse { return AuthorizationResult.Failed("the token exchange failed: ${it.message}") }
-        val token =
-            StravaProtocol.accessTokenFrom(response)
-                ?: return AuthorizationResult.Failed("Strava did not return a token")
-        return AuthorizationResult.Authorized(token)
+        val tokens = StravaProtocol.tokensFrom(response)
+        if (tokens[StravaProtocol.ACCESS_TOKEN].isNullOrBlank()) {
+            return AuthorizationResult.Failed("Strava did not return a token")
+        }
+        return AuthorizationResult.Authorized(tokens)
     }
 
     private fun HttpURLConnection.use(write: (OutputStreamWriter) -> Unit): String =
