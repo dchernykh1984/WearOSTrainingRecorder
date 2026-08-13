@@ -21,6 +21,7 @@ import com.dchernykh.trainingrecorder.wear.race.RaceStatsPoller
 import com.dchernykh.trainingrecorder.wear.service.RecordingService
 import com.dchernykh.trainingrecorder.wear.storage.WorkoutRepository
 import com.dchernykh.trainingrecorder.wear.sync.SettingsStore
+import com.dchernykh.trainingrecorder.wear.upload.UploadWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -227,7 +228,13 @@ class RecordingViewModel(
             }
         // The samples are the only copy of the ride until the file exists, so
         // they are kept if the write failed - a retry has something to write.
-        if (saved.isSuccess) samples.clear()
+        if (saved.isSuccess) {
+            samples.clear()
+            // Queued straight away rather than on the next launch: the rider
+            // closes the app the moment the ride ends, and the workout should
+            // be on its way before they do.
+            UploadWorker.schedule(getApplication())
+        }
         history.update { SportOrdering.record(it, sportId) }
     }
 
