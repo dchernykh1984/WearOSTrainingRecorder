@@ -4,6 +4,12 @@ name: Release Please
 # version and updates CHANGELOG.md from the Conventional Commits. Merging that PR
 # tags the release and creates a GitHub Release.
 #
+# The package sets include-component-in-tag: false, so tags are plain vX.Y.Z.
+# With the release-please default the tag would be
+# `wearos-training-recorder-vX.Y.Z`, which never matches the `tags: ["v*"]`
+# trigger in Build and Distribute and survives its `${TAG#v}` strip untouched -
+# the version would leak into the APK filename and versionName.
+#
 # A tag created with the default GITHUB_TOKEN does NOT trigger the tag-push
 # Build and Distribute workflow, so instead the build-apks job below calls that
 # workflow directly (workflow_call) once a release is created. This attaches the
