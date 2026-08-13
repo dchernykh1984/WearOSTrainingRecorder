@@ -8,6 +8,7 @@ import androidx.health.services.client.data.Availability
 import androidx.health.services.client.data.DataType
 import androidx.health.services.client.data.ExerciseConfig
 import androidx.health.services.client.data.ExerciseLapSummary
+import androidx.health.services.client.data.ExerciseType
 import androidx.health.services.client.data.ExerciseUpdate
 import androidx.health.services.client.data.LocationData
 import com.dchernykh.trainingrecorder.core.sensor.SensorOrigin
@@ -48,6 +49,7 @@ class ExerciseRecorder(
     suspend fun start(
         sportTypeId: String,
         gpsEnabled: Boolean = true,
+        poolLengthMeters: Float = DEFAULT_POOL_LENGTH_METERS,
     ) {
         val capabilities = client.getCapabilitiesAsync().await()
         val exerciseType = ExerciseTypes.forSport(sportTypeId)
@@ -58,18 +60,31 @@ class ExerciseRecorder(
         val supported =
             runCatching { capabilities.getExerciseTypeCapabilities(exerciseType).supportedDataTypes }
                 .getOrDefault(emptySet())
-        val config =
+        val useGps = gpsEnabled && needsGps(sportTypeId)
+        // ExerciseConfig refuses LOCATION unless GPS is on, so the type has to
+        // leave the request rather than merely be ignored - otherwise an indoor
+        // start throws instead of recording.
+        val dataTypes =
+            ExerciseTypes.requestedDataTypes
+                .intersect(supported)
+                .filterNot { !useGps && it == DataType.LOCATION }
+                .toSet()
+        val builder =
             ExerciseConfig
                 .Builder(exerciseType)
                 // Asking for a type the device cannot produce fails the whole
                 // start, so the request is intersected with what it offers.
-                .setDataTypes(ExerciseTypes.requestedDataTypes.intersect(supported))
+                .setDataTypes(dataTypes)
                 // Auto-pause is off: the rider decides. A hill start that the
                 // watch reads as a stop silently loses distance.
                 .setIsAutoPauseAndResumeEnabled(false)
-                .setIsGpsEnabled(gpsEnabled && needsGps(sportTypeId))
-                .build()
-        client.startExerciseAsync(config).await()
+                .setIsGpsEnabled(useGps)
+        // A pool swim without a length is rejected outright: lengths and SWOLF
+        // are meaningless without knowing how long a length is.
+        if (exerciseType == ExerciseType.SWIMMING_POOL) {
+            builder.setSwimmingPoolLengthMeters(poolLengthMeters)
+        }
+        client.startExerciseAsync(builder.build()).await()
     }
 
     suspend fun pause() = client.pauseExerciseAsync().await()
@@ -123,6 +138,9 @@ class ExerciseRecorder(
 
     private companion object {
         val INDOOR_EXERCISE_TYPES = setOf("BIKING_STATIONARY", "RUNNING_TREADMILL", "SWIMMING_POOL")
+
+        /** The commonest pool in the world; the rider can change it in settings. */
+        const val DEFAULT_POOL_LENGTH_METERS = 25f
     }
 }
 
