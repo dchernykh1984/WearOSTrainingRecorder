@@ -149,4 +149,7 @@
     <string name="editor_field_count">Champs</string>
     <string name="editor_add_screen">Ajouter un ecran</string>
     <string name="editor_remove_screen">Supprimer</string>
+
+    <string name="permissions_explanation">L\'enregistrement necessite position, capteurs et Bluetooth.</string>
+    <string name="permissions_grant">Autoriser</string>
 </resources>

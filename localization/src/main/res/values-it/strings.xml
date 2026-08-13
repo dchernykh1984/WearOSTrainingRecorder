@@ -149,4 +149,7 @@
     <string name="editor_field_count">Campi</string>
     <string name="editor_add_screen">Aggiungi schermata</string>
     <string name="editor_remove_screen">Rimuovi</string>
+
+    <string name="permissions_explanation">La registrazione richiede posizione, sensori e Bluetooth.</string>
+    <string name="permissions_grant">Consenti</string>
 </resources>

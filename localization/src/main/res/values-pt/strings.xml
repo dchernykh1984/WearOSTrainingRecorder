@@ -149,4 +149,7 @@
     <string name="editor_field_count">Campos</string>
     <string name="editor_add_screen">Adicionar ecra</string>
     <string name="editor_remove_screen">Remover</string>
+
+    <string name="permissions_explanation">A gravacao precisa de localizacao, sensores e Bluetooth.</string>
+    <string name="permissions_grant">Permitir</string>
 </resources>
