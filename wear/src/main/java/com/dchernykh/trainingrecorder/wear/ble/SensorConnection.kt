@@ -42,7 +42,10 @@ class SensorConnection(
     private val address: String,
     private val profile: SensorProfile,
 ) {
-    private var gatt: BluetoothGatt? = null
+    // Cadence needs the previous sample to compute a rate, and the connection
+    // itself is per-collection rather than per-instance: holding the GATT in a
+    // field would let a second collector overwrite the first, leaking one
+    // connection and closing the wrong one on teardown.
     private var previousCrankRevolutions: Long? = null
     private var previousCrankEventTime: Int? = null
 
@@ -113,11 +116,8 @@ class SensorConnection(
                         trySend(SensorEvent(profile, readingsFrom(value)))
                     }
                 }
-            gatt = device.connectGatt(context, true, callback)
-            awaitClose {
-                gatt?.close()
-                gatt = null
-            }
+            val connection = device.connectGatt(context, true, callback)
+            awaitClose { connection?.close() }
         }
 
     private fun readingsFrom(data: ByteArray): Map<String, SensorReading> {
