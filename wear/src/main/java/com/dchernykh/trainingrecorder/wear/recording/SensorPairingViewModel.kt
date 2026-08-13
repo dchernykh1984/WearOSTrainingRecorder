@@ -26,6 +26,9 @@ class SensorPairingViewModel(
     private val store: PairedSensorStore = PairedSensorStore(application),
     private val scanner: SensorScanner = SensorScanner(),
 ) : AndroidViewModel(application) {
+    /** The signature `viewModel()` reflects for. See [RecordingViewModel]. */
+    constructor(application: Application) : this(application, PairedSensorStore(application), SensorScanner())
+
     private val _paired = MutableStateFlow(store.read())
     val paired: StateFlow<List<PairedSensor>> = _paired.asStateFlow()
 
@@ -42,16 +45,23 @@ class SensorPairingViewModel(
         _scanning.value = true
         scanJob =
             viewModelScope.launch {
-                scanner
-                    .scan()
-                    .collect { found ->
-                        // Replaced by address rather than appended: a strap
-                        // advertises several times a second, and appending would
-                        // grow the list without bound while it sat there.
-                        _discovered.update { current ->
-                            current.filterNot { it.address == found.address } + found
+                // Bluetooth switched off, a refused scan permission and a stack
+                // that reports a scan failure all arrive here as an exception.
+                // None of them is a reason to take the app down: the screen just
+                // finds nothing, which is what it already knows how to show.
+                runCatching {
+                    scanner
+                        .scan()
+                        .collect { found ->
+                            // Replaced by address rather than appended: a strap
+                            // advertises several times a second, and appending would
+                            // grow the list without bound while it sat there.
+                            _discovered.update { current ->
+                                current.filterNot { it.address == found.address } + found
+                            }
                         }
-                    }
+                }
+                _scanning.value = false
             }
     }
 
