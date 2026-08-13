@@ -138,4 +138,15 @@
 
     <string name="recording_notification_title">Enregistrement en cours</string>
     <string name="recording_channel_name">Enregistrement</string>
+
+    <string name="editor_inherits_default">Disposition par defaut utilisee</string>
+    <string name="editor_inherits_discipline">Disposition de la discipline utilisee</string>
+    <string name="editor_own_copy">Ce sport a sa propre disposition</string>
+    <string name="editor_reset">Reinitialiser</string>
+    <string name="editor_screen_number">Ecran %1$d</string>
+    <string name="editor_slot_number">Champ %1$d</string>
+    <string name="editor_empty_slot">Vide</string>
+    <string name="editor_field_count">Champs</string>
+    <string name="editor_add_screen">Ajouter un ecran</string>
+    <string name="editor_remove_screen">Supprimer</string>
 </resources>
