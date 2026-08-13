@@ -34,6 +34,14 @@ data class WorkoutSummary(
      * undeletable - forever.
      */
     val uploadAttempts: Map<String, Int> = emptyMap(),
+    /**
+     * When each service was last tried. Persisted alongside the count because
+     * the backoff is meaningless without it: re-serving the delay from the
+     * moment the queue is rebuilt means it has never elapsed by the time the
+     * same pass asks what is due, so a single failure would strand the workout
+     * forever - pending, unretried, and therefore undeletable.
+     */
+    val uploadAttemptedAt: Map<String, Long> = emptyMap(),
 ) {
     init {
         require(id.isNotBlank()) { "a workout needs an id" }
