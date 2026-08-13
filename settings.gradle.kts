@@ -24,5 +24,6 @@ rootProject.name = "WearOSTrainingRecorder"
 
 // The watch app is the product; the phone app is its companion. Both ship under
 // one applicationId so Google Play can deliver the matching APK per form factor.
+include(":core")
 include(":wear")
 include(":mobile")
