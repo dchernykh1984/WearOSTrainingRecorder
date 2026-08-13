@@ -31,6 +31,8 @@ android {
 
         versionCode = versionCodeBase * 10 + mobileVersionCodeOffset
         versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -123,4 +125,6 @@ listOf(
 
 dependencies {
     testImplementation(libs.junit)
+
+    androidTestImplementation(libs.androidx.test.ext.junit)
 }
