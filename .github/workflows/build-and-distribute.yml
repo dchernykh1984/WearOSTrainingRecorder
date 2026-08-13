@@ -115,10 +115,12 @@ jobs:
           # artifact path into a non-existent subdirectory and break the one flow
           # that trigger exists for, so filenames use a sanitized slug.
           slug="$(printf '%s' "$name" | tr -c 'A-Za-z0-9._-' '-')"
-          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
-          echo "name=${name}" >> "$GITHUB_OUTPUT"
-          echo "slug=${slug}" >> "$GITHUB_OUTPUT"
-          echo "code=${code}" >> "$GITHUB_OUTPUT"
+          {
+            echo "tag=${tag}"
+            echo "name=${name}"
+            echo "slug=${slug}"
+            echo "code=${code}"
+          } >> "$GITHUB_OUTPUT"
         env:
           # inputs.tag is set on workflow_call; otherwise use the pushed tag.
           RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
