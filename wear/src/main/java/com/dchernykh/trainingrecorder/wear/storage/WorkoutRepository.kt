@@ -95,6 +95,7 @@ class WorkoutRepository(
         connectorId: String,
         state: UploadState,
         attempts: Int,
+        attemptedAtEpochMs: Long,
     ) = synchronized(lock) {
         writeIndex(
             loadIndex().map {
@@ -104,6 +105,7 @@ class WorkoutRepository(
                     it.copy(
                         uploads = it.uploads + (connectorId to state),
                         uploadAttempts = it.uploadAttempts + (connectorId to attempts),
+                        uploadAttemptedAt = it.uploadAttemptedAt + (connectorId to attemptedAtEpochMs),
                     )
                 }
             },
@@ -170,6 +172,12 @@ class WorkoutRepository(
                             (value as? JsonPrimitive)?.content?.toIntOrNull()?.let { key to it }
                         }?.toMap()
                         .orEmpty(),
+                uploadAttemptedAt =
+                    (node["attemptedAt"] as? JsonObject)
+                        ?.mapNotNull { (key, value) ->
+                            (value as? JsonPrimitive)?.content?.toLongOrNull()?.let { key to it }
+                        }?.toMap()
+                        .orEmpty(),
             )
         }.getOrNull()
     }
@@ -193,6 +201,10 @@ class WorkoutRepository(
                             put(
                                 "attempts",
                                 buildJsonObject { summary.uploadAttempts.forEach { (k, v) -> put(k, v) } },
+                            )
+                            put(
+                                "attemptedAt",
+                                buildJsonObject { summary.uploadAttemptedAt.forEach { (k, v) -> put(k, v) } },
                             )
                         },
                     )
