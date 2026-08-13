@@ -22,7 +22,14 @@ import java.io.File
  */
 class SettingsListener : WearableListenerService() {
     override fun onDataChanged(events: com.google.android.gms.wearable.DataEventBuffer) {
-        events.filter { it.type == DataEvent.TYPE_CHANGED }.forEach { event ->
+        events.forEach { event ->
+            // A deletion is how the phone revokes credentials, and handling only
+            // TYPE_CHANGED would leave the watch uploading with a token the
+            // rider has just disconnected.
+            if (event.type == DataEvent.TYPE_DELETED) {
+                if (event.dataItem.uri.path == CredentialContract.PATH) CredentialStore(this).clear()
+                return@forEach
+            }
             val dataMap = DataMapItem.fromDataItem(event.dataItem).dataMap
             when (event.dataItem.uri.path) {
                 WatchSettings.PATH ->
@@ -51,6 +58,7 @@ class SettingsListener : WearableListenerService() {
 class SettingsStore(
     context: Context,
     private val file: File = File(context.filesDir, "settings.json"),
+    private val historyFile: File = File(context.filesDir, "sport-history.txt"),
 ) {
     fun write(payload: String) {
         if (SyncContract.decode(payload) == null) return
@@ -60,6 +68,26 @@ class SettingsStore(
     }
 
     fun read(): WatchSettings? = if (file.exists()) SyncContract.decode(file.readText()) else null
+
+    /**
+     * Which sports were used most recently, oldest first.
+     *
+     * Kept here rather than in the view model because the picker's whole promise
+     * is that the sport of the last ride is at the top - which is worth nothing
+     * if it is forgotten the moment the app closes.
+     */
+    fun readHistory(): List<String> =
+        if (historyFile.exists()) {
+            historyFile.readLines().map { it.trim() }.filter { it.isNotEmpty() }
+        } else {
+            emptyList()
+        }
+
+    fun writeHistory(sportTypeIds: List<String>) {
+        val temporary = File(historyFile.parentFile, historyFile.name + ".part")
+        temporary.writeText(sportTypeIds.joinToString("\n"))
+        temporary.renameTo(historyFile)
+    }
 
     companion object {
         const val KEY_PAYLOAD = "payload"
