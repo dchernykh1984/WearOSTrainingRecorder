@@ -169,4 +169,26 @@
     <string name="history_uploaded">Enviado</string>
     <string name="history_failed">Envio rechazado</string>
     <string name="history_not_sent">No enviado</string>
+    <string name="settings_language">Idioma</string>
+    <string name="language_system">Idioma del sistema</string>
+    <string name="language_en">English</string>
+    <string name="language_ru">Русский</string>
+    <string name="language_kk">Қазақша</string>
+    <string name="language_es">Español</string>
+    <string name="language_zh">中文</string>
+    <string name="language_hi">हिन्दी</string>
+    <string name="language_pt">Português</string>
+    <string name="language_fr">Français</string>
+    <string name="language_de">Deutsch</string>
+    <string name="language_ja">日本語</string>
+    <string name="language_it">Italiano</string>
+    <string name="language_tr">Türkçe</string>
+    <string name="language_pl">Polski</string>
+    <string name="language_nl">Nederlands</string>
+    <string name="language_cs">Čeština</string>
+    <string name="nav_sports">Deportes</string>
+    <string name="nav_race">Carrera</string>
+    <string name="nav_connections">Servicios</string>
+    <string name="nav_history">Historial</string>
+    <string name="nav_settings">Ajustes</string>
 </resources>

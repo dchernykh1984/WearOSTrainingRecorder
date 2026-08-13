@@ -38,6 +38,11 @@ detekt {
 }
 
 dependencies {
+    // Exposed rather than implementation: both apps switch the locale through
+    // AppCompatDelegate, and the per-app locale service appcompat contributes to
+    // the manifest has to reach their merged manifests too.
+    api(libs.androidx.appcompat)
+
     testImplementation(project(":core"))
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test)

@@ -162,4 +162,26 @@
     <string name="history_uploaded">アップロード済み</string>
     <string name="history_failed">アップロード拒否</string>
     <string name="history_not_sent">未送信</string>
+    <string name="settings_language">言語</string>
+    <string name="language_system">システムの言語</string>
+    <string name="language_en">English</string>
+    <string name="language_ru">Русский</string>
+    <string name="language_kk">Қазақша</string>
+    <string name="language_es">Español</string>
+    <string name="language_zh">中文</string>
+    <string name="language_hi">हिन्दी</string>
+    <string name="language_pt">Português</string>
+    <string name="language_fr">Français</string>
+    <string name="language_de">Deutsch</string>
+    <string name="language_ja">日本語</string>
+    <string name="language_it">Italiano</string>
+    <string name="language_tr">Türkçe</string>
+    <string name="language_pl">Polski</string>
+    <string name="language_nl">Nederlands</string>
+    <string name="language_cs">Čeština</string>
+    <string name="nav_sports">スポーツ</string>
+    <string name="nav_race">レース</string>
+    <string name="nav_connections">サービス</string>
+    <string name="nav_history">履歴</string>
+    <string name="nav_settings">設定</string>
 </resources>
