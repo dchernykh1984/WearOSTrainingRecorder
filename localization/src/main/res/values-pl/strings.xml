@@ -135,4 +135,7 @@
     <string name="config_level_discipline">Z dyscypliny</string>
     <string name="config_level_sport_type">Wlasne ustawienia</string>
     <string name="screen_count">%d ekranow</string>
+
+    <string name="recording_notification_title">Nagrywanie treningu</string>
+    <string name="recording_channel_name">Nagrywanie</string>
 </resources>

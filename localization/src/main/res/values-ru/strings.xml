@@ -135,4 +135,7 @@
     <string name="config_level_discipline">От направления</string>
     <string name="config_level_sport_type">Свои настройки</string>
     <string name="screen_count">экранов: %d</string>
+
+    <string name="recording_notification_title">Идёт запись тренировки</string>
+    <string name="recording_channel_name">Запись</string>
 </resources>

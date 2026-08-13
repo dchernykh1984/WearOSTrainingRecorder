@@ -135,4 +135,7 @@
     <string name="config_level_discipline">De la discipline</string>
     <string name="config_level_sport_type">Reglages propres</string>
     <string name="screen_count">%d ecrans</string>
+
+    <string name="recording_notification_title">Enregistrement en cours</string>
+    <string name="recording_channel_name">Enregistrement</string>
 </resources>

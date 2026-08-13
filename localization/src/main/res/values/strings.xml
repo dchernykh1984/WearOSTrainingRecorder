@@ -145,4 +145,8 @@
     <string name="config_level_discipline">From discipline</string>
     <string name="config_level_sport_type">Own settings</string>
     <string name="screen_count">%d screens</string>
+
+    <!-- Recording service -->
+    <string name="recording_notification_title">Recording workout</string>
+    <string name="recording_channel_name">Recording</string>
 </resources>

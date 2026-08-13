@@ -135,4 +135,7 @@
     <string name="config_level_discipline">Von Disziplin</string>
     <string name="config_level_sport_type">Eigene Einstellungen</string>
     <string name="screen_count">%d Seiten</string>
+
+    <string name="recording_notification_title">Training wird aufgezeichnet</string>
+    <string name="recording_channel_name">Aufzeichnung</string>
 </resources>
