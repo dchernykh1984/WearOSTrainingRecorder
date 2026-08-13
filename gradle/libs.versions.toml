@@ -1,0 +1,14 @@
+# Gradle version catalog: single source of truth for dependency and plugin
+# versions. Referenced from the build scripts as `libs.<alias>`.
+
+[versions]
+agp = "8.13.2"
+kotlin = "2.2.21"
+junit = "4.13.2"
+
+[libraries]
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
