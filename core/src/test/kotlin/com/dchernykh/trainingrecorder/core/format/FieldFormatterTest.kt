@@ -46,6 +46,12 @@ class FieldFormatterTest {
     }
 
     @Test
+    fun shortImperialDistancesUseFeetRatherThanAUselessFractionOfAMile() {
+        assertEquals("328 ft", FieldFormatter.distance(100.0, UnitSystem.IMPERIAL))
+        assertEquals("0 ft", FieldFormatter.distance(0.0, UnitSystem.IMPERIAL))
+    }
+
+    @Test
     fun speedIsPerHourInBothSystems() {
         assertEquals("36 km/h", FieldFormatter.speed(10.0))
         assertEquals("22.4 mph", FieldFormatter.speed(10.0, UnitSystem.IMPERIAL))
