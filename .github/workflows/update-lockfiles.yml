@@ -22,7 +22,10 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
       - name: Write dependency locks
-        run: ./gradlew :wear:dependencies :mobile:dependencies --write-locks
+        # Every module that ships a lockfile has to be listed: one left out
+        # resolves against a stale lock on the next dependency bump, and the
+        # failure names the lockfile rather than this workflow.
+        run: ./gradlew :core:dependencies :wear:dependencies :mobile:dependencies --write-locks
       - name: Upload lockfiles
         uses: actions/upload-artifact@v7
         with:
