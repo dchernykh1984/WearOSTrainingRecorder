@@ -99,6 +99,7 @@ object UploadQueue {
     fun from(
         workouts: List<WorkoutSummary>,
         connectorIds: Set<String>,
+        nowEpochMs: Long = 0,
     ): List<PendingUpload> =
         workouts
             .sortedBy { it.startedAtEpochMs }
@@ -113,6 +114,12 @@ object UploadQueue {
                             // Carried over from the workout, so a restart resumes
                             // the backoff rather than starting it again.
                             attempts = workout.uploadAttempts[it] ?: 0,
+                            // The moment of the last attempt is not persisted, so
+                            // the backoff is re-served from now. Without this a
+                            // rebuilt entry is due immediately, and a device that
+                            // restarts a few times during an outage burns every
+                            // attempt in seconds and gives up for good.
+                            nextAttemptAtEpochMs = nowEpochMs + backoffMs(workout.uploadAttempts[it] ?: 0),
                         )
                     }
             }
