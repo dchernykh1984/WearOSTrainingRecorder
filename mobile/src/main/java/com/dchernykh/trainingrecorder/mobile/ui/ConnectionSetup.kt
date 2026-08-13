@@ -32,6 +32,7 @@ fun ConnectionSetup(
     values: Map<String, String>,
     onValueChanged: (String, String) -> Unit,
     onConnect: () -> Unit,
+    status: Int? = null,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.padding(16.dp)) {
@@ -39,13 +40,18 @@ fun ConnectionSetup(
             text = stringResource(explanationFor(connectorId)),
             style = MaterialTheme.typography.bodyMedium,
         )
-        if (connectorId == StravaProtocol.ID) {
-            Text(
-                text = stringResource(R.string.connect_strava_callback),
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 8.dp),
-            )
-        }
+        Text(
+            text =
+                stringResource(
+                    if (connectorId == StravaProtocol.ID) {
+                        R.string.connect_strava_callback
+                    } else {
+                        R.string.connect_garmin_token_hint
+                    },
+                ),
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 8.dp),
+        )
         fields.forEach { field ->
             OutlinedTextField(
                 value = values[field.key].orEmpty(),
@@ -63,6 +69,15 @@ fun ConnectionSetup(
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
         ) {
             Text(stringResource(R.string.connect_action))
+        }
+        // Connecting Strava opens a browser and comes back minutes later, so the
+        // screen has to say where it got to - silence reads as a dead button.
+        if (status != null) {
+            Text(
+                text = stringResource(status),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 8.dp),
+            )
         }
     }
 }
