@@ -90,19 +90,39 @@ class StravaAuthorization(
      * no idea whether the app got anything.
      */
     private fun awaitCallback(server: ServerSocket): String {
-        server.soTimeout = TIMEOUT_MS
+        val deadline = System.currentTimeMillis() + TIMEOUT_MS
+        // Browsers open speculative connections to a host before they send
+        // anything on them. Accepting exactly once hands the whole flow to one of
+        // those, and the redirect that actually carries the code is never read.
+        while (System.currentTimeMillis() < deadline) {
+            server.soTimeout = (deadline - System.currentTimeMillis()).toInt().coerceAtLeast(1)
+            val target = runCatching { readRequestTarget(server) }.getOrNull()
+            if (!target.isNullOrBlank()) return target
+        }
+        error("the browser did not return in time")
+    }
+
+    /** The path and query of one request, or null if that connection said nothing. */
+    private fun readRequestTarget(server: ServerSocket): String? =
         server.accept().use { socket ->
-            val reader = socket.getInputStream().bufferedReader()
-            val requestLine = reader.readLine().orEmpty()
+            // Bounded too: a preconnect that opens the socket and never writes
+            // would otherwise block here forever, past any deadline above.
+            socket.soTimeout = READ_TIMEOUT_MS
+            val requestLine =
+                socket
+                    .getInputStream()
+                    .bufferedReader()
+                    .readLine()
+                    .orEmpty()
+            if (requestLine.isBlank()) return null
             socket.getOutputStream().writer().use { writer ->
                 writer.write("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n")
                 writer.write("<html><body><p>$DONE_MESSAGE</p></body></html>")
             }
             // "GET /callback?code=... HTTP/1.1" - the middle token is the path
             // and query the protocol knows how to read.
-            return requestLine.split(' ').getOrNull(1).orEmpty()
+            requestLine.split(' ').getOrNull(1)
         }
-    }
 
     private fun exchange(
         clientId: String,
@@ -119,6 +139,10 @@ class StravaAuthorization(
                 val connection = URL(StravaProtocol.TOKEN_URL).openConnection() as HttpURLConnection
                 connection.requestMethod = "POST"
                 connection.doOutput = true
+                // Bounded, so a stalled network ends as a failure the rider can
+                // retry rather than a screen that says "connecting" forever.
+                connection.connectTimeout = CONNECT_TIMEOUT_MS
+                connection.readTimeout = READ_TIMEOUT_MS
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
                 connection.use { it.write(body) }
             }.getOrElse { return AuthorizationResult.Failed("the token exchange failed: ${it.message}") }
@@ -143,6 +167,11 @@ class StravaAuthorization(
     private companion object {
         /** Long enough for a rider to find their password, short enough to give up. */
         const val TIMEOUT_MS = 300_000
+
+        const val CONNECT_TIMEOUT_MS = 15_000
+
+        /** A browser that has opened a socket and said nothing is not the one. */
+        const val READ_TIMEOUT_MS = 10_000
 
         const val RADIX = 36
         const val DONE_MESSAGE = "You can close this tab and return to the app."
