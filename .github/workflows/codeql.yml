@@ -1,0 +1,47 @@
+name: CodeQL
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 9 * * 1" # every Monday at 09:00 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (java-kotlin)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5.6.0
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4.37.3
+        with:
+          languages: java-kotlin
+          # Kotlin needs a real compile to extract source; autobuild does not
+          # reliably trace an Android Gradle build, so trace it manually.
+          build-mode: manual
+      - name: Compile Kotlin (traced by CodeQL)
+        # --no-build-cache forces actual compilation so the tracer sees the code;
+        # a cache hit would produce zero extracted source and a silently empty
+        # analysis.
+        run: ./gradlew --no-daemon --no-build-cache :wear:compileDebugKotlin :mobile:compileDebugKotlin
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v4.37.3
+        with:
+          category: "/language:java-kotlin"
