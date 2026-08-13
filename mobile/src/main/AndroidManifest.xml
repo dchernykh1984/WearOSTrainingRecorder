@@ -9,6 +9,11 @@
          watches. Simply omitting it is how a handheld APK declares itself: Play
          routes watches to the wear APK, which declares the feature as required. -->
 
+    <!-- The Strava authorization is a loopback redirect plus a token exchange,
+         both of which are network. Without this the socket cannot even be bound,
+         and connecting fails with an error that says nothing about a permission. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- See the comment in the wear manifest: no automatic Google Drive backup of
          third-party OAuth tokens or workout data. -->
     <application
