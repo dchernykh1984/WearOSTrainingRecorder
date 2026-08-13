@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.guava.await
 
 /** What the watch itself is producing right now. */
@@ -122,7 +123,9 @@ class ExerciseRecorder(
                         dataType: DataType<*, *>,
                         newAvailability: Availability,
                     ) {
-                        availability.value = availability.value + (dataType.name to newAvailability)
+                        // update, not a read-modify-write: callbacks for
+                        // different data types arrive concurrently.
+                        availability.update { it + (dataType.name to newAvailability) }
                     }
                 }
             client.setUpdateCallback(callback)

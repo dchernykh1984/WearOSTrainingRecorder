@@ -9,8 +9,7 @@ import com.dchernykh.trainingrecorder.core.sport.SportCatalogue
  *
  * The catalogue names the constant as a string on purpose - it has no Android
  * dependency - so the lookup lands here. A name that no longer exists resolves to
- * [ExerciseType.UNKNOWN] rather than throwing: Health Services still records a
- * session for an unknown type, and refusing to start a workout because a mapping
+ * a generic workout rather than throwing: refusing to start because a mapping
  * drifted would be a far worse failure than a slightly wrong label.
  */
 object ExerciseTypes {
@@ -33,9 +32,14 @@ object ExerciseTypes {
             "WALKING" to ExerciseType.WALKING,
         )
 
+    /**
+     * Falls back to [ExerciseType.WORKOUT] rather than UNKNOWN, which
+     * `ExerciseConfig` refuses outright - the promise is that a drifted mapping
+     * records a slightly mislabelled session, not that it stops the rider.
+     */
     fun forSport(sportTypeId: String): ExerciseType {
-        val name = SportCatalogue.byId(sportTypeId)?.healthServicesExerciseType ?: return ExerciseType.UNKNOWN
-        return byName[name] ?: ExerciseType.UNKNOWN
+        val name = SportCatalogue.byId(sportTypeId)?.healthServicesExerciseType ?: return ExerciseType.WORKOUT
+        return byName[name] ?: ExerciseType.WORKOUT
     }
 
     /** Every name the catalogue can produce, so a test can prove none is missing. */
