@@ -11,3 +11,23 @@ repos:
       - id: mixed-line-ending
         args: [--fix=lf]
         exclude: '\.bat$'
+
+  # Kotlin linting and static analysis run through Gradle, so they require the
+  # JDK + Android SDK. They are staged at pre-push (not every commit) to keep
+  # local commits fast; CI also runs them as a dedicated Gradle job.
+  - repo: local
+    hooks:
+      - id: ktlint
+        name: ktlint
+        entry: ./gradlew --quiet ktlintCheck
+        language: system
+        pass_filenames: false
+        types_or: [kotlin]
+        stages: [pre-push]
+      - id: detekt
+        name: detekt
+        entry: ./gradlew --quiet detekt
+        language: system
+        pass_filenames: false
+        types_or: [kotlin]
+        stages: [pre-push]

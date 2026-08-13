@@ -1,0 +1,24 @@
+# detekt configuration. Overrides layer on top of detekt's bundled defaults
+# (build-upon-default-config = true in the module build scripts).
+
+complexity:
+  LongMethod:
+    # Declarative @Composable UI functions are legitimately long.
+    ignoreAnnotated: ['Composable']
+  LongParameterList:
+    functionThreshold: 7
+    constructorThreshold: 7
+    ignoreAnnotated: ['Composable']
+
+naming:
+  FunctionNaming:
+    # @Composable functions are PascalCase by convention.
+    ignoreAnnotated: ['Composable']
+
+style:
+  MagicNumber:
+    # Magic-number noise is not useful for this UI/config code.
+    active: false
+  ReturnCount:
+    # Guard-clause early returns keep sensor and sync handling readable.
+    max: 3
