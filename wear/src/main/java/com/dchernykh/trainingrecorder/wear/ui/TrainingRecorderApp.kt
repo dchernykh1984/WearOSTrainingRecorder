@@ -27,7 +27,9 @@ fun TrainingRecorderApp(
     onSportChosen: (SportType) -> Unit = {},
 ) {
     MaterialTheme {
-        SportPicker(history = history, onSportChosen = onSportChosen)
+        WithRecordingPermissions {
+            SportPicker(history = history, onSportChosen = onSportChosen)
+        }
     }
 }
 

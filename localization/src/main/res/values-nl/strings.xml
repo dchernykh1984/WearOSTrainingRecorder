@@ -149,4 +149,7 @@
     <string name="editor_field_count">Velden</string>
     <string name="editor_add_screen">Scherm toevoegen</string>
     <string name="editor_remove_screen">Verwijderen</string>
+
+    <string name="permissions_explanation">Opnemen vereist locatie, sensoren en Bluetooth.</string>
+    <string name="permissions_grant">Toestaan</string>
 </resources>
