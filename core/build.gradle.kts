@@ -46,5 +46,7 @@ listOf(
 
 dependencies {
     testImplementation(libs.junit)
+    implementation(libs.kotlinx.serialization.json)
+
     testImplementation(libs.kotlin.test)
 }
