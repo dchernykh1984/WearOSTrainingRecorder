@@ -47,6 +47,7 @@ listOf(
 dependencies {
     testImplementation(libs.junit)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.garmin.fit)
 
     testImplementation(libs.kotlin.test)
 }
