@@ -20,7 +20,7 @@ import kotlinx.coroutines.withContext
 class GarminConnector : StorageConnector {
     override val id: String = GarminProtocol.ID
 
-    override val credentialFields: List<CredentialField> = GarminProtocol.credentialFields + BEARER
+    override val credentialFields: List<CredentialField> = GarminProtocol.credentialFields
 
     override suspend fun upload(
         upload: WorkoutUpload,
@@ -47,6 +47,6 @@ class GarminConnector : StorageConnector {
         }
 
     private companion object {
-        val BEARER = CredentialField("bearer_token", secret = true)
+        val BEARER = CredentialField(GarminProtocol.BEARER_TOKEN, secret = true)
     }
 }

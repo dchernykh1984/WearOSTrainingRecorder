@@ -9,8 +9,11 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.dchernykh.trainingrecorder.core.connector.ConnectorRegistry
+import com.dchernykh.trainingrecorder.core.connector.CredentialContract
+import com.dchernykh.trainingrecorder.core.connector.StravaProtocol
 import com.dchernykh.trainingrecorder.core.connector.UploadResult
 import com.dchernykh.trainingrecorder.core.connector.WorkoutUpload
+import com.dchernykh.trainingrecorder.core.sport.SportCatalogue
 import com.dchernykh.trainingrecorder.core.sync.PendingUpload
 import com.dchernykh.trainingrecorder.core.sync.UploadQueue
 import com.dchernykh.trainingrecorder.core.workout.WorkoutSummary
@@ -40,7 +43,19 @@ class UploadWorker(
 ) : CoroutineWorker(context, parameters) {
     private val repository = WorkoutRepository(context)
     private val credentials = CredentialStore(context)
-    private val registry = ConnectorRegistry(listOf(StravaConnector(), GarminConnector()))
+    private val registry =
+        ConnectorRegistry(
+            listOf(
+                StravaConnector(onTokensRefreshed = ::rememberStravaTokens),
+                GarminConnector(),
+            ),
+        )
+
+    /** Strava rotates the refresh token, so the new pair has to be written down. */
+    private fun rememberStravaTokens(updated: Map<String, String>) {
+        val stored = credentials.read()
+        credentials.write(CredentialContract.encode(stored + (StravaProtocol.ID to updated)))
+    }
 
     override suspend fun doWork(): Result =
         withContext(Dispatchers.IO) {
@@ -86,6 +101,7 @@ class UploadWorker(
                         workoutId = workout.id,
                         sportTypeId = workout.sportTypeId,
                         fileName = "${workout.id}.fit",
+                        activityName = SportCatalogue.byId(workout.sportTypeId)?.id ?: workout.sportTypeId,
                         byteCount = file.length(),
                         openStream = { file.inputStream() },
                     ),
