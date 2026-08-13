@@ -106,7 +106,15 @@ object UploadQueue {
                 connectorIds
                     .sorted()
                     .filter { workout.uploads[it] == null || workout.uploads[it] == UploadState.PENDING }
-                    .map { PendingUpload(workoutId = workout.id, connectorId = it) }
+                    .map {
+                        PendingUpload(
+                            workoutId = workout.id,
+                            connectorId = it,
+                            // Carried over from the workout, so a restart resumes
+                            // the backoff rather than starting it again.
+                            attempts = workout.uploadAttempts[it] ?: 0,
+                        )
+                    }
             }
 
     private const val MILLIS_PER_SECOND = 1000L
