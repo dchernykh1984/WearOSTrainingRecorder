@@ -158,4 +158,9 @@
     <string name="race_bib">Dorsal</string>
     <string name="race_refresh">Atualizar a cada %1$d s</string>
     <string name="race_refresh_hint">Prova longa: poupe bateria. Prova curta: dados frescos.</string>
+
+    <string name="connect_strava_explanation">Crie a sua aplicacao Strava em strava.com/settings/api e cole aqui o client id e o secret. A app nao inclui credenciais proprias.</string>
+    <string name="connect_strava_callback">Defina Authorization Callback Domain como localhost</string>
+    <string name="connect_garmin_explanation">Inicie sessao com a sua conta Garmin Connect. A palavra-passe fica cifrada neste telemovel.</string>
+    <string name="connect_action">Ligar</string>
 </resources>

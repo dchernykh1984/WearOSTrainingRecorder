@@ -151,4 +151,9 @@
     <string name="race_bib">Gogus numarasi</string>
     <string name="race_refresh">Her %1$d sn yenile</string>
     <string name="race_refresh_hint">Uzun yarista pil, kisa yarista taze veri onemli.</string>
+
+    <string name="connect_strava_explanation">strava.com/settings/api adresinde kendi Strava uygulamanizi olusturun ve client id ile secret degerlerini buraya yapistirin. Uygulama kendi kimlik bilgisi icermez.</string>
+    <string name="connect_strava_callback">Authorization Callback Domain alanini localhost yapin</string>
+    <string name="connect_garmin_explanation">Kendi Garmin Connect hesabinizla giris yapin. Sifre bu telefonda sifreli olarak saklanir.</string>
+    <string name="connect_action">Baglan</string>
 </resources>

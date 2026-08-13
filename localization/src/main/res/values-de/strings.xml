@@ -158,4 +158,9 @@
     <string name="race_bib">Startnummer</string>
     <string name="race_refresh">Alle %1$d s aktualisieren</string>
     <string name="race_refresh_hint">Langes Rennen: langsamer abfragen. Kurzes Rennen: frische Daten.</string>
+
+    <string name="connect_strava_explanation">Erstellen Sie unter strava.com/settings/api eine eigene Strava-API-Anwendung und tragen Sie deren Client-ID und Secret hier ein. Die App enthaelt keine eigenen Zugangsdaten.</string>
+    <string name="connect_strava_callback">Authorization Callback Domain auf localhost setzen</string>
+    <string name="connect_garmin_explanation">Melden Sie sich mit Ihrem eigenen Garmin-Connect-Konto an. Das Passwort bleibt verschluesselt auf diesem Telefon.</string>
+    <string name="connect_action">Verbinden</string>
 </resources>
