@@ -11,6 +11,7 @@ kover = "0.9.9"
 androidxTestJunit = "1.3.0"
 androidxTestRunner = "1.7.0"
 kotlinxSerialization = "1.9.0"
+kotlinxCoroutines = "1.10.2"
 garminFit = "21.176.0"
 # Wear Compose 1.6.2 declares androidx.compose 1.9.0, so the compose pin follows
 # it rather than the other way round. No BOM: with two Android modules and a
@@ -39,6 +40,9 @@ kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", vers
 # way to be sure Garmin Connect accepts the file; a hand-rolled writer would be
 # guesswork against a binary format.
 garmin-fit = { group = "com.garmin", name = "fit", version.ref = "garminFit" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+# Health Services returns ListenableFuture; this is the await() bridge.
+kotlinx-coroutines-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-guava", version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
