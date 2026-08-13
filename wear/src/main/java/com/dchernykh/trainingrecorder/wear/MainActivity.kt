@@ -1,20 +1,14 @@
 package com.dchernykh.trainingrecorder.wear
 
-import android.app.Activity
 import android.os.Bundle
-import android.widget.TextView
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import com.dchernykh.trainingrecorder.wear.ui.TrainingRecorderApp
 
-/**
- * Placeholder entry point for the watch app. Replaced once the exercise
- * recording screens land.
- */
-class MainActivity : Activity() {
+/** The watch app's single entry point. Everything below it is Compose. */
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(
-            TextView(this).apply {
-                text = getString(R.string.app_name)
-            },
-        )
+        setContent { TrainingRecorderApp() }
     }
 }
