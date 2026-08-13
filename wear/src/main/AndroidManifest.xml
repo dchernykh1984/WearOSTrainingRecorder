@@ -10,7 +10,11 @@
     <!-- Recording. BODY_SENSORS covers the optical heart-rate sensor, and
          ACTIVITY_RECOGNITION is what Health Services needs for step-derived
          cadence. Location is fine-grained because a workout track from coarse
-         location is worthless. -->
+         location is worthless. Android requires the coarse permission to be
+         declared alongside the fine one: from API 31 the user can grant only
+         approximate location, and without both declared that choice would leave
+         the app with nothing at all. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
