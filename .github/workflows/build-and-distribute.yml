@@ -76,14 +76,33 @@ jobs:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.jks"
 
-      - name: Resolve release tag and version
+      # versionCode is derived from the release version, NOT from
+      # github.run_number. run_number is per-workflow: on the workflow_call path
+      # it is release-please's counter, on a manual tag push it is this
+      # workflow's own. Mixing the two paths - or renaming a workflow file, which
+      # restarts the counter - can emit a lower versionCode than an already
+      # published release and permanently block over-the-top installs.
+      - name: Resolve release tag, version and version code
         id: version
+        run: |
+          tag="${RELEASE_TAG}"
+          name="${tag#v}"
+          if [[ "$name" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            major="${BASH_REMATCH[1]}"
+            minor="${BASH_REMATCH[2]}"
+            patch="${BASH_REMATCH[3]}"
+            code=$(( major * 10000 + minor * 100 + patch ))
+          else
+            # workflow_dispatch off a branch: build and sign, but never publish.
+            echo "::warning::'$tag' is not a vX.Y.Z tag; using version code base 1."
+            code=1
+          fi
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "name=${name}" >> "$GITHUB_OUTPUT"
+          echo "code=${code}" >> "$GITHUB_OUTPUT"
         env:
           # inputs.tag is set on workflow_call; otherwise use the pushed tag.
           RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
-        run: |
-          echo "tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
-          echo "name=${RELEASE_TAG#v}" >> "$GITHUB_OUTPUT"
 
       # The watch and phone APKs must be signed with the SAME key: Google Play
       # only pairs them into one app when the applicationId and the signing
@@ -94,8 +113,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          # versionCode must increase monotonically; run_number is monotonic.
-          VERSION_CODE: ${{ github.run_number }}
+          VERSION_CODE: ${{ steps.version.outputs.code }}
           VERSION_NAME: ${{ steps.version.outputs.name }}
         run: ./gradlew assembleRelease
 
