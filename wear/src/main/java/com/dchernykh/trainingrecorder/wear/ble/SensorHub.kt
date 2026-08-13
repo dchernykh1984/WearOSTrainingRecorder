@@ -117,8 +117,16 @@ class SensorHub(
             val profile = sensor.profile ?: return@forEach
             jobs +=
                 scope.launch {
-                    SensorConnection(context, sensor.address, profile).events().collect { event ->
-                        apply(event)
+                    // A refused Bluetooth permission, a sensor whose profile this
+                    // build cannot read, or a stack that throws mid-connect must
+                    // cost the rider that one sensor - not the whole ride. The
+                    // permission flow promises a refusal is survivable, and an
+                    // uncaught SecurityException here would break that promise at
+                    // the worst possible moment.
+                    runCatching {
+                        SensorConnection(context, sensor.address, profile).events().collect { event ->
+                            apply(event)
+                        }
                     }
                 }
         }
