@@ -26,6 +26,17 @@ jobs:
           pip install pre-commit
           pre-commit run --all-files --show-diff-on-failure
 
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Run actionlint
+        env:
+          ACTIONLINT_VERSION: "1.7.12"
+        run: |
+          curl -fsSL "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" | tar -xz actionlint
+          ./actionlint -color
+
   commitizen:
     if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
