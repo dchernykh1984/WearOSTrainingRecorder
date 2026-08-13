@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
@@ -43,12 +44,20 @@ fun RecordingPager(
     onAction: (RecordingAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val horizontal = rememberPagerState(initialPage = 0) { PAGE_COUNT_WITH_CONTROLS }
+    // The controls sit to the left, so a swipe from left to right reveals them -
+    // which means the data screens, not the buttons, are what the rider sees when
+    // a recording starts.
+    val horizontal = rememberPagerState(initialPage = DATA_PAGE) { PAGE_COUNT_WITH_CONTROLS }
+    // Hoisted out of the pager's page content on purpose: created inside, it
+    // would be discarded whenever the data page leaves composition, and the
+    // rider would come back from the controls to the first screen instead of the
+    // one they were reading.
+    val vertical = rememberPagerState(initialPage = 0) { screens.screens.size }
     HorizontalPager(state = horizontal, modifier = modifier.fillMaxSize()) { page ->
         if (page == CONTROLS_PAGE) {
             ControlsPage(actions = actions, onAction = onAction)
         } else {
-            DataPages(screens = screens, shape = shape, values = values)
+            DataPages(screens = screens, shape = shape, values = values, state = vertical)
         }
     }
 }
@@ -58,9 +67,9 @@ private fun DataPages(
     screens: ScreenSet,
     shape: ScreenShape,
     values: (String) -> String,
+    state: PagerState,
 ) {
-    val vertical = rememberPagerState(initialPage = 0) { screens.screens.size }
-    VerticalPager(state = vertical, modifier = Modifier.fillMaxSize()) { index ->
+    VerticalPager(state = state, modifier = Modifier.fillMaxSize()) { index ->
         DataScreen(screen = screens.screens[index], shape = shape, values = values)
     }
 }
@@ -191,5 +200,6 @@ private fun ControlsPage(
 }
 
 private const val CONTROLS_PAGE = 0
+private const val DATA_PAGE = 1
 private const val PAGE_COUNT_WITH_CONTROLS = 2
 private val ROUND_INSET = 16.dp
