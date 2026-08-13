@@ -24,6 +24,7 @@ import com.dchernykh.trainingrecorder.wear.race.RaceStatsPoller
 import com.dchernykh.trainingrecorder.wear.service.RecordingService
 import com.dchernykh.trainingrecorder.wear.storage.WorkoutRepository
 import com.dchernykh.trainingrecorder.wear.sync.SettingsStore
+import com.dchernykh.trainingrecorder.wear.upload.CredentialStore
 import com.dchernykh.trainingrecorder.wear.upload.UploadWorker
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -123,6 +124,23 @@ class RecordingViewModel(
 
     init {
         applySettings()
+    }
+
+    /**
+     * Pulls whatever the phone has already published.
+     *
+     * The listener only hears *changes*, so a watch installed after the phone
+     * was configured would otherwise sit on defaults - in metric, with no race
+     * and no credentials - until the rider went and touched a setting.
+     */
+    fun syncFromPhone() {
+        viewModelScope.launch {
+            SettingsStore.fetchExisting(getApplication())?.let { settings.write(it) }
+            CredentialStore.fetchExisting(getApplication())?.let {
+                CredentialStore(getApplication()).write(it)
+            }
+            applySettings()
+        }
     }
 
     /** Re-read whenever the screen comes back, so a phone push lands promptly. */
@@ -280,15 +298,6 @@ class RecordingViewModel(
     private suspend fun save(finished: RecordingState) {
         val sportId = finished.sportTypeId ?: return
         val start = finished.startedAtEpochMs ?: return
-        val recorded =
-            RecordedWorkout(
-                sportTypeId = sportId,
-                startedAtEpochMs = start,
-                totalTimerSeconds = finished.movingMillisAt(now()) / MILLIS_PER_SECOND,
-                totalElapsedSeconds = finished.elapsedMillisAt(now()) / MILLIS_PER_SECOND,
-                totalDistanceMeters = sensors.value.value("distance_total") ?: 0.0,
-                points = samples.toList(),
-            )
         // Encoding a six-hour ride is thousands of messages plus a file write and
         // an index rewrite; on the main thread that is an ANR at exactly the
         // moment the rider is waiting to see their ride saved.
@@ -298,10 +307,11 @@ class RecordingViewModel(
             // cancels the scope, and without this the FIT file is never written
             // and the whole workout goes with the view model.
             withContext(Dispatchers.IO + NonCancellable) {
-                runCatching { repository.save("workout-$start", recorded, CONNECTORS) }
+                runCatching { repository.save("workout-$start", recorded(finished, start), CONNECTORS) }
             }
         // The samples are the only copy of the ride until the file exists, so
-        // they are kept if the write failed - a retry has something to write.
+        // they are kept if the write failed: the next FINISH still has a ride to
+        // write, rather than saving an empty one on top of a lost one.
         if (saved.isSuccess) {
             samples.clear()
             // Queued straight away rather than on the next launch: the rider
@@ -310,6 +320,29 @@ class RecordingViewModel(
             UploadWorker.schedule(getApplication())
         }
         history.value = SportOrdering.record(history.value, sportId).also(settings::writeHistory)
+    }
+
+    /**
+     * The workout as the encoder wants it.
+     *
+     * Built inside the save's runCatching rather than before it: a clock adjusted
+     * backwards across a pause can leave elapsed shorter than moving, which the
+     * constructor refuses - and an exception here would be a crash at the one
+     * moment the ride cannot be lost.
+     */
+    private fun recorded(
+        finished: RecordingState,
+        start: Long,
+    ): RecordedWorkout {
+        val now = now()
+        return RecordedWorkout(
+            sportTypeId = finished.sportTypeId.orEmpty(),
+            startedAtEpochMs = start,
+            totalTimerSeconds = finished.movingMillisAt(now) / MILLIS_PER_SECOND,
+            totalElapsedSeconds = finished.elapsedMillisAt(now) / MILLIS_PER_SECOND,
+            totalDistanceMeters = sensors.value.value("distance_total") ?: 0.0,
+            points = samples.toList(),
+        )
     }
 
     /**
@@ -353,6 +386,16 @@ class RecordingViewModel(
 
     private fun recomputeValues() {
         val now = now()
+        // Re-merged on the tick, not only when Health Services delivers a batch:
+        // a strap notifying every second would otherwise sit unread through a
+        // tunnel, and a disconnected one would never age out of the display.
+        sensors.value =
+            SensorSnapshot.merge(
+                external = hub.readings.value,
+                builtIn = builtIn.toMap(),
+                nowEpochMs = now,
+                connectedProfiles = hub.connected.value,
+            )
         _values.value =
             FieldValues.snapshot(
                 state = _state.value,
