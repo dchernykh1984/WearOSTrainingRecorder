@@ -31,6 +31,13 @@ class FieldFormatterTest {
     }
 
     @Test
+    fun aDistanceThatRoundsUpToTheUnitSwitchesRatherThanShowingItInSmallUnits() {
+        // "1000 m" beside a field that changes to kilometres at 1000 reads as a bug.
+        assertEquals("1 km", FieldFormatter.distance(999.6))
+        assertEquals("1 mi", FieldFormatter.distance(1609.3, UnitSystem.IMPERIAL))
+    }
+
+    @Test
     fun longerDistancesSwitchToKilometresAndLosePrecisionAsTheyGrow() {
         assertEquals("1 km", FieldFormatter.distance(1_000.0))
         assertEquals("1.25 km", FieldFormatter.distance(1_250.0))

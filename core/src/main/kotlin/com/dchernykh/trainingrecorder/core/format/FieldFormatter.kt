@@ -37,6 +37,7 @@ object FieldFormatter {
     private const val SECONDS_PER_HOUR_D = 3600.0
     private const val SHORT_DISTANCE_METERS = 1000.0
     private const val PRECISE_DISTANCE_KM = 100.0
+    private const val FEET_PER_MILE = 5280
 
     /** A pace slower than this is a stop, not a pace worth showing. */
     private const val SLOWEST_MEANINGFUL_PACE_SECONDS = 3599.0
@@ -70,9 +71,14 @@ object FieldFormatter {
         if (meters == null || meters < 0) return empty
         // Below the first whole unit a decimal reading is useless - "0.06 mi"
         // tells a runner nothing - so both systems fall back to their small unit.
-        if (units == UnitSystem.METRIC && meters < SHORT_DISTANCE_METERS) return "${meters.roundToInt()} m"
-        if (units == UnitSystem.IMPERIAL && meters < METERS_PER_MILE) {
-            return "${(meters / METERS_PER_FOOT).roundToInt()} ft"
+        // Rounded first, then compared: 999.6 m rounds to 1000, and "1000 m"
+        // beside a field that switches to kilometres at 1000 reads as a bug.
+        if (units == UnitSystem.METRIC) {
+            val whole = meters.roundToLong()
+            if (whole < SHORT_DISTANCE_METERS) return "$whole m"
+        } else {
+            val feet = (meters / METERS_PER_FOOT).roundToLong()
+            if (feet < FEET_PER_MILE) return "$feet ft"
         }
         val value = if (units == UnitSystem.METRIC) meters / METERS_PER_KM else meters / METERS_PER_MILE
         val suffix = if (units == UnitSystem.METRIC) "km" else "mi"
