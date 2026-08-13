@@ -9,6 +9,11 @@ complexity:
     functionThreshold: 7
     constructorThreshold: 7
     ignoreAnnotated: ['Composable']
+  TooManyFunctions:
+    # Immutable configuration types expose the same operation once per tier
+    # (default / discipline / sport), so a coherent class lands just past the
+    # default of 11 without being complex.
+    thresholdInClasses: 15
 
 naming:
   FunctionNaming:
