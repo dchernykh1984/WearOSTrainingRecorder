@@ -1,0 +1,31 @@
+name: Update lockfiles
+
+# Manually regenerate the Gradle dependency lockfiles. Run this after changing
+# dependencies, download the "gradle-lockfiles" artifact, and commit the files.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update-lockfiles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5.6.0
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Write dependency locks
+        run: ./gradlew :wear:dependencies :mobile:dependencies --write-locks
+      - name: Upload lockfiles
+        uses: actions/upload-artifact@v7
+        with:
+          name: gradle-lockfiles
+          path: "**/gradle.lockfile"
+          if-no-files-found: error
