@@ -13,6 +13,11 @@ plugins {
 // them from repository secrets.
 val keystoreFile: String? = System.getenv("KEYSTORE_FILE")
 
+// See the comment in wear/build.gradle.kts: one applicationId, two APKs, so each
+// form factor offsets the shared monotonic base to keep its versionCode unique.
+val versionCodeBase = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
+val mobileVersionCodeOffset = 1
+
 android {
     namespace = "com.dchernykh.trainingrecorder.mobile"
     compileSdk = 36
@@ -23,7 +28,7 @@ android {
         minSdk = 26
         targetSdk = 36
 
-        versionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
+        versionCode = versionCodeBase * 10 + mobileVersionCodeOffset
         versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
     }
 

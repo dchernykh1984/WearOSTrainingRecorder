@@ -13,6 +13,14 @@ plugins {
 // them from repository secrets.
 val keystoreFile: String? = System.getenv("KEYSTORE_FILE")
 
+// Google Play requires a distinct versionCode per APK published under one
+// applicationId. CI feeds a monotonic base (github.run_number) and each form
+// factor adds a fixed offset, so the two APKs can never collide. The watch offset
+// is the higher one: when an APK could serve both form factors, Play resolves the
+// ambiguity in favour of the higher versionCode, and the watch build must win.
+val versionCodeBase = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
+val wearVersionCodeOffset = 2
+
 android {
     namespace = "com.dchernykh.trainingrecorder.wear"
     compileSdk = 36
@@ -26,9 +34,9 @@ android {
         minSdk = 30
         targetSdk = 36
 
-        // versionCode must increase monotonically for over-the-top installs; CI
-        // feeds github.run_number. versionName is the human-readable release tag.
-        versionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
+        // versionCode must increase monotonically for over-the-top installs.
+        // versionName is the human-readable release tag.
+        versionCode = versionCodeBase * 10 + wearVersionCodeOffset
         versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
     }
 
