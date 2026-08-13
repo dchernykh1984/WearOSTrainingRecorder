@@ -37,7 +37,7 @@ class WorkoutRepository(
      * again - which Strava rejects as a duplicate and the queue then records as
      * permanently failed.
      */
-    private val lock = Any()
+    private val lock get() = INDEX_LOCK
     private val json = Json { ignoreUnknownKeys = true }
 
     init {
@@ -141,7 +141,10 @@ class WorkoutRepository(
         val root =
             json.parseToJsonElement(indexFile.readText()) as? JsonArray
                 ?: error("the workout index is not a JSON array")
-        return root.mapNotNull { it as? JsonObject }.mapNotNull(::toSummary)
+        return root.map { node ->
+            val entry = node as? JsonObject ?: error("a workout index entry is not an object")
+            toSummary(entry) ?: error("a workout index entry could not be read")
+        }
     }
 
     private fun toSummary(node: JsonObject): WorkoutSummary? {
@@ -204,6 +207,15 @@ class WorkoutRepository(
         node: JsonObject,
         key: String,
     ): String? = (node[key] as? JsonPrimitive)?.takeIf { it.isString }?.content
+
+    private companion object {
+        /**
+         * Shared, not per-instance: the recording service and the upload worker
+         * each build their own repository, and a per-instance lock would serialise
+         * neither of the two callers it exists for.
+         */
+        val INDEX_LOCK = Any()
+    }
 
     private fun number(
         node: JsonObject,
