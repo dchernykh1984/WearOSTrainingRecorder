@@ -139,6 +139,23 @@ To run all checks manually across every file:
 pre-commit run --all-files
 ```
 
+## Continuous integration and releases
+
+Pull requests must pass the required checks before review: the Gradle gate
+(`android` - ktlint, detekt, Android Lint, unit tests, Kover coverage, assemble),
+instrumented tests on round and square Wear emulators plus a phone emulator,
+CodeQL, an OSV dependency scan, actionlint, pre-commit and commitizen.
+
+Releases are automated. `release-please` maintains a version-bump PR from the
+Conventional Commits; merging it tags a GitHub Release, and the **Build and
+Distribute** workflow (called automatically) attaches signed, attested APKs for
+both form factors - no manual tag push required.
+
+Releasing needs four repository secrets: `KEYSTORE_BASE64` (the base64-encoded
+release keystore), `KEYSTORE_PASSWORD`, `KEY_ALIAS` and `KEY_PASSWORD`. The
+workflow fails fast if any of them is missing, because an unsigned APK otherwise
+builds successfully and only breaks at install time.
+
 ## Contributing
 
 Before requesting a review, make sure the CI pipeline passes on your pull
