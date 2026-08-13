@@ -23,8 +23,12 @@ updates:
       - dependency-name: "com.android.tools.build:gradle"
         versions: [">=9"]
       # The Gradle wrapper itself: AGP 8.13.2 and detekt 1.23.8 do not run on
-      # Gradle 9 yet. Dependabot names the wrapper update "gradle".
-      - dependency-name: "gradle"
+      # Gradle 9 yet. Dependabot calls this dependency "gradle-wrapper", not
+      # "gradle" - the name it actually uses is in the updated-dependencies
+      # trailer of its own commits. An ignore rule for plain "gradle" matches
+      # nothing and fails silently, which is how a wrapper bump to 9.7.0 walked
+      # straight past this list into a grouped pull request.
+      - dependency-name: "gradle-wrapper"
         versions: [">=9"]
       - dependency-name: "org.jetbrains.kotlin.android"
         versions: [">=2.3"]
