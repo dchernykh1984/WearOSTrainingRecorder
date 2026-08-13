@@ -20,6 +20,7 @@ import androidx.wear.compose.material3.Button
 import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
+import com.dchernykh.trainingrecorder.core.field.FieldCatalogue
 import com.dchernykh.trainingrecorder.core.layout.ScreenShape
 import com.dchernykh.trainingrecorder.core.recording.RecordingPhase
 import com.dchernykh.trainingrecorder.core.sport.SportType
@@ -42,11 +43,15 @@ fun TrainingRecorderApp(model: RecordingViewModel = viewModel()) {
             if (state.phase == RecordingPhase.IDLE || state.phase == RecordingPhase.FINISHED) {
                 SportPicker(sports = model.sports, onSportChosen = model::start)
             } else {
-                val sport = state.sportTypeId
+                // Read as observed state, not called as a function: a lambda that
+                // asked the model for each value would be invoked once and never
+                // again, freezing every field for the whole ride.
+                val values by model.values.collectAsStateWithLifecycle()
+                val sport = sportOf(model, state.sportTypeId)
                 RecordingPager(
-                    screens = model.screens.resolve(requireNotNull(sportOf(model, sport))),
+                    screens = model.screensFor(requireNotNull(sport)),
                     shape = currentShape(),
-                    values = model::display,
+                    values = { values[it] ?: FieldCatalogue.EMPTY_VALUE },
                     actions = state.availableActions,
                     onAction = model::onAction,
                 )
