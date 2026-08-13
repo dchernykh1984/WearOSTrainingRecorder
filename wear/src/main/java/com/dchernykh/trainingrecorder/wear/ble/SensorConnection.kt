@@ -122,8 +122,18 @@ class SensorConnection(
                         trySend(SensorEvent(profile, readingsFrom(value)))
                     }
                 }
+            // Cleared here as well as on disconnect: awaitClose runs when the
+            // collector goes away, and onConnectionStateChange never fires after
+            // close(), so without this a re-collection would compute its first
+            // cadence against a minutes-old sample.
+            previousCrankRevolutions = null
+            previousCrankEventTime = null
             val connection = device.connectGatt(context, true, callback)
-            awaitClose { connection?.close() }
+            awaitClose {
+                connection?.close()
+                previousCrankRevolutions = null
+                previousCrankEventTime = null
+            }
         }
 
     private fun readingsFrom(data: ByteArray): Map<String, SensorReading> {
