@@ -124,4 +124,10 @@
     <string name="field_sensor_cadence_battery">Batterij cadans</string>
     <string name="field_sensor_power_battery">Batterij vermogen</string>
     <string name="field_temperature">Temperatuur</string>
+
+    <string name="action_start">Starten</string>
+    <string name="action_pause">Pauze</string>
+    <string name="action_resume">Hervatten</string>
+    <string name="action_finish">Beeindigen</string>
+    <string name="action_discard">Verwijderen</string>
 </resources>

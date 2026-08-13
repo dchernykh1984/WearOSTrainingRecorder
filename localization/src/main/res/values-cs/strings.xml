@@ -124,4 +124,10 @@
     <string name="field_sensor_cadence_battery">Baterie kadence</string>
     <string name="field_sensor_power_battery">Baterie vykonu</string>
     <string name="field_temperature">Teplota</string>
+
+    <string name="action_start">Start</string>
+    <string name="action_pause">Pauza</string>
+    <string name="action_resume">Pokracovat</string>
+    <string name="action_finish">Ukoncit</string>
+    <string name="action_discard">Zahodit</string>
 </resources>
