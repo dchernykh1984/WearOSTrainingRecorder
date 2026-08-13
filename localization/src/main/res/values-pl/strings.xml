@@ -130,4 +130,9 @@
     <string name="action_resume">Wznow</string>
     <string name="action_finish">Zakoncz</string>
     <string name="action_discard">Odrzuc</string>
+
+    <string name="config_level_default">Domyslne</string>
+    <string name="config_level_discipline">Z dyscypliny</string>
+    <string name="config_level_sport_type">Wlasne ustawienia</string>
+    <string name="screen_count">%d ekranow</string>
 </resources>

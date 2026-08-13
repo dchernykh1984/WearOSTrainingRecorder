@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
     alias(libs.plugins.kover)
@@ -66,6 +67,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    buildFeatures {
+        compose = true
+    }
+
     lint {
         // Fail the build on lint errors; warnings stay non-fatal for now and can
         // be promoted to errors once the codebase stabilises.
@@ -124,6 +129,33 @@ listOf(
 }
 
 dependencies {
+    constraints {
+        // The same transitive advisories the watch module pins out; they arrive
+        // here through Play Services Wearable.
+        implementation("com.google.guava:guava:32.0.0-android") {
+            because("GHSA-5mg8-w23w-74h3 and GHSA-7g45-4rm6-3mm3 are fixed in 32.0.0")
+        }
+        implementation("com.google.protobuf:protobuf-javalite:3.25.5") {
+            because("GHSA-735f-pc8j-v9w8 (CVSS 8.7) is fixed in 3.25.5")
+        }
+    }
+
+    implementation(project(":core"))
+    implementation(project(":localization"))
+
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.play.services.wearable)
+
+    debugImplementation(libs.androidx.compose.ui.tooling)
+
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.test.ext.junit)

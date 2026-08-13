@@ -130,4 +130,9 @@
     <string name="action_resume">Pokracovat</string>
     <string name="action_finish">Ukoncit</string>
     <string name="action_discard">Zahodit</string>
+
+    <string name="config_level_default">Vychozi</string>
+    <string name="config_level_discipline">Z discipliny</string>
+    <string name="config_level_sport_type">Vlastni nastaveni</string>
+    <string name="screen_count">%d obrazovek</string>
 </resources>

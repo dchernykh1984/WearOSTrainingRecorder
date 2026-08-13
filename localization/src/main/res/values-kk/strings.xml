@@ -130,4 +130,9 @@
     <string name="action_resume">Жалғастыру</string>
     <string name="action_finish">Аяқтау</string>
     <string name="action_discard">Болдырмау</string>
+
+    <string name="config_level_default">Әдепкі</string>
+    <string name="config_level_discipline">Бағыттан</string>
+    <string name="config_level_sport_type">Жеке баптау</string>
+    <string name="screen_count">экран: %d</string>
 </resources>
