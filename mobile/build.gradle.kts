@@ -107,6 +107,20 @@ kover {
     }
 }
 
+// See the comment in wear/build.gradle.kts. Regenerate mobile/gradle.lockfile
+// with the "Update lockfiles" workflow or
+// `./gradlew :mobile:dependencies --write-locks`.
+listOf(
+    "debugRuntimeClasspath",
+    "releaseRuntimeClasspath",
+    "debugUnitTestRuntimeClasspath",
+    "releaseUnitTestRuntimeClasspath",
+).forEach { configurationName ->
+    configurations.matching { it.name == configurationName }.configureEach {
+        resolutionStrategy.activateDependencyLocking()
+    }
+}
+
 dependencies {
     testImplementation(libs.junit)
 }
