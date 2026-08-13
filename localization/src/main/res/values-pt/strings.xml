@@ -135,4 +135,7 @@
     <string name="config_level_discipline">Da disciplina</string>
     <string name="config_level_sport_type">Definicoes proprias</string>
     <string name="screen_count">%d ecras</string>
+
+    <string name="recording_notification_title">A gravar treino</string>
+    <string name="recording_channel_name">Gravacao</string>
 </resources>

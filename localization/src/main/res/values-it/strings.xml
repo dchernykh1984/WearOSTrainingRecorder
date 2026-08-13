@@ -135,4 +135,7 @@
     <string name="config_level_discipline">Dalla disciplina</string>
     <string name="config_level_sport_type">Impostazioni proprie</string>
     <string name="screen_count">%d schermate</string>
+
+    <string name="recording_notification_title">Registrazione allenamento</string>
+    <string name="recording_channel_name">Registrazione</string>
 </resources>
