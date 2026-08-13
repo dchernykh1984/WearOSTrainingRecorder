@@ -1,5 +1,6 @@
 package com.dchernykh.trainingrecorder.core.sync
 
+import com.dchernykh.trainingrecorder.core.connector.UploadResult
 import com.dchernykh.trainingrecorder.core.workout.UploadState
 import com.dchernykh.trainingrecorder.core.workout.WorkoutSummary
 import kotlin.math.min
@@ -63,6 +64,23 @@ object UploadQueue {
     }
 
     fun hasGivenUp(pending: PendingUpload): Boolean = pending.attempts >= MAX_ATTEMPTS
+
+    /**
+     * What to record against the workout after an attempt.
+     *
+     * A queue entry that has given up must be written down as [UploadState.FAILED]
+     * rather than left pending. Leaving it pending means the retention policy can
+     * never consider the workout synced, so nothing is ever evicted and the watch
+     * fills up - a storage leak caused entirely by a service that is down.
+     */
+    fun stateAfter(
+        pending: PendingUpload,
+        result: UploadResult,
+    ): UploadState =
+        when {
+            result is UploadResult.Retryable && hasGivenUp(afterFailure(pending, 0)) -> UploadState.FAILED
+            else -> result.state
+        }
 
     /** The uploads due now, oldest first, excluding the ones that gave up. */
     fun due(
