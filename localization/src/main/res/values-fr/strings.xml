@@ -203,6 +203,6 @@
     <string name="connect_in_progress">Connexion...</string>
     <string name="connect_done">Connecte</string>
     <string name="connect_failed">Connexion impossible. Verifiez les informations et reessayez.</string>
-    <string name="connect_needs_application">Saisissez d'abord le Client ID et le Secret de votre application.</string>
-    <string name="connect_garmin_token_hint">Collez un jeton de Garmin Connect. La connexion automatique n'est pas encore disponible.</string>
+    <string name="connect_needs_application">Saisissez d\'abord le Client ID et le Secret de votre application.</string>
+    <string name="connect_garmin_token_hint">Collez un jeton de Garmin Connect. La connexion automatique n\'est pas encore disponible.</string>
 </resources>
