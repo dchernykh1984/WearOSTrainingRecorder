@@ -128,11 +128,19 @@ class WorkoutRepository(
             }
         }
 
+    /**
+     * Throws rather than returning an empty list when the index is unreadable.
+     *
+     * Swallowing a parse failure is worse than crashing: the next save would
+     * rewrite the index with one entry and orphan every workout recorded before
+     * it. A corrupt index is rare and recoverable; silently discarding a season
+     * of rides is neither.
+     */
     private fun loadIndex(): List<WorkoutSummary> {
         if (!indexFile.exists()) return emptyList()
         val root =
-            runCatching { json.parseToJsonElement(indexFile.readText()) as? JsonArray }.getOrNull()
-                ?: return emptyList()
+            json.parseToJsonElement(indexFile.readText()) as? JsonArray
+                ?: error("the workout index is not a JSON array")
         return root.mapNotNull { it as? JsonObject }.mapNotNull(::toSummary)
     }
 
