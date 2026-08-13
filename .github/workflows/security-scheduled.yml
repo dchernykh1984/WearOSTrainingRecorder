@@ -14,4 +14,4 @@ permissions:
 jobs:
   # Full dependency vulnerability scan on main and on the weekly schedule.
   osv-scan:
-    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.3.8
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.5.0
