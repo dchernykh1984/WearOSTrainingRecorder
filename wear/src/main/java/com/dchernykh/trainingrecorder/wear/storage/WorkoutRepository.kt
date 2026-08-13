@@ -29,6 +29,15 @@ class WorkoutRepository(
     private val directory: File = File(context.filesDir, "workouts"),
 ) {
     private val indexFile = File(directory, "index.json")
+
+    /**
+     * Every read-modify-write of the index goes through this. A recording thread
+     * saving a workout and an upload worker marking one uploaded otherwise
+     * clobber each other, and a lost "uploaded" mark means the file is sent
+     * again - which Strava rejects as a duplicate and the queue then records as
+     * permanently failed.
+     */
+    private val lock = Any()
     private val json = Json { ignoreUnknownKeys = true }
 
     init {
@@ -39,6 +48,15 @@ class WorkoutRepository(
 
     /** Writes the FIT file and records it, then trims to the retention budget. */
     fun save(
+        workoutId: String,
+        workout: RecordedWorkout,
+        enabledConnectors: Set<String>,
+    ): WorkoutSummary =
+        synchronized(lock) {
+            saveLocked(workoutId, workout, enabledConnectors)
+        }
+
+    private fun saveLocked(
         workoutId: String,
         workout: RecordedWorkout,
         enabledConnectors: Set<String>,
@@ -61,18 +79,23 @@ class WorkoutRepository(
                 uploads = enabledConnectors.associateWith { UploadState.PENDING },
             )
         writeIndex(loadIndex() + summary)
-        prune(enabledConnectors)
+        val index = loadIndex()
+        val evicted = RetentionPolicy.evictable(index, enabledConnectors).toSet()
+        if (evicted.isNotEmpty()) {
+            writeIndex(index.filterNot { it.id in evicted })
+            evicted.forEach { fileFor(it).delete() }
+        }
         return summary
     }
 
-    fun all(): List<WorkoutSummary> = loadIndex().sortedByDescending { it.startedAtEpochMs }
+    fun all(): List<WorkoutSummary> = synchronized(lock) { loadIndex().sortedByDescending { it.startedAtEpochMs } }
 
     fun markUploaded(
         workoutId: String,
         connectorId: String,
         state: UploadState,
         attempts: Int,
-    ) {
+    ) = synchronized(lock) {
         writeIndex(
             loadIndex().map {
                 if (it.id != workoutId) {
@@ -87,14 +110,23 @@ class WorkoutRepository(
         )
     }
 
-    /** Drops what the retention policy allows, files and index entries together. */
-    fun prune(enabledConnectors: Set<String>) {
-        val index = loadIndex()
-        val evicted = RetentionPolicy.evictable(index, enabledConnectors).toSet()
-        if (evicted.isEmpty()) return
-        evicted.forEach { fileFor(it).delete() }
-        writeIndex(index.filterNot { it.id in evicted })
-    }
+    /**
+     * Drops what the retention policy allows.
+     *
+     * The index is rewritten *before* the files are removed. The other order
+     * leaves entries pointing at files that are gone if the write is interrupted,
+     * and an upload then opens a missing file; this way the worst case is an
+     * orphaned file, which costs space and nothing else.
+     */
+    fun prune(enabledConnectors: Set<String>) =
+        synchronized(lock) {
+            val index = loadIndex()
+            val evicted = RetentionPolicy.evictable(index, enabledConnectors).toSet()
+            if (evicted.isNotEmpty()) {
+                writeIndex(index.filterNot { it.id in evicted })
+                evicted.forEach { fileFor(it).delete() }
+            }
+        }
 
     private fun loadIndex(): List<WorkoutSummary> {
         if (!indexFile.exists()) return emptyList()
