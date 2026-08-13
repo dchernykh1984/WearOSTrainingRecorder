@@ -30,7 +30,7 @@ android {
         targetSdk = 36
 
         versionCode = versionCodeBase * 10 + mobileVersionCodeOffset
-        versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
+        versionName = System.getenv("VERSION_NAME") ?: rootProject.extra["releasedVersion"] as String
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
