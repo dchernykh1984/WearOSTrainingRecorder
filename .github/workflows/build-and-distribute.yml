@@ -87,11 +87,24 @@ jobs:
         run: |
           tag="${RELEASE_TAG}"
           name="${tag#v}"
-          if [[ "$name" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+          # Anchored at both ends on purpose: a prerelease tag like v1.0.0-rc.1
+          # would otherwise share a versionCode with the eventual v1.0.0.
+          if [[ "$name" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
             major="${BASH_REMATCH[1]}"
             minor="${BASH_REMATCH[2]}"
             patch="${BASH_REMATCH[3]}"
-            code=$(( major * 10000 + minor * 100 + patch ))
+            if [ "$minor" -gt 999 ] || [ "$patch" -gt 999 ]; then
+              echo "::error::minor and patch must each stay below 1000 for this versionCode scheme."
+              exit 1
+            fi
+            # Each component owns its own decimal field, so no two versions can
+            # collide (0.1.100 and 0.2.0 are 1100 and 2000, not both 200). The
+            # modules then multiply by 10 and add a one-digit form-factor offset,
+            # which keeps the result far below Play's 2100000000 ceiling.
+            code=$(( major * 1000000 + minor * 1000 + patch ))
+          elif [ "$PUBLISHING" = "true" ]; then
+            echo "::error::Release tag '$tag' is not vMAJOR.MINOR.PATCH; refusing to publish."
+            exit 1
           else
             # workflow_dispatch off a branch: build and sign, but never publish.
             echo "::warning::'$tag' is not a vX.Y.Z tag; using version code base 1."
@@ -103,6 +116,7 @@ jobs:
         env:
           # inputs.tag is set on workflow_call; otherwise use the pushed tag.
           RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+          PUBLISHING: ${{ inputs.tag != '' || startsWith(github.ref, 'refs/tags/') }}
 
       # The watch and phone APKs must be signed with the SAME key: Google Play
       # only pairs them into one app when the applicationId and the signing
