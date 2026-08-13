@@ -68,6 +68,18 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    lint {
+        // Fail the build on lint errors; warnings stay non-fatal for now and can
+        // be promoted to errors once the codebase stabilises. Android Lint ships
+        // the Wear OS checks (standalone flag, unsupported APIs, tile and
+        // complication misuse), so this is the gate that catches watch-specific
+        // manifest and API mistakes.
+        abortOnError = true
+        warningsAsErrors = false
+        // lintDebug in CI covers analysis; skip the duplicate release lint pass.
+        checkReleaseBuilds = false
+    }
 }
 
 kotlin {
