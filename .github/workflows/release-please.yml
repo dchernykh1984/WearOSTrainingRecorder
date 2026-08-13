@@ -3,6 +3,11 @@ name: Release Please
 # On every push to main, release-please maintains a "release PR" that bumps the
 # version and updates CHANGELOG.md from the Conventional Commits. Merging that PR
 # tags the release and creates a GitHub Release.
+#
+# A tag created with the default GITHUB_TOKEN does NOT trigger the tag-push
+# Build and Distribute workflow, so instead the build-apks job below calls that
+# workflow directly (workflow_call) once a release is created. This attaches the
+# signed APKs to the release without a PAT or a manual tag re-push.
 on:
   push:
     branches: [main]
@@ -22,3 +27,15 @@ jobs:
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-apks:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    permissions:
+      contents: write # upload the APK assets to the release
+      id-token: write # sign the build provenance attestation
+      attestations: write # record the attestation
+    uses: ./.github/workflows/build-and-distribute.yml
+    with:
+      tag: ${{ needs.release-please.outputs.tag_name }}
+    secrets: inherit
