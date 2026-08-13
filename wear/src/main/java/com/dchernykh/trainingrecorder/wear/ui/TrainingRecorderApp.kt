@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +49,9 @@ fun TrainingRecorderApp(
 ) {
     MaterialTheme {
         WithRecordingPermissions {
+            // Once per launch: what the phone published before this watch existed
+            // arrives no other way, since the listener only hears changes.
+            LaunchedEffect(Unit) { model.syncFromPhone() }
             val state by model.state.collectAsStateWithLifecycle()
             var pairing by remember { mutableStateOf(false) }
             if (state.phase == RecordingPhase.IDLE || state.phase == RecordingPhase.FINISHED) {
