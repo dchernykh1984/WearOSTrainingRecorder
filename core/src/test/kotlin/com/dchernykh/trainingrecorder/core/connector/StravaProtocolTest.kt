@@ -3,6 +3,7 @@ package com.dchernykh.trainingrecorder.core.connector
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -115,5 +116,68 @@ class StravaProtocolTest {
         assertTrue(StravaProtocol.classify(400, "duplicate of activity 123") is UploadResult.Rejected)
         assertTrue(StravaProtocol.classify(400, "malformed") is UploadResult.Rejected)
         assertTrue(StravaProtocol.classify(403) is UploadResult.Rejected)
+    }
+
+    @Test
+    fun aTokenResponseYieldsEverythingWorthKeeping() {
+        val body =
+            """{"token_type":"Bearer","expires_at":1770000000,"expires_in":21600,
+            "refresh_token":"r-new","access_token":"a-new","athlete":{"id":1}}"""
+        val tokens = StravaProtocol.tokensFrom(body)
+        assertEquals("a-new", tokens[StravaProtocol.ACCESS_TOKEN])
+        // Kept because Strava rotates it: the token that comes back replaces the
+        // one that was sent, and dropping it strands the rider at the next expiry.
+        assertEquals("r-new", tokens[StravaProtocol.REFRESH_TOKEN])
+        assertEquals("1770000000", tokens[StravaProtocol.EXPIRES_AT])
+    }
+
+    @Test
+    fun anErrorResponseYieldsNoTokens() {
+        assertTrue(StravaProtocol.tokensFrom("""{"message":"Bad Request","errors":[]}""").isEmpty())
+        assertTrue(StravaProtocol.tokensFrom("not json").isEmpty())
+    }
+
+    @Test
+    fun aTokenIsRefreshedShortlyBeforeItExpires() {
+        val credentials =
+            mapOf(
+                StravaProtocol.ACCESS_TOKEN to "a",
+                StravaProtocol.REFRESH_TOKEN to "r",
+                StravaProtocol.EXPIRES_AT to "1000000",
+            )
+        // Not at the last second: an upload started right on the boundary would
+        // finish after it, and be rejected for a token that was valid at the start.
+        assertFalse(StravaProtocol.needsRefresh(credentials, 999_000))
+        assertTrue(StravaProtocol.needsRefresh(credentials, 999_500))
+        assertTrue(StravaProtocol.needsRefresh(credentials, 1_000_001))
+    }
+
+    @Test
+    fun withNothingToRefreshWithTheTokenIsUsedAsItIs() {
+        // A pasted token has no refresh token; spending a request to discover
+        // that helps nobody and costs the rider's rate limit.
+        val pasted = mapOf(StravaProtocol.ACCESS_TOKEN to "a")
+        assertFalse(StravaProtocol.needsRefresh(pasted, 9_999_999))
+    }
+
+    @Test
+    fun aMissingAccessTokenIsRefreshedImmediately() {
+        val credentials = mapOf(StravaProtocol.REFRESH_TOKEN to "r")
+        assertTrue(StravaProtocol.needsRefresh(credentials, 0))
+    }
+
+    @Test
+    fun theRefreshRequestAsksForTheRightGrant() {
+        val fields = StravaProtocol.refreshRequestFields("id", "secret", "r")
+        assertEquals("refresh_token", fields["grant_type"])
+        assertEquals("r", fields["refresh_token"])
+    }
+
+    @Test
+    fun theCodeExchangeAsksForTheRightGrant() {
+        val fields = StravaProtocol.tokenRequestFields("id", "secret", "c")
+        assertEquals("authorization_code", fields["grant_type"])
+        assertEquals("c", fields["code"])
+        assertEquals("secret", fields["client_secret"])
     }
 }

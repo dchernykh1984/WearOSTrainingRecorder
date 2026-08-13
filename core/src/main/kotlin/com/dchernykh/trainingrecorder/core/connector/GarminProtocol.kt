@@ -26,7 +26,22 @@ object GarminProtocol {
     const val OAUTH2_EXCHANGE_URL = "https://connectapi.garmin.com/oauth-service/oauth/exchange/user/2.0"
     const val UPLOAD_URL = "https://connectapi.garmin.com/upload-service/upload/.fit"
 
-    val credentialFields =
+    /**
+     * The credential key, named once so both ends cannot drift apart - the phone
+     * writing one spelling and the watch expecting another is invisible until
+     * every upload silently declines to start.
+     */
+    const val BEARER_TOKEN = "bearer_token"
+
+    /**
+     * What the rider supplies. The token itself, rather than a login: Garmin's
+     * sign-in is an undocumented SSO exchange this app does not attempt, and a
+     * pasted token works today where a guessed flow would not.
+     */
+    val credentialFields = listOf(CredentialField(BEARER_TOKEN, secret = true))
+
+    /** The sign-in fields, kept for the exchange this app does not yet perform. */
+    val signInFields =
         listOf(
             CredentialField("login"),
             CredentialField("password", secret = true),

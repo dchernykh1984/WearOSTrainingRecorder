@@ -8,9 +8,24 @@ import kotlin.test.assertTrue
 
 class GarminProtocolTest {
     @Test
-    fun theRidersOwnLoginIsWhatIsAskedForNotAnApplicationSecret() {
-        assertEquals(listOf("login", "password"), GarminProtocol.credentialFields.map { it.key })
-        assertTrue(GarminProtocol.credentialFields.single { it.key == "password" }.secret)
+    fun theTokenIsWhatIsAskedForBecauseTheSignInIsNotImplemented() {
+        // Asking for a login the app cannot exchange for a token would leave the
+        // rider with a connector that looks configured and never uploads.
+        assertEquals(listOf(GarminProtocol.BEARER_TOKEN), GarminProtocol.credentialFields.map { it.key })
+        assertTrue(GarminProtocol.credentialFields.single().secret)
+    }
+
+    @Test
+    fun theRidersOwnLoginIsWhatTheSignInWouldAskForNotAnApplicationSecret() {
+        assertEquals(listOf("login", "password"), GarminProtocol.signInFields.map { it.key })
+        assertTrue(GarminProtocol.signInFields.single { it.key == "password" }.secret)
+    }
+
+    @Test
+    fun bothEndsNameTheTokenTheSameWay() {
+        // The phone writes this key and the watch reads it; two spellings is a
+        // failure with no symptom other than uploads that never begin.
+        assertEquals("bearer_token", GarminProtocol.BEARER_TOKEN)
     }
 
     @Test

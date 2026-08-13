@@ -25,6 +25,15 @@ class WorkoutUpload(
     val sportTypeId: String,
     val fileName: String,
     val byteCount: Long,
+    /**
+     * What the ride is called on the service. Distinct from [fileName], which is
+     * storage detail - a rider whose Strava feed reads
+     * "workout-1723600000000.fit" has been shown the wrong string.
+     *
+     * Before [openStream] so that stays the trailing parameter, which is how
+     * every caller passes it.
+     */
+    val activityName: String = fileName,
     val openStream: () -> InputStream,
 ) {
     init {

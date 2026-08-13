@@ -103,15 +103,64 @@ object StravaProtocol {
         )
 
     /**
-     * The access token out of a token response, or null if the body does not
-     * carry one - which is how a rejected exchange arrives, since Strava answers
-     * with a JSON error rather than an empty body.
+     * The form that trades a refresh token for a fresh access token.
+     *
+     * Strava's access tokens last about six hours, so without this a rider who
+     * connects in the morning finds the evening's ride rejected - and after ten
+     * rejections the queue gives up and the workout is marked failed.
      */
-    fun accessTokenFrom(body: String): String? =
-        runCatching {
-            val root = Json { ignoreUnknownKeys = true }.parseToJsonElement(body) as? JsonObject
-            (root?.get("access_token") as? JsonPrimitive)?.takeIf { it.isString }?.content
-        }.getOrNull()?.takeIf { it.isNotBlank() }
+    fun refreshRequestFields(
+        clientId: String,
+        clientSecret: String,
+        refreshToken: String,
+    ): Map<String, String> =
+        mapOf(
+            "client_id" to clientId,
+            "client_secret" to clientSecret,
+            "refresh_token" to refreshToken,
+            "grant_type" to "refresh_token",
+        )
+
+    /**
+     * Everything a token response carries that outlives the request.
+     *
+     * The refresh token is kept because Strava rotates it: the one that comes
+     * back replaces the one that was sent, and dropping it strands the rider at
+     * the next expiry with no way back but re-authorizing.
+     */
+    fun tokensFrom(body: String): Map<String, String> {
+        val root =
+            runCatching {
+                Json { ignoreUnknownKeys = true }.parseToJsonElement(body) as? JsonObject
+            }.getOrNull() ?: return emptyMap()
+
+        fun text(key: String): String? =
+            (root[key] as? JsonPrimitive)?.content?.takeIf { it.isNotBlank() && it != "null" }
+
+        return buildMap {
+            text("access_token")?.let { put(ACCESS_TOKEN, it) }
+            text("refresh_token")?.let { put(REFRESH_TOKEN, it) }
+            text("expires_at")?.let { put(EXPIRES_AT, it) }
+        }
+    }
+
+    /**
+     * True when the stored token is past its life, or close enough that an
+     * upload started now would finish after it. Missing expiry means unknown,
+     * which is treated as still valid - a needless refresh costs a request the
+     * rider's rate limit could spend better.
+     */
+    fun needsRefresh(
+        credentials: Map<String, String>,
+        nowEpochSeconds: Long,
+    ): Boolean {
+        // Nothing to refresh with: whatever the access token is, it is all there
+        // will ever be, and spending a request to find that out helps nobody.
+        if (credentials[REFRESH_TOKEN].isNullOrBlank()) return false
+        if (credentials[ACCESS_TOKEN].isNullOrBlank()) return true
+        val expiresAt = credentials[EXPIRES_AT]?.toLongOrNull()
+        return expiresAt != null && nowEpochSeconds >= expiresAt - EXPIRY_MARGIN_SECONDS
+    }
 
     /** Strava names the sport with `sport_type`, and models indoor as a flag. */
     fun uploadFields(
@@ -153,6 +202,16 @@ object StravaProtocol {
     private fun encode(value: String): String = java.net.URLEncoder.encode(value, Charsets.UTF_8.name())
 
     private fun decode(value: String): String = java.net.URLDecoder.decode(value, Charsets.UTF_8.name())
+
+    /** The credential keys, named once so both ends cannot drift apart. */
+    const val ACCESS_TOKEN = "access_token"
+    const val REFRESH_TOKEN = "refresh_token"
+    const val EXPIRES_AT = "expires_at"
+    const val CLIENT_ID = "client_id"
+    const val CLIENT_SECRET = "client_secret"
+
+    /** Refreshed this far before expiry, so a slow upload does not straddle it. */
+    private const val EXPIRY_MARGIN_SECONDS = 600L
 
     const val MIN_PORT = 1024
     const val MAX_PORT = 65535
