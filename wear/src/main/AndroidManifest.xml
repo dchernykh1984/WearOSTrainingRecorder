@@ -7,6 +7,33 @@
         android:name="android.hardware.type.watch"
         android:required="true" />
 
+    <!-- Recording. BODY_SENSORS covers the optical heart-rate sensor, and
+         ACTIVITY_RECOGNITION is what Health Services needs for step-derived
+         cadence. Location is fine-grained because a workout track from coarse
+         location is worthless. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
+
+    <!-- External sensors. BLUETOOTH_SCAN carries neverForLocation because the
+         app scans for fitness sensors, not to infer where the rider is. -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+    <!-- The recording outlives the screen, so it runs in a foreground service.
+         The health type is the one Wear OS expects for an exercise. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Uploading finished workouts and polling the timing server. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <!-- Auto-backup is off: the app will hold OAuth tokens for Strava / Garmin
          Connect plus raw location and heart-rate tracks, and Android's automatic
          backup would copy all of it to the user's Google Drive outside our
