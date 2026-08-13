@@ -152,4 +152,10 @@
 
     <string name="permissions_explanation">La registrazione richiede posizione, sensori e Bluetooth.</string>
     <string name="permissions_grant">Consenti</string>
+
+    <string name="race_site">Indirizzo del sito</string>
+    <string name="race_competition">ID gara</string>
+    <string name="race_bib">Pettorale</string>
+    <string name="race_refresh">Aggiorna ogni %1$d s</string>
+    <string name="race_refresh_hint">Gara lunga: risparmia batteria. Gara corta: dati freschi.</string>
 </resources>

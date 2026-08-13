@@ -152,4 +152,10 @@
 
     <string name="permissions_explanation">Aufzeichnung braucht Standort, Sensoren und Bluetooth.</string>
     <string name="permissions_grant">Zulassen</string>
+
+    <string name="race_site">Website</string>
+    <string name="race_competition">Wettkampf-ID</string>
+    <string name="race_bib">Startnummer</string>
+    <string name="race_refresh">Alle %1$d s aktualisieren</string>
+    <string name="race_refresh_hint">Langes Rennen: langsamer abfragen. Kurzes Rennen: frische Daten.</string>
 </resources>

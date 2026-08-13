@@ -165,4 +165,11 @@
     <!-- Permissions -->
     <string name="permissions_explanation">Recording needs location, sensors and Bluetooth.</string>
     <string name="permissions_grant">Allow</string>
+
+    <!-- Race stats settings -->
+    <string name="race_site">Site URL</string>
+    <string name="race_competition">Competition ID</string>
+    <string name="race_bib">Bib number</string>
+    <string name="race_refresh">Refresh every %1$d s</string>
+    <string name="race_refresh_hint">A long race is worth a slow poll; a short one is worth the battery.</string>
 </resources>

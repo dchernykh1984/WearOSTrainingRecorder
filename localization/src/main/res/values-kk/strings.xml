@@ -152,4 +152,10 @@
 
     <string name="permissions_explanation">Жазу үшін геолокация, датчиктер және Bluetooth қажет.</string>
     <string name="permissions_grant">Рұқсат ету</string>
+
+    <string name="race_site">Сайт мекенжайы</string>
+    <string name="race_competition">Жарыс ID</string>
+    <string name="race_bib">Старт нөмірі</string>
+    <string name="race_refresh">Әр %1$d с жаңарту</string>
+    <string name="race_refresh_hint">Ұзақ жарыста батареяны үнемдеңіз, қысқасында жаңа деректер маңызды.</string>
 </resources>

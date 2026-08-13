@@ -152,4 +152,10 @@
 
     <string name="permissions_explanation">Для записи нужны геолокация, датчики и Bluetooth.</string>
     <string name="permissions_grant">Разрешить</string>
+
+    <string name="race_site">Адрес сайта</string>
+    <string name="race_competition">ID соревнования</string>
+    <string name="race_bib">Стартовый номер</string>
+    <string name="race_refresh">Обновлять раз в %1$d с</string>
+    <string name="race_refresh_hint">На длинной гонке экономьте батарею, на короткой — берите свежие данные.</string>
 </resources>
