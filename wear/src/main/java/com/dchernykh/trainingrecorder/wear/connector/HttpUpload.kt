@@ -38,6 +38,40 @@ object HttpUpload {
         val body: String,
     )
 
+    /**
+     * A plain form post, for the token exchanges that are not file uploads.
+     *
+     * Returns the body whatever the status: an OAuth error arrives as JSON with
+     * a 4xx, and the caller needs to read it rather than guess.
+     */
+    fun form(
+        url: String,
+        fields: Map<String, String>,
+    ): String {
+        val body =
+            fields.entries.joinToString("&") { (key, value) ->
+                "${encode(key)}=${encode(value)}"
+            }
+        val connection = URL(url).openConnection() as HttpURLConnection
+        return try {
+            connection.requestMethod = "POST"
+            connection.doOutput = true
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+            connection.outputStream.use { it.write(body.toByteArray()) }
+            val stream =
+                if (connection.responseCode in SUCCESS_RANGE) {
+                    connection.inputStream
+                } else {
+                    connection.errorStream
+                }
+            stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun encode(value: String): String = java.net.URLEncoder.encode(value, Charsets.UTF_8.name())
+
     fun post(
         url: String,
         parts: List<Part>,
@@ -93,4 +127,6 @@ object HttpUpload {
     }
 
     private val SUCCESS = 200..299
+
+    private val SUCCESS_RANGE = 200..299
 }
