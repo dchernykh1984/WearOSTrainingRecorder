@@ -1,5 +1,6 @@
 package com.dchernykh.trainingrecorder.wear.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -27,6 +32,7 @@ import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.localization.Labels
 import com.dchernykh.trainingrecorder.localization.R
 import com.dchernykh.trainingrecorder.wear.recording.RecordingViewModel
+import com.dchernykh.trainingrecorder.wear.recording.SensorPairingViewModel
 
 /**
  * The watch app: pick a sport, then the recording screens.
@@ -36,12 +42,24 @@ import com.dchernykh.trainingrecorder.wear.recording.RecordingViewModel
  * process being restarted mid-ride without any saved back stack.
  */
 @Composable
-fun TrainingRecorderApp(model: RecordingViewModel = viewModel()) {
+fun TrainingRecorderApp(
+    model: RecordingViewModel = viewModel(),
+    sensorModel: SensorPairingViewModel = viewModel(),
+) {
     MaterialTheme {
         WithRecordingPermissions {
             val state by model.state.collectAsStateWithLifecycle()
+            var pairing by remember { mutableStateOf(false) }
             if (state.phase == RecordingPhase.IDLE || state.phase == RecordingPhase.FINISHED) {
-                SportPicker(sports = model.sports, onSportChosen = model::start)
+                if (pairing) {
+                    SensorPairingScreen(model = sensorModel, onLeave = { pairing = false })
+                } else {
+                    SportPicker(
+                        sports = model.sports,
+                        onSportChosen = model::start,
+                        onPairSensors = { pairing = true },
+                    )
+                }
             } else {
                 // Read as observed state, not called as a function: a lambda that
                 // asked the model for each value would be invoked once and never
@@ -58,6 +76,34 @@ fun TrainingRecorderApp(model: RecordingViewModel = viewModel()) {
             }
         }
     }
+}
+
+/**
+ * The pairing screen, scanning only while it is on screen.
+ *
+ * Tied to composition rather than to a button, because a BLE scan the rider
+ * forgot to stop is the fastest way to flatten a watch battery there is.
+ */
+@Composable
+private fun SensorPairingScreen(
+    model: SensorPairingViewModel,
+    onLeave: () -> Unit,
+) {
+    val paired by model.paired.collectAsStateWithLifecycle()
+    val discovered by model.discovered.collectAsStateWithLifecycle()
+    val scanning by model.scanning.collectAsStateWithLifecycle()
+    DisposableEffect(Unit) {
+        model.startScan()
+        onDispose { model.stopScan() }
+    }
+    BackHandler { onLeave() }
+    SensorPairing(
+        paired = paired,
+        discovered = discovered,
+        scanning = scanning,
+        onPair = model::pair,
+        onForget = model::forget,
+    )
 }
 
 private fun sportOf(
@@ -79,6 +125,7 @@ private fun currentShape(): ScreenShape =
 fun SportPicker(
     sports: List<SportType>,
     onSportChosen: (SportType) -> Unit,
+    onPairSensors: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -98,5 +145,12 @@ fun SportPicker(
                 label = { Text(stringResource(Labels.sport(sport.id))) },
             )
         }
+        // Last, below every sport: pairing is something a rider does once and
+        // then never again, while starting a workout is what they came for.
+        Button(
+            onClick = onPairSensors,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(stringResource(R.string.sensors_title)) },
+        )
     }
 }
