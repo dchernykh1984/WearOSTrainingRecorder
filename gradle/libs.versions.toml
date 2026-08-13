@@ -11,6 +11,7 @@ kover = "0.9.9"
 androidxTestJunit = "1.3.0"
 androidxTestRunner = "1.7.0"
 kotlinxSerialization = "1.9.0"
+garminFit = "21.176.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -18,6 +19,10 @@ kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", vers
 # Runtime only - the compiler plugin is deliberately not applied. The race-stats
 # payload is a flat map of strings, so parseToJsonElement is enough and the
 # module stays free of code generation.
+# The official Garmin FIT SDK. Writing FIT with Garmin's own encoder is the only
+# way to be sure Garmin Connect accepts the file; a hand-rolled writer would be
+# guesswork against a binary format.
+garmin-fit = { group = "com.garmin", name = "fit", version.ref = "garminFit" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestJunit" }
 # androidx.test.ext:junit pulls core/monitor/storage but NOT the runner, and the
