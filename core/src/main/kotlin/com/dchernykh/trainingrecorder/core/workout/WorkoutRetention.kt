@@ -91,10 +91,19 @@ object RetentionPolicy {
         val evicted = mutableListOf<String>()
         var kept = 0
         var bytes = 0L
-        newestFirst.forEach { workout ->
-            val overCount = kept >= maxKept
-            val overBytes = bytes + workout.fileSizeBytes > maxTotalBytes
-            if ((overCount || overBytes) && workout.isSafeToDelete(enabledConnectors)) {
+        // Strictly oldest-first: once either budget is spent, everything older
+        // goes. Skipping a workout that does not fit and keeping smaller older
+        // ones would be best-fit, which reads as the watch deleting the ride the
+        // rider just finished while a month-old one survives.
+        //
+        // The newest is kept whatever it costs. A single ride larger than the
+        // whole budget is a reason to be over budget, not a reason to delete the
+        // ride that was just recorded.
+        var full = false
+        newestFirst.forEachIndexed { position, workout ->
+            val newest = position == 0
+            full = full || (!newest && (kept >= maxKept || bytes + workout.fileSizeBytes > maxTotalBytes))
+            if (full && workout.isSafeToDelete(enabledConnectors)) {
                 evicted += workout.id
             } else {
                 kept++
