@@ -56,6 +56,10 @@ object HttpUpload {
         return try {
             connection.requestMethod = "POST"
             connection.doOutput = true
+            // Bounded like the upload: a token endpoint that never answers would
+            // otherwise hold the whole drain until WorkManager's ten-minute cap.
+            connection.connectTimeout = CONNECT_TIMEOUT_MS
+            connection.readTimeout = READ_TIMEOUT_MS
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
             connection.outputStream.use { it.write(body.toByteArray()) }
             val stream =
