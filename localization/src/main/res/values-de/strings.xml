@@ -124,4 +124,10 @@
     <string name="field_sensor_cadence_battery">Trittfrequenz Akku</string>
     <string name="field_sensor_power_battery">Leistung Akku</string>
     <string name="field_temperature">Temperatur</string>
+
+    <string name="action_start">Start</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_resume">Fortsetzen</string>
+    <string name="action_finish">Beenden</string>
+    <string name="action_discard">Verwerfen</string>
 </resources>
