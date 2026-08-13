@@ -1,0 +1,17 @@
+name: Security
+
+# Split from the scheduled scan on purpose: a single workflow with two jobs
+# guarded by `if:` would always show one skipped job on every pull request.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  # Fail only on vulnerabilities the pull request introduces.
+  osv-scan:
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@v2.3.8
