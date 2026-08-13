@@ -176,6 +176,8 @@ dependencies {
     implementation(libs.androidx.wear.ongoing)
 
     implementation(libs.androidx.health.services.client)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.guava)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.play.services.wearable)
 
