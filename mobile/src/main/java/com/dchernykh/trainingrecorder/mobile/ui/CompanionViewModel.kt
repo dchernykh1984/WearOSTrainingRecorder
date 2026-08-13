@@ -18,6 +18,8 @@ import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.core.workout.WorkoutSummary
 import com.dchernykh.trainingrecorder.localization.AppLanguage
 import com.dchernykh.trainingrecorder.localization.R
+import com.dchernykh.trainingrecorder.mobile.connect.AuthorizationResult
+import com.dchernykh.trainingrecorder.mobile.connect.StravaAuthorization
 import com.dchernykh.trainingrecorder.mobile.settings.PhoneSettingsStore
 import com.dchernykh.trainingrecorder.mobile.sync.SettingsPublisher
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +54,7 @@ class CompanionViewModel(
     application: Application,
     private val store: PhoneSettingsStore = PhoneSettingsStore(application),
     private val publisher: SettingsPublisher = SettingsPublisher(application),
+    private val authorization: StravaAuthorization = StravaAuthorization(application),
 ) : AndroidViewModel(application) {
     /**
      * Kotlin default arguments do not emit a one-argument constructor, and
@@ -62,6 +65,7 @@ class CompanionViewModel(
         application,
         PhoneSettingsStore(application),
         SettingsPublisher(application),
+        StravaAuthorization(application),
     )
 
     private val _configuration = mutableStateOf(ScreenConfiguration.initial())
@@ -91,11 +95,26 @@ class CompanionViewModel(
      */
     val connectors: List<ConnectorSetup> =
         listOf(
+            // Strava's client id and secret are all the rider types; the access
+            // token is obtained by the authorization below and never entered.
             ConnectorSetup(StravaProtocol.ID, StravaProtocol.credentialFields),
-            ConnectorSetup(GarminProtocol.ID, GarminProtocol.credentialFields),
+            // Garmin takes the token itself, because its sign-in is an
+            // undocumented SSO exchange this app does not attempt. A pasted
+            // token works today; guessing at that flow would not.
+            ConnectorSetup(GarminProtocol.ID, listOf(CredentialField("bearer", secret = true))),
         )
 
     private val credentials: MutableState<Map<String, Map<String, String>>> = mutableStateOf(emptyMap())
+
+    /**
+     * Which connector last reported something, and what. Connecting opens a
+     * browser and comes back minutes later, so a screen that said nothing would
+     * leave the rider wondering whether the button worked.
+     */
+    private val _connectionStatus = mutableStateOf<Pair<String, Int>?>(null)
+    val connectionStatus: State<Pair<String, Int>?> = _connectionStatus
+
+    fun statusFor(connectorId: String): Int? = _connectionStatus.value?.takeIf { it.first == connectorId }?.second
 
     init {
         store.readSettings()?.let {
@@ -120,12 +139,38 @@ class CompanionViewModel(
     }
 
     /**
-     * Sent only when the rider asks, unlike everything else here. A token typed
-     * one character at a time would otherwise be published half-finished on
-     * every keystroke, and the watch would spend the typing failing to log in.
+     * Connects a service: Strava runs its authorization, everything else simply
+     * publishes what the rider typed.
+     *
+     * Sent only when asked, unlike everything else here. A token typed one
+     * character at a time would otherwise be published half-finished on every
+     * keystroke, and the watch would spend the typing failing to log in.
      */
-    fun publishCredentials() {
-        save { publisher.publishCredentials(credentials.value) }
+    fun connect(connectorId: String) {
+        if (connectorId != StravaProtocol.ID) {
+            save { publisher.publishCredentials(credentials.value) }
+            return
+        }
+        val fields = credentials.value[connectorId].orEmpty()
+        val clientId = fields["client_id"].orEmpty()
+        val clientSecret = fields["client_secret"].orEmpty()
+        if (clientId.isBlank() || clientSecret.isBlank()) {
+            _connectionStatus.value = connectorId to R.string.connect_needs_application
+            return
+        }
+        _connectionStatus.value = connectorId to R.string.connect_in_progress
+        viewModelScope.launch {
+            when (val result = authorization.authorize(clientId, clientSecret)) {
+                is AuthorizationResult.Authorized -> {
+                    updateCredential(connectorId, "access_token", result.accessToken)
+                    publisher.publishCredentials(credentials.value)
+                    _connectionStatus.value = connectorId to R.string.connect_done
+                }
+                is AuthorizationResult.Failed -> {
+                    _connectionStatus.value = connectorId to R.string.connect_failed
+                }
+            }
+        }
     }
 
     fun updateScreens(

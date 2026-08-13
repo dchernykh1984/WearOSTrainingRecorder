@@ -162,7 +162,8 @@ private fun ConnectionList(
                 fields = connector.credentialFields,
                 values = model.credentialsFor(connector.id),
                 onValueChanged = { key, value -> model.updateCredential(connector.id, key, value) },
-                onConnect = { model.publishCredentials() },
+                onConnect = { model.connect(connector.id) },
+                status = model.statusFor(connector.id),
             )
             HorizontalDivider()
         }
