@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.3.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.2.0...v0.3.0) (2026-08-14)
+
+
+### Features
+
+* **core:** add an append-only track journal a killed process cannot lose ([073191c](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/073191c9d5494d1d7cc6e2b8fa4f896670afc78d))
+* **core:** add the watch-to-phone path finished workouts travel on ([442259f](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/442259f94d7b0caf03b63b47db50e153b526d91c))
+* **mobile:** let the rider choose metric or imperial for every field at once ([85adfab](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/85adfaba5adc49c025af5edd4dc20185d0326598))
+* **mobile:** receive the watch's workouts so the history stops being empty ([908da3f](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/908da3f78402b7957c14ef6ae73021dc781ff57b))
+* **mobile:** sign in to Garmin with the rider's own login and password ([279721c](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/279721cd2e5dafe1b70ecace14f7efbcf9f4e23a))
+* port the Garmin sign-in so the watch uploads with a token it can renew ([d827207](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/d827207c3846f0a92fa31d50f0183c549225b386))
+* **wear:** journal the track as it is ridden and recover an interrupted one ([1bcd406](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/1bcd40642f4d7201e1c1fc920d51cdb5e959d10a))
+* **wear:** publish finished workouts so the phone has a history to show ([9eea119](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/9eea11936a2c5ebf377a8140fb6b61b780819f46))
+
+
+### Bug Fixes
+
+* **core:** drop a journal line cut off inside its last column ([4b93274](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/4b93274793f8008870ece85d097c647d286f9745))
+* **core:** keep the header Garmin was recorded as refusing an upload without ([279e415](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/279e415d94da69bced7352c2cb08a6cc207ed661))
+* **core:** make the journal version guard say and do the same thing ([2b4f174](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/2b4f1745d37632b82cbb08e8ee2138f8f94f1c82))
+* **localization:** stop promising an encryption the credentials do not have ([83051b4](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/83051b41d325dbfeb23598d1bcd502da0d9ed972))
+* **mobile:** clear a stale code prompt when a new Garmin sign-in starts ([1106762](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/1106762674a4df0489727a95f456630735c89508))
+* **mobile:** keep the code field up when Garmin rejects a code ([8f45e48](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/8f45e4858b51a2a2ce0c846e197d83ceaf02c068))
+* **mobile:** keep the history looking for new rides while it is open ([9df7f44](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/9df7f448ec1bc2a5401cc292230a75b6ae5df5f8))
+* **mobile:** send the sign-in session only to the host that issued it ([eb5ef71](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/eb5ef7108c0bae399f81dccf3d8a0fcdfa7c8076))
+* **mobile:** stop polling behind a phone in a pocket, and read files off the main thread ([e5be600](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/e5be60003eb566236c103c754486a9a346615c74))
+* **mobile:** stop two writers of the workout history sharing one temporary file ([616e0b9](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/616e0b964865d54d4109938bd3f6c92272216302))
+* **mobile:** survive a deleted data item instead of crashing the phone ([538aeaf](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/538aeafe5131fe9746cf779e32fd1b57d2d9d7ee))
+* **wear:** claim an interrupted ride's journal before a new ride can overwrite it ([07ea7d4](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/07ea7d4e9dce73a5550a9e0de3a2c3d1c23c1e2d))
+* **wear:** drop a claimed journal that cannot become a ride ([56db38d](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/56db38dd1675174de0c15824a865e72b7ad2424f))
+* **wear:** finish the whole save even when the rider swipes the app away ([ca2e2a7](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/ca2e2a78bd650d1a4bfe518dabce2b0f809444ca))
+* **wear:** keep the whole save inside one uncancellable block ([5748b1a](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/5748b1a142ad81b4dfa005bfe7b82898cdd74e8f))
+* **wear:** keep what a re-saved workout already knows about its uploads ([f8f4e77](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/f8f4e771afb507574f422faef7fa2d59d697d166))
+* **wear:** leave no ride owning the journal when opening it fails ([df81e2c](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/df81e2c3743f60d218004992d839d3481a213fd9))
+* **wear:** let only the ride that opened a journal close it ([3fce18b](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/3fce18b0875978f9448b6568cbcc987cf11d5fbe))
+* **wear:** make saving a workout idempotent by id ([01b8cfc](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/01b8cfcc5e7af2ffb1f701d04381731cc5361467))
+* **wear:** never let a stuck claim cost the ride that came after it ([b75b1d4](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/b75b1d42c3cdcc1372e6f96ef8f2a1ca06e0aaf9))
+* **wear:** renew a refused Garmin token instead of retrying against it ([bf6eb1c](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/bf6eb1c9a5e073cba61cad33283576ba096395fd))
+* **wear:** run every journal operation in the order it was asked for ([97c5437](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/97c543794e5573c000ee6a0c427834a350079bcd))
+
 ## [0.2.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.1.1...v0.2.0) (2026-08-14)
 
 
