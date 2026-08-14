@@ -161,7 +161,7 @@
 
     <string name="connect_strava_explanation">Crea tu propia aplicacion de Strava en strava.com/settings/api y pega aqui su client id y secret. La app no incluye credenciales propias.</string>
     <string name="connect_strava_callback">Establece Authorization Callback Domain en localhost</string>
-    <string name="connect_garmin_explanation">Inicia sesion con tu cuenta de Garmin Connect. La contrasena queda cifrada en este telefono.</string>
+    <string name="connect_garmin_explanation">Inicia sesion con tu cuenta de Garmin Connect. La contrasena queda en el almacenamiento privado de la app en este telefono y nunca se envia al reloj.</string>
     <string name="connect_action">Conectar</string>
 
     <string name="history_empty">Aun no hay entrenamientos.</string>

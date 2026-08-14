@@ -154,7 +154,7 @@
 
     <string name="connect_strava_explanation">strava.com/settings/api पर अपना Strava एप्लिकेशन बनाएं और उसका client id और secret यहाँ डालें। ऐप में कोई अपनी कुंजी नहीं है।</string>
     <string name="connect_strava_callback">Authorization Callback Domain को localhost पर सेट करें</string>
-    <string name="connect_garmin_explanation">अपने Garmin Connect खाते से साइन इन करें। पासवर्ड इसी फ़ोन पर एन्क्रिप्टेड रहता है।</string>
+    <string name="connect_garmin_explanation">अपने Garmin Connect खाते से साइन इन करें। पासवर्ड इसी फ़ोन पर ऐप के निजी संग्रह में रहता है और घड़ी को कभी नहीं भेजा जाता।</string>
     <string name="connect_action">कनेक्ट करें</string>
 
     <string name="history_empty">अभी कोई ट्रेनिंग नहीं।</string>

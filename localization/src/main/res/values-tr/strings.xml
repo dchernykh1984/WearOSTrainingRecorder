@@ -154,7 +154,7 @@
 
     <string name="connect_strava_explanation">strava.com/settings/api adresinde kendi Strava uygulamanizi olusturun ve client id ile secret degerlerini buraya yapistirin. Uygulama kendi kimlik bilgisi icermez.</string>
     <string name="connect_strava_callback">Authorization Callback Domain alanini localhost yapin</string>
-    <string name="connect_garmin_explanation">Kendi Garmin Connect hesabinizla giris yapin. Sifre bu telefonda sifreli olarak saklanir.</string>
+    <string name="connect_garmin_explanation">Kendi Garmin Connect hesabinizla giris yapin. Sifre bu telefonda uygulamanin ozel deposunda kalir ve saate hicbir zaman gonderilmez.</string>
     <string name="connect_action">Baglan</string>
 
     <string name="history_empty">Henuz antrenman yok.</string>

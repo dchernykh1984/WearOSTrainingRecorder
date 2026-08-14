@@ -161,7 +161,7 @@
 
     <string name="connect_strava_explanation">Maak op strava.com/settings/api je eigen Strava-applicatie en plak hier de client id en secret. De app bevat zelf geen gegevens.</string>
     <string name="connect_strava_callback">Stel Authorization Callback Domain in op localhost</string>
-    <string name="connect_garmin_explanation">Meld je aan met je eigen Garmin Connect-account. Het wachtwoord blijft versleuteld op deze telefoon.</string>
+    <string name="connect_garmin_explanation">Meld je aan met je eigen Garmin Connect-account. Het wachtwoord blijft in de prive-opslag van de app op deze telefoon en gaat nooit naar het horloge.</string>
     <string name="connect_action">Verbinden</string>
 
     <string name="history_empty">Nog geen trainingen.</string>

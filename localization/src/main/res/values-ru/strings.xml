@@ -161,7 +161,7 @@
 
     <string name="connect_strava_explanation">Создайте своё приложение Strava на strava.com/settings/api и вставьте сюда его client id и secret. Приложение не содержит собственных ключей: чужая утечка вас не затронет, и суточная квота запросов — только ваша.</string>
     <string name="connect_strava_callback">В поле Authorization Callback Domain укажите: localhost</string>
-    <string name="connect_garmin_explanation">Войдите под своей учётной записью Garmin Connect. Публичного API для загрузки у Garmin нет, поэтому вход выполняется так же, как это делают настольные инструменты. Пароль хранится на телефоне в зашифрованном виде и никуда не уходит.</string>
+    <string name="connect_garmin_explanation">Войдите под своей учётной записью Garmin Connect. Публичного API для загрузки у Garmin нет, поэтому приложение входит так же, как настольные утилиты; пароль остаётся в приватном хранилище приложения на телефоне и на часы не передаётся.</string>
     <string name="connect_action">Подключить</string>
 
     <string name="history_empty">Тренировок пока нет.</string>
