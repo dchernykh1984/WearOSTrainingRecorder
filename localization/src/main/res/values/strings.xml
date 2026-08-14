@@ -140,6 +140,7 @@
     <string name="action_finish">Finish</string>
     <string name="action_hold_to_end">Hold to end</string>
     <string name="action_discard">Discard</string>
+    <string name="action_hold_to_discard">Hold to discard</string>
 
     <!-- Screen configuration -->
     <string name="config_level_default">Default</string>

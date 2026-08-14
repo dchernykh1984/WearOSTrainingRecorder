@@ -116,9 +116,12 @@ private fun RecordingAction.iconRes(): Int =
     }
 
 /**
- * The word under the button. Finishing says how it is done rather than what it
- * is, because a control that only responds to a long press and does not say so
- * reads as a broken one.
+ * The word under the button.
+ *
+ * Both long-press controls say how they are done rather than what they are. That
+ * matters most while a ride is starting up, when discarding is the *only* control
+ * on screen: a tap does nothing there, and a button captioned "Discard" that
+ * ignores being pressed is indistinguishable from a broken one.
  */
 @StringRes
 private fun RecordingAction.captionRes(): Int =
@@ -127,7 +130,7 @@ private fun RecordingAction.captionRes(): Int =
         RecordingAction.RESUME -> R.string.action_resume
         RecordingAction.PAUSE -> R.string.action_pause
         RecordingAction.FINISH -> R.string.action_hold_to_end
-        RecordingAction.DISCARD -> R.string.action_discard
+        RecordingAction.DISCARD -> R.string.action_hold_to_discard
     }
 
 /**

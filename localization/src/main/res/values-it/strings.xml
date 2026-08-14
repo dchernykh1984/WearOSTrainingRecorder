@@ -131,6 +131,7 @@
     <string name="action_finish">Termina</string>
     <string name="action_hold_to_end">Tieni premuto</string>
     <string name="action_discard">Annulla</string>
+    <string name="action_hold_to_discard">Tieni premuto per annullare</string>
 
     <string name="config_level_default">Predefinito</string>
     <string name="config_level_discipline">Dalla disciplina</string>

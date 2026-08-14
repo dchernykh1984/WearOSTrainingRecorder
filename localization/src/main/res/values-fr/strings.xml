@@ -131,6 +131,7 @@
     <string name="action_finish">Terminer</string>
     <string name="action_hold_to_end">Maintenir pour finir</string>
     <string name="action_discard">Annuler</string>
+    <string name="action_hold_to_discard">Maintenir pour annuler</string>
 
     <string name="config_level_default">Par defaut</string>
     <string name="config_level_discipline">De la discipline</string>
