@@ -3,8 +3,10 @@ package com.dchernykh.trainingrecorder.wear.ui
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -116,21 +118,46 @@ private fun RoundBands(
     values: (String) -> String,
     modifier: Modifier = Modifier,
 ) {
-    var consumed = 0
-    Column(
-        modifier = modifier.fillMaxSize().padding(horizontal = ROUND_INSET, vertical = ROUND_VERTICAL_INSET),
-        verticalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        bands.forEach { band ->
-            val bandSlots = slots.drop(consumed).take(band.columns)
-            consumed += band.columns
-            Row(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                bandSlots.forEach { fieldId ->
-                    Slot(fieldId = fieldId, values = values, modifier = Modifier.weight(1f).fillMaxHeight())
+    // Inset band by band against the circle, not once against the square.
+    //
+    // The first and last band sit where the rim cuts hardest, and a caption like
+    // "Torque Effectiveness" drawn to the full width there loses a letter off
+    // each end - which is what it did. The span is measured across the whole
+    // height of the band rather than at its middle, because a block's corners
+    // reach further out than its centre line does.
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val diameter = maxHeight.value.toDouble()
+        // Measured against the inset content, not the whole face. Taken against
+        // the diameter, the first band's top sits exactly on the rim, where the
+        // chord is zero wide - and the band vanishes, which is what happened.
+        val contentTop = ROUND_VERTICAL_INSET.value.toDouble()
+        val bandHeight = (diameter - contentTop * 2) / bands.size
+        var consumed = 0
+        Column(
+            modifier = Modifier.fillMaxSize().padding(vertical = ROUND_VERTICAL_INSET),
+            verticalArrangement = Arrangement.SpaceEvenly,
+        ) {
+            bands.forEachIndexed { index, band ->
+                val span =
+                    LayoutPlanner.spanFor(
+                        radius = diameter / 2,
+                        top = contentTop + index * bandHeight,
+                        bottom = contentTop + (index + 1) * bandHeight,
+                    )
+                val bandSlots = slots.drop(consumed).take(band.columns)
+                consumed += band.columns
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = maxOf(span.start.toFloat().dp, ROUND_INSET))
+                            .weight(1f),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    bandSlots.forEach { fieldId ->
+                        Slot(fieldId = fieldId, values = values, modifier = Modifier.weight(1f).fillMaxHeight())
+                    }
                 }
             }
         }
@@ -159,6 +186,10 @@ private fun SquareGrid(
                 row.forEach { fieldId ->
                     Slot(fieldId = fieldId, values = values, modifier = Modifier.weight(1f).fillMaxHeight())
                 }
+                // An odd count leaves the last row one short. Without the gap it
+                // would spread its single field across the full width and read as
+                // twice the size of everything above it.
+                repeat(columns - row.size) { Spacer(modifier = Modifier.weight(1f)) }
             }
         }
     }
@@ -197,6 +228,12 @@ private fun Slot(
                     style = MaterialTheme.typography.labelSmall,
                     minFontSize = MIN_LABEL,
                     maxFontSize = MAX_LABEL,
+                    // Two lines allowed, because captions are words: "Torque
+                    // Effectiveness" does not fit one line of a two-column band at
+                    // any size, and a caption cut mid-word is worse than a caption
+                    // on two lines. Values stay on one - a number that wraps is
+                    // not a number.
+                    maxLines = 2,
                     modifier = Modifier.fillMaxWidth().weight(LABEL_SHARE),
                 )
             }
@@ -245,6 +282,7 @@ private fun FittedText(
     minFontSize: TextUnit,
     maxFontSize: TextUnit,
     modifier: Modifier = Modifier,
+    maxLines: Int = 1,
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         BasicText(
@@ -255,7 +293,7 @@ private fun FittedText(
                     textAlign = TextAlign.Center,
                     lineHeight = TextUnit.Unspecified,
                 ),
-            maxLines = 1,
+            maxLines = maxLines,
             autoSize =
                 TextAutoSize.StepBased(
                     minFontSize = minFontSize,

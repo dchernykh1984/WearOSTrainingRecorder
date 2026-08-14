@@ -9,6 +9,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -54,18 +55,25 @@ fun RaceSettings(
             singleLine = true,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         )
-        Text(
-            text = stringResource(R.string.race_refresh, config.refreshSeconds),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 16.dp),
-        )
         // Stepped through the offered intervals rather than sliding over every
         // second between ten and three thousand six hundred. The slider carries
         // the index; the seconds come from the list.
         val choices = RaceStatsConfig.REFRESH_CHOICES
-        val selected = choices.indexOf(RaceStatsConfig.nearestRefresh(config.refreshSeconds))
+        val snapped = RaceStatsConfig.nearestRefresh(config.refreshSeconds)
+        // A value from before this list existed is normalised once, so the label,
+        // the thumb and the interval the watch actually polls on cannot disagree -
+        // a screen reading "every 1873 s" with its thumb parked on 1800 is one of
+        // them lying and no way to tell which.
+        LaunchedEffect(snapped, config.refreshSeconds) {
+            if (snapped != config.refreshSeconds) onChanged(config.copy(refreshSeconds = snapped))
+        }
+        Text(
+            text = stringResource(R.string.race_refresh, snapped),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 16.dp),
+        )
         Slider(
-            value = selected.toFloat(),
+            value = choices.indexOf(snapped).toFloat(),
             // Rounded, not truncated. The slider snaps in pixels and maps back
             // through a float, so a tick arrives as 5.9999995 often enough to
             // matter: truncating turns the interval the rider dragged to into the
