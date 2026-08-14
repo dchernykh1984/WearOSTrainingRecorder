@@ -135,9 +135,6 @@ dependencies {
         implementation("com.google.guava:guava:32.0.0-android") {
             because("GHSA-5mg8-w23w-74h3 and GHSA-7g45-4rm6-3mm3 are fixed in 32.0.0")
         }
-        implementation("com.google.protobuf:protobuf-javalite:3.25.5") {
-            because("GHSA-735f-pc8j-v9w8 (CVSS 8.7) is fixed in 3.25.5")
-        }
     }
 
     implementation(project(":core"))
