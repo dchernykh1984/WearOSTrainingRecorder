@@ -1,7 +1,7 @@
 package com.dchernykh.trainingrecorder.wear.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -42,6 +42,8 @@ fun RecordingPager(
     values: (String) -> String,
     actions: List<RecordingAction>,
     onAction: (RecordingAction) -> Unit,
+    /** Named on the controls page, so the rider can see what they are stopping. */
+    @StringRes sportLabelRes: Int = 0,
     modifier: Modifier = Modifier,
 ) {
     // The controls sit to the RIGHT of the data screens. Wear OS reserves the
@@ -55,7 +57,7 @@ fun RecordingPager(
     val vertical = rememberPagerState(initialPage = 0) { screens.screens.size }
     HorizontalPager(state = horizontal, modifier = modifier.fillMaxSize()) { page ->
         if (page == CONTROLS_PAGE) {
-            ControlsPage(actions = actions, onAction = onAction)
+            ControlsPage(sportLabelRes = sportLabelRes, actions = actions, onAction = onAction)
         } else {
             DataPages(screens = screens, shape = shape, values = values, state = vertical)
         }
@@ -186,15 +188,41 @@ private fun Slot(
     }
 }
 
+/**
+ * The controls, laid out like the watch's own workout screen: what is being
+ * recorded, then one large disc per action with its word underneath.
+ *
+ * Centred as a column rather than pinned to the middle of the screen, because the
+ * pair of buttons and their captions is taller than it is deep - and on a round
+ * face, anything that grows downwards from the centre runs into the rim.
+ */
 @Composable
 private fun ControlsPage(
+    sportLabelRes: Int,
     actions: List<RecordingAction>,
     onAction: (RecordingAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            actions.forEach { ControlButton(action = it, onAction = onAction) }
+    Column(
+        modifier = modifier.fillMaxSize().padding(horizontal = CONTROLS_INSET),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        if (sportLabelRes != 0) {
+            Text(
+                text = stringResource(sportLabelRes),
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp),
+            )
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            // Top, not centre: a caption that wraps to two lines would otherwise
+            // push its own button out of line with the one beside it.
+            verticalAlignment = Alignment.Top,
+        ) {
+            actions.sortedBy { it.controlOrder() }.forEach { ControlButton(action = it, onAction = onAction) }
         }
     }
 }
@@ -203,3 +231,4 @@ private const val DATA_PAGE = 0
 private const val CONTROLS_PAGE = 1
 private const val PAGE_COUNT_WITH_CONTROLS = 2
 private val ROUND_INSET = 16.dp
+private val CONTROLS_INSET = 8.dp
