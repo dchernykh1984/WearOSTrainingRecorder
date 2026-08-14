@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.3](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.3.2...v0.3.3) (2026-08-14)
+
+
+### Bug Fixes
+
+* **mobile:** keep Reset always present so the banner cannot move anything ([88fac4d](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/88fac4d287a68e63fa4e9208b3986c7183b6489c))
+* **mobile:** make the refresh slider land on intervals a rider would pick ([7d04655](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/7d04655dec123dd50d96fb648168145b2f3f6c94))
+* **mobile:** round the slider tick and keep the banner one size ([5b8d728](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/5b8d728bcc9ef58ab48a30783b553f099d0227df))
+* **mobile:** stop the editor jumping when a sport forks from its parent ([f7f450b](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/f7f450b65e0c269fc036afaac6677a70ef515b54))
+* **wear:** inset each band against the circle so the rim stops eating captions ([ed81e3f](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/ed81e3f52e81c4fb78dc0ead7d300bf6592418c9))
+* **wear:** let the line height follow the size, and hold an empty cell open ([5737e88](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/5737e8811fb44cb1841354a627b4105d7199503d))
+* **wear:** let the text measure itself instead of guessing from the band height ([52a0979](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/52a097930ac78d2d5bb4f1862dbd709bf4bf2266))
+* **wear:** measure the rim against what a band draws, not the cell it was given ([c8bd6c0](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/c8bd6c02a45acc7d112dd541d898bb8fa2125b66))
+* **wear:** size a slot's text to the room it actually gets ([159d7c5](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/159d7c587c12443e00660e012a299bba3d63a849))
+
 ## [0.3.2](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.3.1...v0.3.2) (2026-08-14)
 
 
