@@ -129,7 +129,6 @@
     <string name="action_pause">Пауза</string>
     <string name="action_resume">Продолжить</string>
     <string name="action_hold_to_end">Удерживайте для финиша</string>
-    <string name="action_discard">Отменить</string>
     <string name="action_hold_to_discard">Удерживайте, чтобы отменить</string>
 
     <string name="config_level_default">По умолчанию</string>

@@ -129,7 +129,6 @@
     <string name="action_pause">Pause</string>
     <string name="action_resume">Fortsetzen</string>
     <string name="action_hold_to_end">Halten zum Beenden</string>
-    <string name="action_discard">Verwerfen</string>
     <string name="action_hold_to_discard">Halten zum Verwerfen</string>
 
     <string name="config_level_default">Standard</string>
