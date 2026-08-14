@@ -134,9 +134,19 @@ class TrackJournalStore(
         // A claim already there is one a previous launch made and never got to
         // clear, which means the save failed: that ride still deserves a turn.
         if (!claimed.exists() && !runCatching { file.renameTo(claimed) }.getOrDefault(false)) return null
-        return runCatching {
-            claimed.useLines { TrackJournal.parse(it) }
-        }.getOrNull()?.takeIf { it.points.isNotEmpty() }
+        val ride =
+            runCatching {
+                claimed.useLines { TrackJournal.parse(it) }
+            }.getOrNull()?.takeIf { it.points.isNotEmpty() }
+        // Dropped here when there is nothing to recover - a header-only journal
+        // from a watch that died before its first fix, a version this build
+        // cannot read, a truncated first line. Left in place it would fail the
+        // same way on every launch, and, because a claim that exists is never
+        // replaced, it would block every later interrupted ride from ever being
+        // claimed at all: crash recovery would be switched off for good by the
+        // one case it cannot do anything with.
+        if (ride == null) runCatching { claimed.delete() }
+        return ride
     }
 
     /**
