@@ -171,8 +171,11 @@ private fun Slot(
     values: (String) -> String,
     modifier: Modifier = Modifier,
 ) {
-    if (fieldId == null) return
+    // An empty slot still occupies its cell. Emitting nothing drops the
+    // caller's weight with it, and the field beside it then spreads across the
+    // whole band, out of line with every other row on the screen.
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        if (fieldId == null) return@Box
         Column(
             // Capped before it is filled, so a slot with the whole face to itself
             // keeps its caption next to its value instead of pushing the two to
@@ -217,6 +220,23 @@ private fun Slot(
  * value like "1:23:45" in a two-column band was clipped to something that still
  * looked like a time and was not one. Measuring is the platform's job, and it
  * measures both dimensions and honours the font scale for free.
+ *
+ * The line height has to be released along with it. Auto-sizing substitutes the
+ * font size and nothing else, so a style that carries the theme's 30 sp line box
+ * keeps it at every candidate size - and in a 22 sp cell every candidate then
+ * fails to fit, the search bottoms out at the smallest, and the digits are cut.
+ * Unspecified lets the line box follow the size that is actually chosen.
+ *
+ * The step is coarse on purpose. Each candidate is a paragraph layout, the values
+ * change once a second, and a tenth of a millimetre of extra precision is not
+ * worth ten more layouts a second on a watch.
+ *
+ * The overflow stays Clip, which looks like the wrong choice and is not: auto-
+ * sizing asks each candidate whether it fits, and text that is allowed to
+ * ellipsise always says yes. Setting Ellipsis here therefore makes every size fit,
+ * the search returns the largest, and a ten-field screen goes back to drawing
+ * every row on top of the next - which is exactly what it did when this was
+ * tried. Clipping only ever happens at the smallest size, when nothing fits.
  */
 @Composable
 private fun FittedText(
@@ -233,13 +253,27 @@ private fun FittedText(
                 style.copy(
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
+                    lineHeight = TextUnit.Unspecified,
                 ),
             maxLines = 1,
-            autoSize = TextAutoSize.StepBased(minFontSize = minFontSize, maxFontSize = maxFontSize),
+            autoSize =
+                TextAutoSize.StepBased(
+                    minFontSize = minFontSize,
+                    maxFontSize = maxFontSize,
+                    stepSize = AUTO_SIZE_STEP,
+                ),
         )
     }
 }
 
+/**
+ * The controls, laid out like the watch's own workout screen: what is being
+ * recorded, then one large disc per action with its word underneath.
+ *
+ * Centred as a column rather than pinned to the middle of the screen, because the
+ * pair of buttons and their captions is taller than it is deep - and on a round
+ * face, anything that grows downwards from the centre runs into the rim.
+ */
 @Composable
 private fun ControlsPage(
     sportLabelRes: Int,
@@ -302,6 +336,9 @@ private val MIN_LABEL = 8.sp
 private val MAX_LABEL = 16.sp
 private val MIN_VALUE = 12.sp
 private val MAX_VALUE = 44.sp
+
+/** Coarse enough that the search is a handful of layouts, not a hundred. */
+private val AUTO_SIZE_STEP = 2.sp
 private val CONTROLS_INSET = 16.dp
 
 /** Two comfortable slots on a large face; the row shares the width below that. */
