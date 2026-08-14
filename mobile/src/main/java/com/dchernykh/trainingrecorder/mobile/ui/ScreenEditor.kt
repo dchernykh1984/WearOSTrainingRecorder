@@ -2,12 +2,12 @@ package com.dchernykh.trainingrecorder.mobile.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -23,7 +23,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dchernykh.trainingrecorder.core.config.ConfigLevel
@@ -175,13 +177,20 @@ private fun SlotCountRow(
     ) {
         Text(text = stringResource(R.string.editor_field_count), modifier = Modifier.weight(1f))
         OutlinedButton(onClick = { onChange(current - 1) }, enabled = current > 1) { Text("-") }
-        Text(
-            text = current.toString(),
-            textAlign = TextAlign.Center,
-            // Wide enough for two digits, so the buttons do not shuffle sideways
-            // when the count crosses from nine to ten.
-            modifier = Modifier.widthIn(min = COUNT_WIDTH),
-        )
+        // The width of the widest count this can ever show, measured rather than
+        // guessed at in dp: a fixed reservation is only wide enough at the font
+        // size it was chosen for, and the buttons start shuffling again for a
+        // rider who has turned the system text size up.
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = WIDEST_COUNT,
+                // Present to the layout and to nothing else - drawn invisibly,
+                // and hidden from the screen reader, which would otherwise
+                // announce a number that is not the count.
+                modifier = Modifier.alpha(0f).clearAndSetSemantics {},
+            )
+            Text(text = current.toString(), textAlign = TextAlign.Center)
+        }
         OutlinedButton(onClick = { onChange(current + 1) }, enabled = current < Screen.MAX_SLOTS) { Text("+") }
     }
 }
@@ -318,5 +327,5 @@ private fun CategoryHeader(
     HorizontalDivider()
 }
 
-/** Room for two digits, so the count cannot nudge the buttons about. */
-private val COUNT_WIDTH = 24.dp
+/** The widest the count can be: [Screen.MAX_SLOTS] is two digits. */
+private const val WIDEST_COUNT = "00"
