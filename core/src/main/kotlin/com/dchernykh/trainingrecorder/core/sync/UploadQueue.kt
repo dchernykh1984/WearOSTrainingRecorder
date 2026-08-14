@@ -82,6 +82,17 @@ object UploadQueue {
             else -> result.state
         }
 
+    /**
+     * Everything still owed, whether or not its backoff has elapsed.
+     *
+     * The difference from [due] is the whole reason a ride can sit at "waiting
+     * to upload" forever. A drain that finds nothing *due* has still not
+     * finished the job if something is merely waiting out an hour's backoff, and
+     * a worker that reports itself finished there is a worker nothing will wake
+     * again until the rider opens the app or records another ride.
+     */
+    fun outstanding(queue: List<PendingUpload>): List<PendingUpload> = queue.filterNot { hasGivenUp(it) }
+
     /** The uploads due now, oldest first, excluding the ones that gave up. */
     fun due(
         queue: List<PendingUpload>,
