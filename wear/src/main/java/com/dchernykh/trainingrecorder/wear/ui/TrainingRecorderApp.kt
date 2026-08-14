@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -77,10 +78,28 @@ fun TrainingRecorderApp(
                     values = { values[it] ?: FieldCatalogue.EMPTY_VALUE },
                     actions = state.availableActions,
                     onAction = model::onAction,
+                    sportLabelRes = Labels.sport(sport.id),
                 )
             }
         }
     }
+}
+
+/**
+ * Centred rather than left-aligned, which is what a round screen asks for.
+ *
+ * The list scrolls, so every row passes through the top and bottom of the face
+ * on its way past - and that is exactly where the circle takes the corners away.
+ * A line that starts at the left edge loses its first letters there; a centred
+ * one loses the same amount from both ends and stays readable the whole way.
+ */
+@Composable
+private fun CentredLabel(text: String) {
+    Text(
+        text = text,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 /**
@@ -147,7 +166,7 @@ fun SportPicker(
             Button(
                 onClick = { onSportChosen(sport) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(Labels.sport(sport.id))) },
+                label = { CentredLabel(stringResource(Labels.sport(sport.id))) },
             )
         }
         // Last, below every sport: pairing is something a rider does once and
@@ -155,7 +174,7 @@ fun SportPicker(
         Button(
             onClick = onPairSensors,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.sensors_title)) },
+            label = { CentredLabel(stringResource(R.string.sensors_title)) },
         )
     }
 }
