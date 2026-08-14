@@ -1,78 +1,51 @@
 package com.dchernykh.trainingrecorder.core.connector
 
 /**
- * How the app talks to Garmin Connect.
+ * How the app uploads to Garmin Connect, and what its answers mean.
  *
- * There is no official route. Garmin's Connect API is partner-approval-only and,
- * as of 2026, closed to new applicants, so this reproduces the sign-in the Python
- * `garminconnect` library performs: the SSO form yields a service ticket, the
- * ticket is exchanged for an OAuth1 token, and that is exchanged for an OAuth2
- * bearer used on the upload.
+ * Getting a token to upload with is [GarminSignIn]; this is what happens once
+ * there is one.
  *
- * Two things to know before debugging a failure here. The credentials are the
- * rider's own Garmin login and password - there is no client secret to leak, but
- * there is a password to keep encrypted. And the Python library depends on
- * `curl-cffi` specifically to imitate a browser's TLS fingerprint, which implies
- * bot protection that inspects the handshake before it ever reads a password. A
- * plain HTTP client may therefore be refused at the transport layer, with nothing
- * in the response to explain why.
+ * There is no official route to any of it. Garmin's Connect API is
+ * partner-approval-only and, as of 2026, closed to new applicants, so both
+ * halves reproduce what the Python `garminconnect` library does. One thing to
+ * know before debugging a failure: that library depends on `curl-cffi` to
+ * imitate a browser's TLS fingerprint, which implies bot protection reading the
+ * handshake before it reads anything else. A plain client may therefore be
+ * refused at the transport layer, with nothing in the response to explain why.
  */
 object GarminProtocol {
     const val ID = "garmin"
 
-    const val SSO_URL = "https://sso.garmin.com/sso/signin"
-    const val SSO_EMBED_URL = "https://sso.garmin.com/sso/embed"
-    const val OAUTH1_PREVIEW_URL = "https://connectapi.garmin.com/oauth-service/oauth/preauthorized"
-    const val OAUTH2_EXCHANGE_URL = "https://connectapi.garmin.com/oauth-service/oauth/exchange/user/2.0"
     const val UPLOAD_URL = "https://connectapi.garmin.com/upload-service/upload/.fit"
 
     /**
-     * The credential key, named once so both ends cannot drift apart - the phone
-     * writing one spelling and the watch expecting another is invisible until
-     * every upload silently declines to start.
+     * The credential keys, named once so both ends cannot drift apart - the
+     * phone writing one spelling and the watch expecting another is invisible
+     * until every upload silently declines to start.
      */
-    const val BEARER_TOKEN = "bearer_token"
+    const val ACCESS_TOKEN = "access_token"
+    const val REFRESH_TOKEN = "refresh_token"
+    const val EXPIRES_AT = "expires_at"
 
     /**
-     * What the rider supplies. The token itself, rather than a login: Garmin's
-     * sign-in is an undocumented SSO exchange this app does not attempt, and a
-     * pasted token works today where a guessed flow would not.
+     * Which of Garmin's client ids issued the token. Kept because a refresh has
+     * to name the same one, and [GarminSignIn] discovers it by trying several.
      */
-    val credentialFields = listOf(CredentialField(BEARER_TOKEN, secret = true))
+    const val TOKEN_CLIENT_ID = "token_client_id"
 
-    /** The sign-in fields, kept for the exchange this app does not yet perform. */
-    val signInFields =
+    /**
+     * What the rider supplies: their own Garmin login and password.
+     *
+     * There is no client secret to leak here - the credentials are the rider's
+     * own - but there is a password, which is why it never leaves the phone.
+     * Only the tokens travel to the watch.
+     */
+    val credentialFields =
         listOf(
-            CredentialField("login"),
-            CredentialField("password", secret = true),
+            CredentialField(LOGIN, secret = false),
+            CredentialField(PASSWORD, secret = true),
         )
-
-    /** Query the sign-in form is submitted with; Garmin rejects a bare POST. */
-    fun signInQuery(): Map<String, String> =
-        mapOf(
-            "id" to "gauth-widget",
-            "embedWidget" to "true",
-            "gauthHost" to SSO_EMBED_URL,
-            "service" to SSO_EMBED_URL,
-            "source" to SSO_EMBED_URL,
-            "redirectAfterAccountLoginUrl" to SSO_EMBED_URL,
-            "redirectAfterAccountCreationUrl" to SSO_EMBED_URL,
-        )
-
-    /**
-     * The service ticket, which the sign-in response embeds in a JavaScript
-     * redirect rather than a header. Absent means the credentials were refused -
-     * or that the request never reached the form at all.
-     */
-    fun ticketFrom(html: String): String? =
-        TICKET
-            .find(html)
-            ?.groupValues
-            ?.getOrNull(1)
-            ?.takeIf { it.isNotBlank() }
-
-    /** True when Garmin is asking for a second factor, which this app cannot answer. */
-    fun needsMfa(html: String): Boolean = html.contains("MFA", ignoreCase = true) && html.contains("verificationCode")
 
     /**
      * What an upload status means for the queue.
@@ -91,7 +64,39 @@ object GarminProtocol {
             else -> UploadResult.Rejected("garmin refused the upload: $statusCode")
         }
 
-    private val TICKET = Regex("""ticket=([^"'&\\]+)""")
+    /**
+     * The headers the mobile API expects alongside the bearer.
+     *
+     * The token was issued to Garmin's own Android app, so the request that
+     * carries it says the same thing about itself. A bearer that arrives under a
+     * user agent the issuer never heard of is the sort of mismatch bot
+     * protection exists to notice.
+     */
+    fun apiHeaders(accessToken: String): Map<String, String> =
+        nativeHeaders() +
+            mapOf(
+                "Authorization" to "Bearer $accessToken",
+                "Accept" to "application/json",
+            )
+
+    /** Shared with the token exchange, which sends them without a bearer. */
+    internal fun nativeHeaders(): Map<String, String> =
+        mapOf(
+            "User-Agent" to "GCM-Android-5.23",
+            "X-Garmin-User-Agent" to
+                "com.garmin.android.apps.connectmobile/5.23; ; Google/sdk_gphone64_arm64/google; " +
+                "Android/33; Dalvik/2.1.0",
+            "X-Garmin-Paired-App-Version" to "10861",
+            "X-Garmin-Client-Platform" to "Android",
+            "X-App-Ver" to "10861",
+            "X-Lang" to "en",
+            "X-GCExperience" to "GC5",
+            "Accept-Language" to "en-US,en;q=0.9",
+        )
+
+    const val LOGIN = "login"
+    const val PASSWORD = "password"
+
     private const val UNAUTHORIZED = 401
     private const val FORBIDDEN = 403
     private const val CONFLICT = 409

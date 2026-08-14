@@ -10,6 +10,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.dchernykh.trainingrecorder.core.connector.ConnectorRegistry
 import com.dchernykh.trainingrecorder.core.connector.CredentialContract
+import com.dchernykh.trainingrecorder.core.connector.GarminProtocol
 import com.dchernykh.trainingrecorder.core.connector.StravaProtocol
 import com.dchernykh.trainingrecorder.core.connector.UploadResult
 import com.dchernykh.trainingrecorder.core.connector.WorkoutUpload
@@ -50,14 +51,22 @@ class UploadWorker(
         ConnectorRegistry(
             listOf(
                 StravaConnector(onTokensRefreshed = ::rememberStravaTokens),
-                GarminConnector(),
+                GarminConnector(onTokensRefreshed = ::rememberGarminTokens),
             ),
         )
 
     /** Strava rotates the refresh token, so the new pair has to be written down. */
-    private fun rememberStravaTokens(updated: Map<String, String>) {
+    private fun rememberStravaTokens(updated: Map<String, String>) = remember(StravaProtocol.ID, updated)
+
+    /** Garmin rotates it too, and its tokens are the shorter-lived of the two. */
+    private fun rememberGarminTokens(updated: Map<String, String>) = remember(GarminProtocol.ID, updated)
+
+    private fun remember(
+        connectorId: String,
+        updated: Map<String, String>,
+    ) {
         val stored = credentials.read()
-        credentials.write(CredentialContract.encode(stored + (StravaProtocol.ID to updated)))
+        credentials.write(CredentialContract.encode(stored + (connectorId to updated)))
     }
 
     override suspend fun doWork(): Result =
