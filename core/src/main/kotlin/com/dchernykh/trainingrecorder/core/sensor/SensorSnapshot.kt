@@ -55,8 +55,47 @@ data class SensorSnapshot(
         const val EXTERNAL_STALE_AFTER_MS = 3_000L
 
         /**
+         * How long the watch's own reading stays on screen after its last
+         * update.
+         *
+         * Longer than the external window on purpose: Health Services delivers
+         * in batches, and blanking a field because one batch was late would
+         * flicker for no reason. Fifteen seconds is far more than a late batch
+         * and far less than a rider staring at a number that stopped being true.
+         *
+         * This window is why the constant exists at all. Built-in readings used
+         * to be copied into the snapshot without any check, so a source that
+         * went quiet left its last value on screen for the rest of the ride -
+         * a heart rate frozen at 66 while the rider moved about, looking every
+         * bit as live as a real one.
+         */
+        const val BUILT_IN_STALE_AFTER_MS = 15_000L
+
+        /**
+         * Readings that are running totals rather than measurements of now.
+         *
+         * These must never age out. Distance does not stop being true because no
+         * batch arrived in the last fifteen seconds - it is the same distance,
+         * and blanking it mid-ride would be a worse lie than showing it. Only
+         * values that describe this instant can go stale.
+         */
+        val CUMULATIVE_FIELDS =
+            setOf(
+                "distance_total",
+                "distance_lap",
+                "distance_lap_last",
+                "ascent_total",
+                "descent_total",
+                "calories",
+                "lap_count",
+                "stroke_count",
+                "lengths",
+            )
+
+        /**
          * Folds the two sources into what the screens read. External wins while
-         * it is fresh; otherwise the built-in reading is used if there is one.
+         * it is fresh; otherwise the built-in reading is used while it is fresh
+         * in its own right; when neither is, the field shows nothing.
          */
         fun merge(
             external: Map<String, SensorReading>,
@@ -64,13 +103,25 @@ data class SensorSnapshot(
             nowEpochMs: Long,
             connectedProfiles: Set<SensorProfile> = emptySet(),
             staleAfterMs: Long = EXTERNAL_STALE_AFTER_MS,
+            builtInStaleAfterMs: Long = BUILT_IN_STALE_AFTER_MS,
         ): SensorSnapshot {
             require(staleAfterMs > 0) { "the staleness window must be positive" }
-            val merged = builtIn.toMutableMap()
+            require(builtInStaleAfterMs > 0) { "the built-in staleness window must be positive" }
+            val merged = mutableMapOf<String, SensorReading>()
+            builtIn.forEach { (fieldId, reading) ->
+                if (isCurrent(fieldId, reading, nowEpochMs, builtInStaleAfterMs)) merged[fieldId] = reading
+            }
             external.forEach { (fieldId, reading) ->
-                if (nowEpochMs - reading.atEpochMs <= staleAfterMs) merged[fieldId] = reading
+                if (isCurrent(fieldId, reading, nowEpochMs, staleAfterMs)) merged[fieldId] = reading
             }
             return SensorSnapshot(merged.toMap(), connectedProfiles)
         }
+
+        private fun isCurrent(
+            fieldId: String,
+            reading: SensorReading,
+            nowEpochMs: Long,
+            windowMs: Long,
+        ): Boolean = fieldId in CUMULATIVE_FIELDS || nowEpochMs - reading.atEpochMs <= windowMs
     }
 }

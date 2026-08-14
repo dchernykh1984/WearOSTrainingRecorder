@@ -1,10 +1,12 @@
 package com.dchernykh.trainingrecorder.core.sensor
 
+import com.dchernykh.trainingrecorder.core.field.FieldCatalogue
 import com.dchernykh.trainingrecorder.core.field.SensorProfile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -102,5 +104,86 @@ class SensorSnapshotTest {
     fun sensorOriginRoundTripsThroughItsId() {
         SensorOrigin.entries.forEach { assertEquals(it, SensorOrigin.byId(it.id)) }
         assertNull(SensorOrigin.byId("nope"))
+    }
+
+    /**
+     * The failure this window exists for, seen on a real watch: the strap went
+     * quiet, the optical sensor had already stopped, and the last heart rate sat
+     * on screen for a minute looking exactly like a live one.
+     */
+    @Test
+    fun `a built-in reading that stopped arriving is not shown for ever`() {
+        val stale =
+            mapOf("hr" to SensorReading(66.0, SensorOrigin.BUILT_IN, now - SensorSnapshot.BUILT_IN_STALE_AFTER_MS - 1))
+
+        val merged = SensorSnapshot.merge(external = emptyMap(), builtIn = stale, nowEpochMs = now)
+
+        assertNull(merged.value("hr"))
+    }
+
+    @Test
+    fun `a built-in reading survives a late batch`() {
+        val recent =
+            mapOf("hr" to SensorReading(66.0, SensorOrigin.BUILT_IN, now - SensorSnapshot.BUILT_IN_STALE_AFTER_MS + 1))
+
+        val merged = SensorSnapshot.merge(external = emptyMap(), builtIn = recent, nowEpochMs = now)
+
+        assertEquals(66.0, merged.value("hr"))
+    }
+
+    /**
+     * The watch's own window is the longer one: Health Services batches, and a
+     * strap notifies about once a second.
+     */
+    @Test
+    fun `the watch gets more grace than a strap does`() {
+        assertTrue(SensorSnapshot.BUILT_IN_STALE_AFTER_MS > SensorSnapshot.EXTERNAL_STALE_AFTER_MS)
+    }
+
+    /**
+     * A total does not stop being true because no batch arrived. Blanking the
+     * distance mid-ride would be a worse lie than showing the last one.
+     */
+    @Test
+    fun `a running total never goes stale`() {
+        val ancient =
+            mapOf(
+                "distance_total" to SensorReading(12_345.0, SensorOrigin.BUILT_IN, now - HOUR_MS),
+                "ascent_total" to SensorReading(430.0, SensorOrigin.BUILT_IN, now - HOUR_MS),
+                "calories" to SensorReading(500.0, SensorOrigin.BUILT_IN, now - HOUR_MS),
+            )
+
+        val merged = SensorSnapshot.merge(external = emptyMap(), builtIn = ancient, nowEpochMs = now)
+
+        assertEquals(12_345.0, merged.value("distance_total"))
+        assertEquals(430.0, merged.value("ascent_total"))
+        assertEquals(500.0, merged.value("calories"))
+    }
+
+    @Test
+    fun `every field named cumulative is one the catalogue knows`() {
+        SensorSnapshot.CUMULATIVE_FIELDS.forEach { fieldId ->
+            assertNotNull(FieldCatalogue.byId(fieldId), "unknown field id: $fieldId")
+        }
+    }
+
+    /**
+     * Both sources dying leaves nothing, which is the documented behaviour:
+     * strap, else the optical sensor, else write nothing.
+     */
+    @Test
+    fun `when both sources go quiet the field empties`() {
+        val merged =
+            SensorSnapshot.merge(
+                external = mapOf("hr" to SensorReading(140.0, SensorOrigin.EXTERNAL, now - HOUR_MS)),
+                builtIn = mapOf("hr" to SensorReading(66.0, SensorOrigin.BUILT_IN, now - HOUR_MS)),
+                nowEpochMs = now,
+            )
+
+        assertNull(merged.value("hr"))
+    }
+
+    private companion object {
+        const val HOUR_MS = 3_600_000L
     }
 }
