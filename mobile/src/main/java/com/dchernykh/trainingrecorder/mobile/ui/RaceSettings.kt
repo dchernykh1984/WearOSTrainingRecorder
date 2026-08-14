@@ -15,6 +15,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.dchernykh.trainingrecorder.core.race.RaceStatsConfig
 import com.dchernykh.trainingrecorder.localization.R
+import kotlin.math.roundToInt
 
 /**
  * The race-stats parameters, which live on the phone because they are typed
@@ -65,7 +66,12 @@ fun RaceSettings(
         val selected = choices.indexOf(RaceStatsConfig.nearestRefresh(config.refreshSeconds))
         Slider(
             value = selected.toFloat(),
-            onValueChange = { onChanged(config.copy(refreshSeconds = choices[it.toInt()])) },
+            // Rounded, not truncated. The slider snaps in pixels and maps back
+            // through a float, so a tick arrives as 5.9999995 often enough to
+            // matter: truncating turns the interval the rider dragged to into the
+            // one below it, the thumb springs back, and that value can never be
+            // chosen - which is the bug this whole control was rewritten for.
+            onValueChange = { onChanged(config.copy(refreshSeconds = choices[it.roundToInt()])) },
             valueRange = 0f..(choices.size - 1).toFloat(),
             steps = choices.size - 2,
             modifier = Modifier.fillMaxWidth(),

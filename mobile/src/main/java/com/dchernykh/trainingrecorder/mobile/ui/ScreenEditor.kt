@@ -96,6 +96,11 @@ private fun InheritanceBanner(
                     },
                 ),
             style = MaterialTheme.typography.bodyMedium,
+            // Two lines' worth of room, always. The sentence changes when a sport
+            // forks - and gets longer in German and Kazakh - so on a narrow phone
+            // it can gain a line at the moment the rider is tapping the field
+            // count below it, which moves the control out from under the tap.
+            minLines = 2,
             modifier = Modifier.weight(1f),
         )
         // Always here, disabled until there is something to reset.
