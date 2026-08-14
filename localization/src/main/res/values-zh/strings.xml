@@ -154,7 +154,7 @@
 
     <string name="connect_strava_explanation">请在 strava.com/settings/api 创建你自己的 Strava 应用，并将其 client id 和 secret 填在这里。本应用不内置任何凭据。</string>
     <string name="connect_strava_callback">将 Authorization Callback Domain 设为 localhost</string>
-    <string name="connect_garmin_explanation">使用你自己的 Garmin Connect 账号登录。密码以加密方式保存在本手机上。</string>
+    <string name="connect_garmin_explanation">使用你自己的 Garmin Connect 账号登录。密码只保存在本手机上应用的私有存储中，不会发送到手表。</string>
     <string name="connect_action">连接</string>
 
     <string name="history_empty">还没有训练记录。</string>

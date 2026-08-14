@@ -161,7 +161,7 @@
 
     <string name="connect_strava_explanation">Creez votre propre application Strava sur strava.com/settings/api et collez son client id et son secret ici. L\'application n\'embarque aucun identifiant.</string>
     <string name="connect_strava_callback">Definissez Authorization Callback Domain sur localhost</string>
-    <string name="connect_garmin_explanation">Connectez-vous avec votre compte Garmin Connect. Le mot de passe reste chiffre sur ce telephone.</string>
+    <string name="connect_garmin_explanation">Connectez-vous avec votre compte Garmin Connect. Le mot de passe reste dans le stockage prive de l\'application sur ce telephone et n\'est jamais envoye a la montre.</string>
     <string name="connect_action">Connecter</string>
 
     <string name="history_empty">Aucune seance pour l\'instant.</string>

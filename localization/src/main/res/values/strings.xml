@@ -176,7 +176,7 @@
     <!-- Connecting a service -->
     <string name="connect_strava_explanation">Create your own Strava API application at strava.com/settings/api and paste its client id and secret here. The app ships no credentials of its own, so nobody else\'s leak can affect you and the daily request quota is yours alone.</string>
     <string name="connect_strava_callback">Set the Authorization Callback Domain to: localhost</string>
-    <string name="connect_garmin_explanation">Sign in with your own Garmin Connect account. Garmin has no public API for uploads, so the app signs in the way the desktop tools do; your password is stored encrypted on this phone and never leaves it.</string>
+    <string name="connect_garmin_explanation">Sign in with your own Garmin Connect account. Garmin has no public API for uploads, so the app signs in the way the desktop tools do; your password stays in this app\'s private storage on the phone and is never sent to the watch.</string>
     <string name="connect_action">Connect</string>
 
     <!-- Workout history -->

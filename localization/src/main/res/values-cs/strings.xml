@@ -161,7 +161,7 @@
 
     <string name="connect_strava_explanation">Vytvorte si vlastni aplikaci Strava na strava.com/settings/api a vlozte sem jeji client id a secret. Aplikace nema vlastni prihlasovaci udaje.</string>
     <string name="connect_strava_callback">Nastavte Authorization Callback Domain na localhost</string>
-    <string name="connect_garmin_explanation">Prihlaste se vlastnim uctem Garmin Connect. Heslo zustava zasifrovane v tomto telefonu.</string>
+    <string name="connect_garmin_explanation">Prihlaste se vlastnim uctem Garmin Connect. Heslo zustava v soukromem ulozisti aplikace v tomto telefonu a nikdy se neposila do hodinek.</string>
     <string name="connect_action">Pripojit</string>
 
     <string name="history_empty">Zatim zadne treninky.</string>
