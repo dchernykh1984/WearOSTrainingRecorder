@@ -25,6 +25,7 @@ import com.dchernykh.trainingrecorder.wear.service.RecordingService
 import com.dchernykh.trainingrecorder.wear.storage.TrackJournalStore
 import com.dchernykh.trainingrecorder.wear.storage.WorkoutRepository
 import com.dchernykh.trainingrecorder.wear.sync.SettingsStore
+import com.dchernykh.trainingrecorder.wear.sync.WorkoutPublisher
 import com.dchernykh.trainingrecorder.wear.upload.CredentialStore
 import com.dchernykh.trainingrecorder.wear.upload.UploadWorker
 import kotlinx.coroutines.CancellationException
@@ -88,6 +89,9 @@ class RecordingViewModel(
      * long as it should get.
      */
     private val journal = TrackJournalStore(application)
+
+    /** Same reasoning: nothing outside this model publishes a saved ride. */
+    private val publisher = WorkoutPublisher(application)
 
     private val _state = MutableStateFlow(RecordingState())
     val state: StateFlow<RecordingState> = _state.asStateFlow()
@@ -167,6 +171,7 @@ class RecordingViewModel(
         if (saved.isSuccess) {
             journal.finish()
             history.value = SportOrdering.record(history.value, ride.sportTypeId).also(settings::writeHistory)
+            publisher.publish(repository)
             UploadWorker.schedule(getApplication())
         }
     }
@@ -392,6 +397,9 @@ class RecordingViewModel(
             // earlier would leave a window where a kill loses the ride from both
             // places at once.
             withContext(Dispatchers.IO + NonCancellable) { journal.finish() }
+            // The phone's history is fed from here: it holds no workouts of its
+            // own, so a ride it is never told about is a ride it can never show.
+            withContext(Dispatchers.IO) { publisher.publish(repository) }
             // Queued straight away rather than on the next launch: the rider
             // closes the app the moment the ride ends, and the workout should
             // be on its way before they do.
