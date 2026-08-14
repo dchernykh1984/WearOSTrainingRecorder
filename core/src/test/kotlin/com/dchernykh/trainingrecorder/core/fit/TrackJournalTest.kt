@@ -70,6 +70,23 @@ class TrackJournalTest {
         assertEquals(2, recovered.points.size)
     }
 
+    /**
+     * The subtle half of the same failure: a line cut off inside its last value
+     * still has every column, and the digits that survived parse as a perfectly
+     * plausible smaller number - so the ride would come back claiming it had
+     * moved for two minutes when it had moved for three hours.
+     */
+    @Test
+    fun `drops a last line cut off inside its final column`() {
+        val complete = journal(listOf(point(0), point(1)), moving = 10_740_000L).toList()
+        val truncated = complete.dropLast(1) + complete.last().substringBefore("740000")
+
+        val recovered = assertNotNull(TrackJournal.parse(truncated.asSequence()))
+
+        assertEquals(1, recovered.points.size)
+        assertEquals(10_740_000L, recovered.movingMillis)
+    }
+
     @Test
     fun `refuses a journal it cannot place a ride in`() {
         assertNull(TrackJournal.parse(emptySequence()))

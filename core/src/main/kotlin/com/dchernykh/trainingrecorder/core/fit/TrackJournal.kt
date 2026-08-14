@@ -70,14 +70,26 @@ object TrackJournal {
     private const val SEPARATOR = '\t'
     private const val HEADER_TAG = "ride"
     private const val POINT_TAG = "p"
-    private const val HEADER_FIELDS = 4
-    private const val POINT_FIELDS = 12
+
+    /**
+     * The last column of every line, and the only thing that proves the line
+     * reached the disk whole.
+     *
+     * Counting columns is not enough: a line cut off part-way through its final
+     * value still has the right number of them, and the half a number that
+     * survives parses perfectly well as a smaller one. That is how a ride
+     * recovered from a journal came to claim it had been moving for two minutes
+     * when it had been moving for three hours.
+     */
+    private const val END = "."
+    private const val HEADER_FIELDS = 5
+    private const val POINT_FIELDS = 13
 
     /** Written once, when the recording starts. */
     fun header(
         sportTypeId: String,
         startedAtEpochMs: Long,
-    ): String = listOf(HEADER_TAG, VERSION.toString(), sportTypeId, startedAtEpochMs.toString()).joinToString("\t")
+    ): String = listOf(HEADER_TAG, VERSION.toString(), sportTypeId, startedAtEpochMs.toString(), END).joinToString("\t")
 
     /**
      * One sample.
@@ -102,6 +114,7 @@ object TrackJournal {
             point.distanceMeters.orBlank(),
             point.temperatureC.orBlank(),
             movingMillis.toString(),
+            END,
         ).joinToString("\t")
 
     /**
@@ -122,13 +135,13 @@ object TrackJournal {
             val fields = raw.split(SEPARATOR)
             when (fields.firstOrNull()) {
                 HEADER_TAG -> {
-                    if (fields.size < HEADER_FIELDS) return@forEach
+                    if (!isWhole(fields, HEADER_FIELDS)) return@forEach
                     if (fields[1].toIntOrNull() != VERSION) unreadable = true
                     ride = fields[3].toLongOrNull()?.let { Header(fields[2], it) }
                 }
 
                 POINT_TAG -> {
-                    if (fields.size < POINT_FIELDS) return@forEach
+                    if (!isWhole(fields, POINT_FIELDS)) return@forEach
                     val timestamp = fields[1].toLongOrNull() ?: return@forEach
                     points += pointFrom(fields, timestamp)
                     moving = fields[11].toLongOrNull() ?: moving
@@ -139,6 +152,17 @@ object TrackJournal {
             ?.takeUnless { unreadable }
             ?.let { RecoveredRide(it.sportTypeId, it.startedAtEpochMs, points.toList(), moving) }
     }
+
+    /**
+     * True when the line is all there.
+     *
+     * The marker is written last, so a line that has it is a line whose every
+     * value was written before the process stopped.
+     */
+    private fun isWhole(
+        fields: List<String>,
+        expected: Int,
+    ): Boolean = fields.size == expected && fields.last() == END
 
     /** What the first line names: which ride the samples below it belong to. */
     private data class Header(
