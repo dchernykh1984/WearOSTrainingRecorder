@@ -78,7 +78,12 @@ class WorkoutRepository(
                 fileSizeBytes = target.length(),
                 uploads = enabledConnectors.associateWith { UploadState.PENDING },
             )
-        writeIndex(loadIndex() + summary)
+        // Replaced rather than appended, so saving the same id twice lands on
+        // itself. A ride recovered from its journal is deliberately saved under
+        // the id its interrupted run would have used, and a second row for it
+        // would be a duplicate everywhere it is shown - including the phone's
+        // history, whose list is keyed by id and crashes outright on a repeat.
+        writeIndex(loadIndex().filterNot { it.id == workoutId } + summary)
         val index = loadIndex()
         val evicted = RetentionPolicy.evictable(index, enabledConnectors).toSet()
         if (evicted.isNotEmpty()) {

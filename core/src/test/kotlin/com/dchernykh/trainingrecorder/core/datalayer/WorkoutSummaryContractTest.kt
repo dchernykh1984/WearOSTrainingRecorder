@@ -95,6 +95,20 @@ class WorkoutSummaryContractTest {
         assertEquals(listOf("workout-1"), decoded.map { it.id })
     }
 
+    /**
+     * The phone keys its list by id, and Compose throws on a repeated key - so a
+     * duplicate arriving from a watch would take the history screen down rather
+     * than show a row twice.
+     */
+    @Test
+    fun `never hands the phone the same ride twice`() {
+        val payload = WorkoutSummaryContract.encode(listOf(summary(1), summary(1)))
+
+        val decoded = assertNotNull(WorkoutSummaryContract.decode(payload))
+
+        assertEquals(1, decoded.size)
+    }
+
     @Test
     fun `survives a ride with no upload state yet`() {
         val decoded =
