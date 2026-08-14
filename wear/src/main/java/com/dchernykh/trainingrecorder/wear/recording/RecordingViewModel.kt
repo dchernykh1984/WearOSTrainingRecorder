@@ -33,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,6 +45,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.TimeZone
+import java.util.concurrent.Executors
 
 /**
  * Ties the recording together: the state machine, Health Services, the samples
@@ -89,6 +91,19 @@ class RecordingViewModel(
      * long as it should get.
      */
     private val journal = TrackJournalStore(application)
+
+    /**
+     * One thread, so journal work happens in the order it was asked for.
+     *
+     * The calls are individually safe - the store is synchronized - but their
+     * order is the whole meaning: a discard that overtakes the begin it was
+     * meant to undo leaves an orphan journal, and samples handed to a begin that
+     * has not run yet are written nowhere. Dispatchers.IO is a pool and gives no
+     * such guarantee; one thread does, and one thread is what a file appended to
+     * once a second needs.
+     */
+    private val journalExecutor = Executors.newSingleThreadExecutor()
+    private val journalContext = journalExecutor.asCoroutineDispatcher()
 
     /** Same reasoning: nothing outside this model publishes a saved ride. */
     private val publisher = WorkoutPublisher(application)
@@ -140,7 +155,7 @@ class RecordingViewModel(
         // On the first construction after a launch, which is exactly when a ride
         // the last process never got to finish is sitting on disk waiting to be
         // noticed.
-        viewModelScope.launch(Dispatchers.IO) { recoverInterruptedRide() }
+        viewModelScope.launch(journalContext) { recoverInterruptedRide() }
     }
 
     /**
@@ -224,7 +239,7 @@ class RecordingViewModel(
         // Opened with the same start time the save will use for the id, so a ride
         // recovered from this journal is the same workout the finish would have
         // written rather than a second copy of it.
-        viewModelScope.launch(Dispatchers.IO) { journal.begin(sport.id, startedAt) }
+        viewModelScope.launch(journalContext) { journal.begin(sport.id, startedAt) }
         RecordingService.start(getApplication())
         // Started with the workout, not held open between rides: a GATT link to
         // a power meter kept alive all day is a flat battery on both ends.
@@ -306,13 +321,11 @@ class RecordingViewModel(
                         distanceMeters = sensors.value.value("distance_total"),
                     )
                 samples += point
-                // Off the main thread, but awaited rather than launched: a sample
-                // a second is nothing to wait for, and launching each append
-                // separately would let two of them race and interleave halfway
-                // through a line.
-                withContext(Dispatchers.IO) {
-                    journal.append(point, _state.value.movingMillisAt(timestamp))
-                }
+                // Queued rather than awaited: the journal thread keeps them in
+                // order behind the begin that opened the file, and the collector
+                // has no reason to wait for a write it does not read back.
+                val moving = _state.value.movingMillisAt(timestamp)
+                viewModelScope.launch(journalContext) { journal.append(point, moving) }
             }
             recomputeValues()
         }
@@ -400,7 +413,7 @@ class RecordingViewModel(
                 // Dropped only now, once the ride exists as a file. Deleting it
                 // any earlier would leave a window where a kill loses the ride
                 // from both places at once.
-                journal.finish(start)
+                withContext(journalContext) { journal.finish(start) }
                 // Queued before the phone is told, because this is the part that
                 // matters: the workout should be on its way before the rider has
                 // put the watch down.
@@ -458,7 +471,13 @@ class RecordingViewModel(
         // it - left behind, the next launch would helpfully recover the very
         // thing the rider just decided not to keep. Named, so a discard that
         // lands late cannot take a newer ride's journal with it.
-        discarded?.let { CoroutineScope(Dispatchers.IO).launch { journal.finish(it) } }
+        discarded?.let {
+            // On the journal thread like everything else, so a discard cannot
+            // overtake the begin it is undoing. Detached from the view model's
+            // scope, because discarding is often the last thing that happens
+            // before the screen goes away and takes that scope with it.
+            CoroutineScope(journalContext).launch { journal.finish(it) }
+        }
         busy = false
         RecordingService.stop(getApplication())
     }
@@ -479,6 +498,9 @@ class RecordingViewModel(
 
     override fun onCleared() {
         stopCollecting()
+        // Shut down after the queue drains, so a finish queued on the way out
+        // still runs; left open it would be a thread per view model.
+        journalExecutor.shutdown()
         super.onCleared()
     }
 
