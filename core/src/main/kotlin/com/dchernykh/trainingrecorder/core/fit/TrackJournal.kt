@@ -1,0 +1,170 @@
+package com.dchernykh.trainingrecorder.core.fit
+
+/**
+ * A ride recovered from a journal that outlived the process that wrote it.
+ *
+ * [movingMillis] is carried rather than derived because it cannot be: the gap
+ * between the first and last sample is elapsed time, and how much of it the rider
+ * was actually moving is only known to the recording that was interrupted.
+ */
+data class RecoveredRide(
+    val sportTypeId: String,
+    val startedAtEpochMs: Long,
+    val points: List<TrackPoint>,
+    val movingMillis: Long,
+) {
+    /**
+     * The ride as the encoder wants it.
+     *
+     * Elapsed time is measured to the last sample that reached the disk, not to
+     * now: a watch that died at nine and is switched on at noon did not record a
+     * three-hour ride.
+     */
+    fun toWorkout(): RecordedWorkout {
+        val lastTimestamp = points.lastOrNull()?.timestampEpochMs ?: startedAtEpochMs
+        val elapsedSeconds = ((lastTimestamp - startedAtEpochMs).coerceAtLeast(0)) / MILLIS_PER_SECOND
+        val movingSeconds = (movingMillis / MILLIS_PER_SECOND).coerceIn(0.0, elapsedSeconds)
+        return RecordedWorkout(
+            sportTypeId = sportTypeId,
+            startedAtEpochMs = startedAtEpochMs,
+            totalTimerSeconds = movingSeconds,
+            totalElapsedSeconds = elapsedSeconds,
+            totalDistanceMeters = points.lastOrNull { it.distanceMeters != null }?.distanceMeters ?: 0.0,
+            points = points,
+        )
+    }
+
+    private companion object {
+        const val MILLIS_PER_SECOND = 1000.0
+    }
+}
+
+/**
+ * The ride on disk while it is still being ridden.
+ *
+ * The samples used to live only in memory until the rider pressed Finish, which
+ * made a process kill mid-ride lose the whole track - exactly the one failure
+ * this app is not allowed to have. This is the wire format for an append-only
+ * file written as each sample arrives: a header line naming the ride, then one
+ * line per sample.
+ *
+ * Append-only and line-based on purpose. A watch that loses power writes no
+ * footer and gets no chance to close the file, so the format has to be one where
+ * whatever reached the disk is readable on its own and the last line - which may
+ * be half-written - can simply be dropped. Rewriting a whole document per sample
+ * would also mean a file write per second for six hours, which is a battery cost
+ * the rider pays for nothing.
+ *
+ * Tab-separated rather than JSON per line because every byte here is written
+ * while riding: the fields are fixed, positional and never nested, so the
+ * structure a JSON object would carry is structure that is already known.
+ */
+object TrackJournal {
+    /**
+     * Bumped when the column order changes. A journal from a newer version is
+     * refused rather than misread - recovering a ride with the altitude in the
+     * heart rate column would be worse than admitting the file cannot be read.
+     */
+    const val VERSION = 1
+
+    private const val SEPARATOR = '\t'
+    private const val HEADER_TAG = "ride"
+    private const val POINT_TAG = "p"
+    private const val HEADER_FIELDS = 4
+    private const val POINT_FIELDS = 12
+
+    /** Written once, when the recording starts. */
+    fun header(
+        sportTypeId: String,
+        startedAtEpochMs: Long,
+    ): String = listOf(HEADER_TAG, VERSION.toString(), sportTypeId, startedAtEpochMs.toString()).joinToString("\t")
+
+    /**
+     * One sample.
+     *
+     * [movingMillis] rides along on every line rather than being written once at
+     * the end, because the end is the thing that may never happen.
+     */
+    fun line(
+        point: TrackPoint,
+        movingMillis: Long,
+    ): String =
+        listOf(
+            POINT_TAG,
+            point.timestampEpochMs.toString(),
+            point.latitudeDeg.orBlank(),
+            point.longitudeDeg.orBlank(),
+            point.altitudeMeters.orBlank(),
+            point.heartRateBpm.orBlank(),
+            point.cadenceRpm.orBlank(),
+            point.speedMps.orBlank(),
+            point.powerWatts.orBlank(),
+            point.distanceMeters.orBlank(),
+            point.temperatureC.orBlank(),
+            movingMillis.toString(),
+        ).joinToString("\t")
+
+    /**
+     * Reads back whatever survived.
+     *
+     * Null when there is no usable header, because without one there is no sport
+     * and no start time and the samples cannot be turned into a workout. A line
+     * that does not parse is skipped rather than fatal: the last one is expected
+     * to be truncated, and losing a second of a ride is not a reason to lose the
+     * ride.
+     */
+    fun parse(lines: Sequence<String>): RecoveredRide? {
+        var ride: Header? = null
+        var unreadable = false
+        var moving = 0L
+        val points = mutableListOf<TrackPoint>()
+        lines.forEach { raw ->
+            val fields = raw.split(SEPARATOR)
+            when (fields.firstOrNull()) {
+                HEADER_TAG -> {
+                    if (fields.size < HEADER_FIELDS) return@forEach
+                    if (fields[1].toIntOrNull() != VERSION) unreadable = true
+                    ride = fields[3].toLongOrNull()?.let { Header(fields[2], it) }
+                }
+
+                POINT_TAG -> {
+                    if (fields.size < POINT_FIELDS) return@forEach
+                    val timestamp = fields[1].toLongOrNull() ?: return@forEach
+                    points += pointFrom(fields, timestamp)
+                    moving = fields[11].toLongOrNull() ?: moving
+                }
+            }
+        }
+        return ride
+            ?.takeUnless { unreadable }
+            ?.let { RecoveredRide(it.sportTypeId, it.startedAtEpochMs, points.toList(), moving) }
+    }
+
+    /** What the first line names: which ride the samples below it belong to. */
+    private data class Header(
+        val sportTypeId: String,
+        val startedAtEpochMs: Long,
+    )
+
+    private fun pointFrom(
+        fields: List<String>,
+        timestamp: Long,
+    ) = TrackPoint(
+        timestampEpochMs = timestamp,
+        latitudeDeg = fields[2].toDoubleOrNull(),
+        longitudeDeg = fields[3].toDoubleOrNull(),
+        altitudeMeters = fields[4].toDoubleOrNull(),
+        heartRateBpm = fields[5].toIntOrNull(),
+        cadenceRpm = fields[6].toIntOrNull(),
+        speedMps = fields[7].toDoubleOrNull(),
+        powerWatts = fields[8].toIntOrNull(),
+        distanceMeters = fields[9].toDoubleOrNull(),
+        temperatureC = fields[10].toIntOrNull(),
+    )
+
+    /**
+     * An absent reading is an empty column rather than the word "null", which
+     * would parse back as a value on any reader that trusted it.
+     */
+    private fun Any?.orBlank(): String = this?.toString().orEmpty()
+}
