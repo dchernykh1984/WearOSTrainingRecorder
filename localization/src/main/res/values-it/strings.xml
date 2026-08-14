@@ -128,7 +128,7 @@
     <string name="action_start">Avvia</string>
     <string name="action_pause">Pausa</string>
     <string name="action_resume">Riprendi</string>
-    <string name="action_hold_to_end">Tieni premuto</string>
+    <string name="action_hold_to_end">Tieni premuto per finire</string>
     <string name="action_discard">Annulla</string>
     <string name="action_hold_to_discard">Tieni premuto per annullare</string>
 
