@@ -2,66 +2,35 @@ package com.dchernykh.trainingrecorder.core.connector
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class GarminProtocolTest {
     @Test
-    fun theTokenIsWhatIsAskedForBecauseTheSignInIsNotImplemented() {
-        // Asking for a login the app cannot exchange for a token would leave the
-        // rider with a connector that looks configured and never uploads.
-        assertEquals(listOf(GarminProtocol.BEARER_TOKEN), GarminProtocol.credentialFields.map { it.key })
-        assertTrue(GarminProtocol.credentialFields.single().secret)
+    fun theRidersOwnLoginIsWhatIsAskedForNotAnApplicationSecret() {
+        // There is no client secret to ask for: the credentials are the rider's
+        // own Garmin account, which is why the password never leaves the phone.
+        assertEquals(listOf("login", "password"), GarminProtocol.credentialFields.map { it.key })
+        assertTrue(GarminProtocol.credentialFields.single { it.key == "password" }.secret)
     }
 
     @Test
-    fun theRidersOwnLoginIsWhatTheSignInWouldAskForNotAnApplicationSecret() {
-        assertEquals(listOf("login", "password"), GarminProtocol.signInFields.map { it.key })
-        assertTrue(GarminProtocol.signInFields.single { it.key == "password" }.secret)
+    fun bothEndsNameTheTokensTheSameWay() {
+        // The phone writes these keys and the watch reads them; two spellings is
+        // a failure with no symptom other than uploads that never begin.
+        assertEquals("access_token", GarminProtocol.ACCESS_TOKEN)
+        assertEquals("refresh_token", GarminProtocol.REFRESH_TOKEN)
+        assertEquals("expires_at", GarminProtocol.EXPIRES_AT)
     }
 
     @Test
-    fun bothEndsNameTheTokenTheSameWay() {
-        // The phone writes this key and the watch reads it; two spellings is a
-        // failure with no symptom other than uploads that never begin.
-        assertEquals("bearer_token", GarminProtocol.BEARER_TOKEN)
-    }
+    fun theUploadCarriesTheBearerUnderTheIdentityItWasIssuedTo() {
+        val headers = GarminProtocol.apiHeaders("token-value")
 
-    @Test
-    fun theSignInQueryCarriesTheWidgetParametersGarminInsistsOn() {
-        val query = GarminProtocol.signInQuery()
-        assertEquals("gauth-widget", query["id"])
-        assertEquals("true", query["embedWidget"])
-        assertEquals(GarminProtocol.SSO_EMBED_URL, query["service"])
-        assertEquals(GarminProtocol.SSO_EMBED_URL, query["gauthHost"])
-    }
-
-    @Test
-    fun theServiceTicketIsPulledOutOfTheRedirectScript() {
-        val ticket = "ST-012345-abcXYZ-cas"
-        val html = """<script>response_url = "https://connect.garmin.com/modern?ticket=$ticket";</script>"""
-        assertEquals(ticket, GarminProtocol.ticketFrom(html))
-    }
-
-    @Test
-    fun aTicketIsReadOutOfAnEscapedRedirectToo() {
-        val html = """response_url = "https:\/\/connect.garmin.com\/modern?ticket=ST-99-zz-cas\\";"""
-        assertEquals("ST-99-zz-cas", GarminProtocol.ticketFrom(html))
-    }
-
-    @Test
-    fun aRefusedSignInHasNoTicket() {
-        assertNull(GarminProtocol.ticketFrom("<html>Invalid username or password</html>"))
-        assertNull(GarminProtocol.ticketFrom(""))
-        assertNull(GarminProtocol.ticketFrom("ticket="))
-    }
-
-    @Test
-    fun aSecondFactorPromptIsRecognisedRatherThanReadAsAWrongPassword() {
-        val html = """<form>Enter your MFA code<input name="verificationCode"></form>"""
-        assertTrue(GarminProtocol.needsMfa(html))
-        assertFalse(GarminProtocol.needsMfa("<html>Invalid username or password</html>"))
+        assertEquals("Bearer token-value", headers["Authorization"])
+        // A token issued to Garmin's Android app arriving under some other user
+        // agent is exactly the mismatch bot protection exists to notice.
+        assertEquals("GCM-Android-5.23", headers["User-Agent"])
+        assertTrue(headers.containsKey("X-Garmin-User-Agent"))
     }
 
     @Test

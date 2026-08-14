@@ -47,6 +47,7 @@ object HttpUpload {
     fun form(
         url: String,
         fields: Map<String, String>,
+        headers: Map<String, String> = emptyMap(),
     ): String {
         val body =
             fields.entries.joinToString("&") { (key, value) ->
@@ -61,6 +62,9 @@ object HttpUpload {
             connection.connectTimeout = CONNECT_TIMEOUT_MS
             connection.readTimeout = READ_TIMEOUT_MS
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+            // After the default, so a caller that needs its own content type or
+            // an authorization header gets the one it asked for.
+            headers.forEach { (name, value) -> connection.setRequestProperty(name, value) }
             connection.outputStream.use { it.write(body.toByteArray()) }
             val stream =
                 if (connection.responseCode in SUCCESS) {
