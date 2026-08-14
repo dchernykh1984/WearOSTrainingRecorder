@@ -140,4 +140,31 @@ class RaceStatsTest {
             RaceStatsFormatter.displayValue("gap_prev_abs", RaceStatsSnapshot.EMPTY),
         )
     }
+
+    @Test
+    fun `every offered refresh interval is one the config accepts`() {
+        RaceStatsConfig.REFRESH_CHOICES.forEach { seconds ->
+            assertEquals(seconds, RaceStatsConfig(refreshSeconds = seconds).refreshSeconds)
+        }
+    }
+
+    @Test
+    fun `the offered intervals run from the floor to the ceiling, in order`() {
+        assertEquals(RaceStatsConfig.MIN_REFRESH_SECONDS, RaceStatsConfig.REFRESH_CHOICES.first())
+        assertEquals(RaceStatsConfig.MAX_REFRESH_SECONDS, RaceStatsConfig.REFRESH_CHOICES.last())
+        assertEquals(RaceStatsConfig.REFRESH_CHOICES.sorted(), RaceStatsConfig.REFRESH_CHOICES)
+        assertTrue(RaceStatsConfig.DEFAULT_REFRESH_SECONDS in RaceStatsConfig.REFRESH_CHOICES)
+    }
+
+    /**
+     * A stored value need not be one of the choices - an older build, a
+     * hand-edited file - and the slider has to land somewhere sensible anyway.
+     */
+    @Test
+    fun `an interval that is not offered snaps to the closest one that is`() {
+        assertEquals(60, RaceStatsConfig.nearestRefresh(58))
+        assertEquals(10, RaceStatsConfig.nearestRefresh(RaceStatsConfig.MIN_REFRESH_SECONDS))
+        assertEquals(3600, RaceStatsConfig.nearestRefresh(RaceStatsConfig.MAX_REFRESH_SECONDS))
+        assertEquals(120, RaceStatsConfig.nearestRefresh(119))
+    }
 }
