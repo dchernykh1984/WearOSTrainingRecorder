@@ -131,6 +131,7 @@
     <string name="action_finish">Zakoncz</string>
     <string name="action_hold_to_end">Przytrzymaj</string>
     <string name="action_discard">Odrzuc</string>
+    <string name="action_hold_to_discard">Przytrzymaj, aby odrzucic</string>
 
     <string name="config_level_default">Domyslne</string>
     <string name="config_level_discipline">Z dyscypliny</string>

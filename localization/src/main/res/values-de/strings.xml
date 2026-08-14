@@ -131,6 +131,7 @@
     <string name="action_finish">Beenden</string>
     <string name="action_hold_to_end">Halten zum Beenden</string>
     <string name="action_discard">Verwerfen</string>
+    <string name="action_hold_to_discard">Halten zum Verwerfen</string>
 
     <string name="config_level_default">Standard</string>
     <string name="config_level_discipline">Von Disziplin</string>

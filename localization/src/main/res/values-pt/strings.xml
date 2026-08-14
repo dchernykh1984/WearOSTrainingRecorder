@@ -131,6 +131,7 @@
     <string name="action_finish">Terminar</string>
     <string name="action_hold_to_end">Segure para terminar</string>
     <string name="action_discard">Descartar</string>
+    <string name="action_hold_to_discard">Segure para descartar</string>
 
     <string name="config_level_default">Predefinido</string>
     <string name="config_level_discipline">Da disciplina</string>

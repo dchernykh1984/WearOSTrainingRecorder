@@ -131,6 +131,7 @@
     <string name="action_finish">Ukoncit</string>
     <string name="action_hold_to_end">Podrzte pro ukonceni</string>
     <string name="action_discard">Zahodit</string>
+    <string name="action_hold_to_discard">Podrzte pro zahozeni</string>
 
     <string name="config_level_default">Vychozi</string>
     <string name="config_level_discipline">Z discipliny</string>

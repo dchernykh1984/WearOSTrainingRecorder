@@ -128,6 +128,7 @@
     <string name="action_finish">Bitir</string>
     <string name="action_hold_to_end">Bitirmek icin basili tut</string>
     <string name="action_discard">Sil</string>
+    <string name="action_hold_to_discard">Silmek icin basili tut</string>
     <string name="config_level_default">Varsayilan</string>
     <string name="config_level_discipline">Disiplinden</string>
     <string name="config_level_sport_type">Kendi ayari</string>

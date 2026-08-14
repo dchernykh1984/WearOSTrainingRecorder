@@ -131,6 +131,7 @@
     <string name="action_finish">Завершить</string>
     <string name="action_hold_to_end">Удерживайте</string>
     <string name="action_discard">Отменить</string>
+    <string name="action_hold_to_discard">Удерживайте, чтобы отменить</string>
 
     <string name="config_level_default">По умолчанию</string>
     <string name="config_level_discipline">От направления</string>
