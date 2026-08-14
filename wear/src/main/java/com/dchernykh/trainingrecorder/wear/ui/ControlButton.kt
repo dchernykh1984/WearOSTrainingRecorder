@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +51,7 @@ fun ControlButton(
     val longPress = action.requiresLongPress
     val caption = stringResource(action.captionRes())
     Column(
-        modifier = modifier.width(SLOT_WIDTH),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         IconButton(
@@ -151,9 +150,6 @@ private fun RecordingAction.captionRes(): Int =
  */
 private val BUTTON_SIZE = 64.dp
 private val ICON_SIZE = 30.dp
-
-/** Wide enough for the longest caption without squeezing the pair together. */
-private val SLOT_WIDTH = 84.dp
 
 /**
  * Taken from the watch's own workout screen rather than from the theme: these two
