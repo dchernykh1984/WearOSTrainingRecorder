@@ -68,6 +68,12 @@ class WorkoutRepository(
         FitActivityEncoder.encode(workout, temporary)
         check(temporary.renameTo(target)) { "could not move the finished workout into place" }
 
+        // What the index already knows about this id, if anything. A ride
+        // recovered from its journal is saved under the id its interrupted run
+        // would have used, and that run may well have got as far as uploading:
+        // starting its upload state from scratch would send a ride Strava
+        // already has, be refused as a duplicate, and record it as failed.
+        val known = loadIndex().firstOrNull { it.id == workoutId }
         val summary =
             WorkoutSummary(
                 id = workoutId,
@@ -76,7 +82,9 @@ class WorkoutRepository(
                 durationSeconds = workout.totalTimerSeconds.toLong(),
                 distanceMeters = workout.totalDistanceMeters,
                 fileSizeBytes = target.length(),
-                uploads = enabledConnectors.associateWith { UploadState.PENDING },
+                uploads = enabledConnectors.associateWith { UploadState.PENDING } + known?.uploads.orEmpty(),
+                uploadAttempts = known?.uploadAttempts.orEmpty(),
+                uploadAttemptedAt = known?.uploadAttemptedAt.orEmpty(),
             )
         // Replaced rather than appended, so saving the same id twice lands on
         // itself. A ride recovered from its journal is deliberately saved under
