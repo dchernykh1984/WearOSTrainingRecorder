@@ -46,6 +46,14 @@ object WorkoutSummaryContract {
      */
     const val MAX_SUMMARIES = 50
 
+    /**
+     * Enough for anything a service or an exception actually says, and a bound
+     * on the one field here whose length nothing else limits. Fifty rides times
+     * two services of unbounded text is how a 100 KB item is overrun by a
+     * message no screen has room for anyway.
+     */
+    const val MAX_REASON = 120
+
     private val json = Json { ignoreUnknownKeys = true }
 
     private const val KEY_VERSION = "version"
@@ -93,7 +101,10 @@ object WorkoutSummaryContract {
             // history correctly, which is the only compatibility that matters
             // when watch and phone update on their own schedules.
             put(KEY_ATTEMPTS, buildJsonObject { summary.uploadAttempts.forEach { (id, n) -> put(id, n) } })
-            put(KEY_REASONS, buildJsonObject { summary.uploadReasons.forEach { (id, why) -> put(id, why) } })
+            put(
+                KEY_REASONS,
+                buildJsonObject { summary.uploadReasons.forEach { (id, why) -> put(id, why.take(MAX_REASON)) } },
+            )
         }
 
     /**
