@@ -90,10 +90,14 @@ class CompanionViewModel(
             _units.value = it.units
             _language.value = AppLanguage.byTag(it.languageTag)
         }
-        // From disk first, so the screen has something the moment it opens rather
-        // than after the Data Layer gets round to answering.
-        _workouts.value = history.read()
-        refreshWorkouts()
+        // From disk first, so the screen has something before the Data Layer
+        // gets round to answering - but off the main thread, because reading and
+        // decoding fifty rides during the first frame is jank the rider sees.
+        viewModelScope.launch {
+            _workouts.value = withContext(Dispatchers.IO) { history.read() }
+            refreshWorkouts()
+            connections.load()
+        }
     }
 
     /**
