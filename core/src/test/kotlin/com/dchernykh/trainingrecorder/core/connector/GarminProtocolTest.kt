@@ -31,6 +31,10 @@ class GarminProtocolTest {
         // agent is exactly the mismatch bot protection exists to notice.
         assertEquals("GCM-Android-5.23", headers["User-Agent"])
         assertTrue(headers.containsKey("X-Garmin-User-Agent"))
+        // Recorded as mandatory by the version that uploaded with a pasted
+        // token; dropping it would fail every upload with a 4xx the queue would
+        // eventually record as permanent.
+        assertEquals("NT", headers["NK"])
     }
 
     @Test

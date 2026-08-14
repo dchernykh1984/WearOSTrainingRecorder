@@ -77,6 +77,13 @@ object GarminProtocol {
             mapOf(
                 "Authorization" to "Bearer $accessToken",
                 "Accept" to "application/json",
+                // Kept from the version that uploaded with a hand-pasted token,
+                // which recorded that Garmin refuses an upload without it and
+                // does not check the value. The Python client omits it on this
+                // path, so it may well be unnecessary now - but the two answers
+                // cost nothing and cannot be told apart from here, and the one
+                // that is wrong fails every upload the rider ever makes.
+                "NK" to "NT",
             )
 
     /** Shared with the token exchange, which sends them without a bearer. */
