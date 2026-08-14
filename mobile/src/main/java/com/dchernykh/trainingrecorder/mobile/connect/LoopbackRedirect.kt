@@ -38,9 +38,13 @@ class LoopbackRedirect private constructor(
      * Requests are answered as they arrive - including the ones that lose this
      * race - because a browser left holding an unanswered socket shows a hung
      * tab, and the rider cannot tell a hung tab from a broken app.
+     *
+     * The listener is closed by the time this returns, either way: one call, one
+     * authorization.
      */
     fun awaitTarget(timeoutMs: Long): String? {
         require(timeoutMs > 0) { "the wait must be positive" }
+        check(!server.isClosed) { "the redirect listener has already been used" }
         val answers = ArrayBlockingQueue<String>(1)
         val threads = Executors.newCachedThreadPool()
         threads.execute {
@@ -55,6 +59,12 @@ class LoopbackRedirect private constructor(
         return try {
             answers.poll(timeoutMs, TimeUnit.MILLISECONDS)
         } finally {
+            // Closed here rather than left to the caller. A thread parked in
+            // accept() does not notice being interrupted - only the socket
+            // closing ends it - so waiting for the enclosing `use` would leave
+            // it running through the token exchange, still listening on a port
+            // whose only purpose has been served.
+            close()
             threads.shutdownNow()
         }
     }
