@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
@@ -42,9 +43,9 @@ fun RecordingPager(
     values: (String) -> String,
     actions: List<RecordingAction>,
     onAction: (RecordingAction) -> Unit,
+    modifier: Modifier = Modifier,
     /** Named on the controls page, so the rider can see what they are stopping. */
     @StringRes sportLabelRes: Int = 0,
-    modifier: Modifier = Modifier,
 ) {
     // The controls sit to the RIGHT of the data screens. Wear OS reserves the
     // left-to-right swipe for dismissing an app, so putting them on the left
@@ -204,7 +205,7 @@ private fun ControlsPage(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxSize().padding(horizontal = CONTROLS_INSET),
+        modifier = modifier.fillMaxSize().padding(horizontal = CONTROLS_INSET, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -217,12 +218,20 @@ private fun ControlsPage(
             )
         }
         Row(
+            // Shared out rather than fixed. Two captions wide enough for German
+            // at a fixed width overflow a 192 dp watch - the small round faces
+            // this app still supports - and the rim then eats the words that were
+            // added to make the buttons explain themselves. Capped as well as
+            // shared, so a large face does not push the pair out to its edges.
+            modifier = Modifier.fillMaxWidth().widthIn(max = CONTROLS_MAX_WIDTH),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             // Top, not centre: a caption that wraps to two lines would otherwise
             // push its own button out of line with the one beside it.
             verticalAlignment = Alignment.Top,
         ) {
-            actions.sortedBy { it.controlOrder() }.forEach { ControlButton(action = it, onAction = onAction) }
+            actions.sortedBy { it.controlOrder() }.forEach {
+                ControlButton(action = it, onAction = onAction, modifier = Modifier.weight(1f))
+            }
         }
     }
 }
@@ -231,4 +240,7 @@ private const val DATA_PAGE = 0
 private const val CONTROLS_PAGE = 1
 private const val PAGE_COUNT_WITH_CONTROLS = 2
 private val ROUND_INSET = 16.dp
-private val CONTROLS_INSET = 8.dp
+private val CONTROLS_INSET = 16.dp
+
+/** Two comfortable slots on a large face; the row shares the width below that. */
+private val CONTROLS_MAX_WIDTH = 200.dp
