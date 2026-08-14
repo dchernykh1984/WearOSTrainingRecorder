@@ -165,6 +165,7 @@
     <string name="connect_strava_callback">В поле Authorization Callback Domain укажите: localhost</string>
     <string name="connect_garmin_explanation">Войдите под своей учётной записью Garmin Connect. Публичного API для загрузки у Garmin нет, поэтому приложение входит так же, как настольные утилиты; пароль остаётся в приватном хранилище приложения на телефоне и на часы не передаётся.</string>
     <string name="connect_action">Подключить</string>
+    <string name="connect_show_secret">Показать</string>
 
     <string name="history_empty">Тренировок пока нет.</string>
     <string name="history_pending">Ожидает отправки</string>

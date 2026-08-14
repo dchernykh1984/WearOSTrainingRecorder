@@ -158,6 +158,7 @@
     <string name="connect_strava_callback">Authorization Callback Domain alanini localhost yapin</string>
     <string name="connect_garmin_explanation">Kendi Garmin Connect hesabinizla giris yapin. Sifre bu telefonda uygulamanin ozel deposunda kalir ve saate hicbir zaman gonderilmez.</string>
     <string name="connect_action">Baglan</string>
+    <string name="connect_show_secret">Goster</string>
 
     <string name="history_empty">Henuz antrenman yok.</string>
     <string name="history_pending">Yukleme bekliyor</string>

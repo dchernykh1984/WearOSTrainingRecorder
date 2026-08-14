@@ -158,6 +158,7 @@
     <string name="connect_strava_callback">Authorization Callback Domain को localhost पर सेट करें</string>
     <string name="connect_garmin_explanation">अपने Garmin Connect खाते से साइन इन करें। पासवर्ड इसी फ़ोन पर ऐप के निजी संग्रह में रहता है और घड़ी को कभी नहीं भेजा जाता।</string>
     <string name="connect_action">कनेक्ट करें</string>
+    <string name="connect_show_secret">दिखाएं</string>
 
     <string name="history_empty">अभी कोई ट्रेनिंग नहीं।</string>
     <string name="history_pending">अपलोड की प्रतीक्षा</string>
