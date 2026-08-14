@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.1](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.3.0...v0.3.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **localization:** finish the captions that stopped at the word hold ([eadc319](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/eadc31972fd3e1976acfd36676cb114470d23a5a))
+* **wear:** cap the controls row instead of only appearing to ([a5f09d1](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/a5f09d1f175fc5a13380892bed09052dbab2e5aa))
+* **wear:** centre the sport labels so a round screen cannot clip them ([5a38227](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/5a382274f378d537be1a09f978979a9b07263ff1))
+* **wear:** darken the go disc until its icon actually contrasts ([c651d33](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/c651d330f74c51d6df95ddc1cc6f414b812a5dd1))
+* **wear:** let the controls fit a small round watch ([71c64e8](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/71c64e8016ff3ea12680caab449e87393b20ada0))
+* **wear:** make the recording controls the size and colour a wrist needs ([d3a750a](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/d3a750a49d47e2abedb6cdafe425e4160bea0d11))
+* **wear:** say that discarding a start needs a hold ([78fe103](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/78fe1035b79f0d7a751f82f5b70dbe4bdad94608))
+* **wear:** stop the screen reader announcing every control twice ([d3a5dc6](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/d3a5dc653e458b49ef1137978e2758cc1d9f7eeb))
+
 ## [0.3.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.2.0...v0.3.0) (2026-08-14)
 
 
