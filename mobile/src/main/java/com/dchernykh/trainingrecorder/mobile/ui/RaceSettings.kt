@@ -58,11 +58,16 @@ fun RaceSettings(
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 16.dp),
         )
+        // Stepped through the offered intervals rather than sliding over every
+        // second between ten and three thousand six hundred. The slider carries
+        // the index; the seconds come from the list.
+        val choices = RaceStatsConfig.REFRESH_CHOICES
+        val selected = choices.indexOf(RaceStatsConfig.nearestRefresh(config.refreshSeconds))
         Slider(
-            value = config.refreshSeconds.toFloat(),
-            onValueChange = { onChanged(config.copy(refreshSeconds = it.toInt())) },
-            valueRange =
-                RaceStatsConfig.MIN_REFRESH_SECONDS.toFloat()..RaceStatsConfig.MAX_REFRESH_SECONDS.toFloat(),
+            value = selected.toFloat(),
+            onValueChange = { onChanged(config.copy(refreshSeconds = choices[it.toInt()])) },
+            valueRange = 0f..(choices.size - 1).toFloat(),
+            steps = choices.size - 2,
             modifier = Modifier.fillMaxWidth(),
         )
         Text(

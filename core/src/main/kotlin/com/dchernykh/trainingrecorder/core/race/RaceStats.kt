@@ -5,6 +5,7 @@ import com.dchernykh.trainingrecorder.core.field.FieldCategory
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlin.math.abs
 
 /**
  * What the rider sets on the phone to identify themselves in a race. All three
@@ -36,6 +37,31 @@ data class RaceStatsConfig(
         const val DEFAULT_REFRESH_SECONDS = 60
         const val MIN_REFRESH_SECONDS = 10
         const val MAX_REFRESH_SECONDS = 3600
+
+        /**
+         * The intervals the rider can actually choose between.
+         *
+         * The range spans ten seconds to an hour, and offering it as a continuous
+         * line makes the part anyone wants unreachable: every value under two
+         * minutes lives in the first three per cent of a slider, where one pixel
+         * is worth a quarter of a minute. Picking sixty seconds - the default,
+         * and the one the sibling apps use - was not possible at all.
+         *
+         * Spaced the way the choice actually matters: finely where a rider is
+         * trading freshness against battery in a short race, coarsely out at the
+         * end where the difference between half an hour and an hour is nothing.
+         */
+        val REFRESH_CHOICES =
+            listOf(10, 15, 20, 30, 45, 60, 90, 120, 180, 300, 600, 900, 1800, 3600)
+
+        /**
+         * The offered interval closest to [seconds].
+         *
+         * Needed because a stored value need not be one of the choices: it may
+         * come from an older build, from a hand-edited settings file, or from a
+         * later version of this list.
+         */
+        fun nearestRefresh(seconds: Int): Int = REFRESH_CHOICES.minBy { abs(it - seconds) }
     }
 }
 
