@@ -129,6 +129,7 @@
     <string name="action_pause">Кідірту</string>
     <string name="action_resume">Жалғастыру</string>
     <string name="action_finish">Аяқтау</string>
+    <string name="action_hold_to_end">Басып тұрыңыз</string>
     <string name="action_discard">Болдырмау</string>
 
     <string name="config_level_default">Әдепкі</string>

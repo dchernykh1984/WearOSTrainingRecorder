@@ -126,6 +126,7 @@
     <string name="action_pause">暂停</string>
     <string name="action_resume">继续</string>
     <string name="action_finish">结束</string>
+    <string name="action_hold_to_end">长按结束</string>
     <string name="action_discard">放弃</string>
     <string name="config_level_default">默认</string>
     <string name="config_level_discipline">来自项目</string>

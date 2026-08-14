@@ -126,6 +126,7 @@
     <string name="action_pause">रोकें</string>
     <string name="action_resume">जारी रखें</string>
     <string name="action_finish">समाप्त</string>
+    <string name="action_hold_to_end">समाप्त करने के लिए दबाए रखें</string>
     <string name="action_discard">रद्द करें</string>
     <string name="config_level_default">डिफ़ॉल्ट</string>
     <string name="config_level_discipline">अनुशासन से</string>

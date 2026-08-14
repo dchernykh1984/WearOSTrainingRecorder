@@ -129,6 +129,7 @@
     <string name="action_pause">Pause</string>
     <string name="action_resume">Reprendre</string>
     <string name="action_finish">Terminer</string>
+    <string name="action_hold_to_end">Maintenir pour finir</string>
     <string name="action_discard">Annuler</string>
 
     <string name="config_level_default">Par defaut</string>
