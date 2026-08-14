@@ -223,7 +223,11 @@ private fun ControlsPage(
             // this app still supports - and the rim then eats the words that were
             // added to make the buttons explain themselves. Capped as well as
             // shared, so a large face does not push the pair out to its edges.
-            modifier = Modifier.fillMaxWidth().widthIn(max = CONTROLS_MAX_WIDTH),
+            // The cap comes first. Modifiers apply left to right, and a
+            // fillMaxWidth ahead of it hands down an exact width that widthIn can
+            // only agree with - the row looked capped and spread to the rim on
+            // every face wider than the cap.
+            modifier = Modifier.widthIn(max = CONTROLS_MAX_WIDTH).fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             // Top, not centre: a caption that wraps to two lines would otherwise
             // push its own button out of line with the one beside it.
