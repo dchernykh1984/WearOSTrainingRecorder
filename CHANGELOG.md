@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.4.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.3.3...v0.4.0) (2026-08-14)
+
+
+### Features
+
+* **mobile:** let the rider read back the secrets they type ([2194a47](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/2194a47ee9d3d66d9b699cab6de7ebf53cb98999))
+* **mobile:** open the field picker one heading at a time ([79ebba0](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/79ebba0fdc746ef08db26ea03008f9e33ce514cf))
+* say why a ride is still waiting instead of only that it is ([3e9b2de](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/3e9b2de62b28b9d7bfcde74f4b3547686218e54a))
+
+
+### Bug Fixes
+
+* **core:** age the watch's own readings out the way a strap's already were ([7247609](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/72476098b05a87fa8b13adf0702585467f159e64))
+* **core:** bound the failure text a summary carries to the phone ([c1170de](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/c1170de3fcd3c24b84b05b04c2e8af19ecc556a3))
+* **mobile:** answer every connection the browser opens during Strava sign-in ([ef1dbf1](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/ef1dbf19b6619ef930ebe870c0ec2addb7aaaaaa))
+* **mobile:** close the redirect listener when the wait for it ends ([64601d4](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/64601d466fdbe8bbe42ac0a9b994414932f0f82e))
+* **mobile:** keep the field count level with the buttons that change it ([00d1fcd](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/00d1fcdcffcc8f37987ad7abf65107b2f2ec60cb))
+* **mobile:** let the headings outrank the fields under them ([6e04abf](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/6e04abfd32ba87dc5eb1ce46a65a1419ae911963))
+* **mobile:** measure the space the field count needs instead of guessing it ([aa7478e](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/aa7478e245d848fbd6156a4db2093c52fbb791d9))
+* **wear:** keep the retry chain from drifting hours between passes ([8b2ac2d](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/8b2ac2de06f39d6b6351d2ff9af4dc73116dff3e))
+* **wear:** stop declaring the upload drain finished while rides still wait ([60f7ce6](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/60f7ce6a7a682c9cd7dafbbadbb495e63abe4c63))
+
 ## [0.3.3](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.3.2...v0.3.3) (2026-08-14)
 
 
