@@ -32,6 +32,7 @@ import com.dchernykh.trainingrecorder.core.sport.SportCatalogue
 import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.localization.Labels
 import com.dchernykh.trainingrecorder.localization.R
+import kotlinx.coroutines.delay
 
 /**
  * The phone companion.
@@ -64,12 +65,18 @@ fun CompanionApp(
                 if (picking != null) picking = null else editingId = null
             }
 
-            // Re-read when the rider opens the history, because the listener
-            // writes the watch's list to disk from a service the screen knows
-            // nothing about - without this, a ride that arrived while the app was
-            // open would only appear on the next launch.
+            // The listener writes the watch's list to disk from a service the
+            // screen knows nothing about, so the screen has to go and look. While
+            // the history is open it keeps looking: a ride that lands while the
+            // rider is watching the list is exactly the ride they are watching
+            // for, and one that only appeared after navigating away and back
+            // would read as the sync being broken. The effect ends with the
+            // section, so nothing polls behind the other four tabs.
             LaunchedEffect(section) {
-                if (section == Section.HISTORY) model.refreshWorkouts()
+                while (section == Section.HISTORY) {
+                    model.refreshWorkouts()
+                    delay(HISTORY_REFRESH_MS)
+                }
             }
 
             Scaffold(
@@ -243,3 +250,10 @@ private fun ConfigLevel.labelRes(): Int =
         ConfigLevel.DISCIPLINE -> R.string.config_level_discipline
         ConfigLevel.SPORT_TYPE -> R.string.config_level_sport_type
     }
+
+/**
+ * How often the history looks for what the watch has sent while it is on screen.
+ * Ten seconds is under the time it takes to wonder whether a ride arrived, and
+ * far over the cost of reading one small file.
+ */
+private const val HISTORY_REFRESH_MS = 10_000L
