@@ -48,18 +48,38 @@ class GarminConnector(
     ): UploadResult =
         withContext(Dispatchers.IO) {
             val current = refreshed(credentials)
-            val token = current[GarminProtocol.ACCESS_TOKEN].orEmpty()
-            if (token.isBlank()) return@withContext UploadResult.Retryable("not signed in yet")
-            val response =
-                runCatching {
-                    HttpUpload.post(
-                        url = GarminProtocol.UPLOAD_URL,
-                        parts = listOf(Part.File("file", upload.fileName, upload.openStream)),
-                        headers = GarminProtocol.apiHeaders(token),
-                    )
-                }.getOrElse { return@withContext UploadResult.Retryable("network: ${it.message}") }
-            GarminProtocol.classify(response.statusCode)
+            val first = send(upload, current) ?: return@withContext UploadResult.Retryable("not signed in yet")
+            // A rejection is the other way a token can be spent. The expiry says
+            // when it should have run out, but a watch whose clock drifted, or a
+            // session Garmin invalidated early, says nothing until it refuses -
+            // and without this the queue would retry against a dead token until
+            // it gave up and marked a perfectly good ride permanently failed.
+            if (first != UNAUTHORIZED) return@withContext GarminProtocol.classify(first)
+            val renewed = forceRefresh(current) ?: return@withContext GarminProtocol.classify(first)
+            val second = send(upload, renewed) ?: return@withContext UploadResult.Retryable("not signed in yet")
+            GarminProtocol.classify(second)
         }
+
+    /** The status code, or null when there is no token to send. */
+    private fun send(
+        upload: WorkoutUpload,
+        credentials: Map<String, String>,
+    ): Int? {
+        val token = credentials[GarminProtocol.ACCESS_TOKEN].orEmpty()
+        if (token.isBlank()) return null
+        return runCatching {
+            HttpUpload
+                .post(
+                    url = GarminProtocol.UPLOAD_URL,
+                    parts = listOf(Part.File("file", upload.fileName, upload.openStream)),
+                    headers = GarminProtocol.apiHeaders(token),
+                ).statusCode
+        }.getOrElse { SERVICE_UNAVAILABLE }
+    }
+
+    /** A refresh asked for by a refusal rather than by the clock. */
+    private fun forceRefresh(credentials: Map<String, String>): Map<String, String>? =
+        exchangeRefreshToken(credentials)?.let { tokens -> (credentials + tokens).also(onTokensRefreshed) }
 
     /**
      * The credentials to upload with, refreshing first if the token is spent.
@@ -75,8 +95,13 @@ class GarminConnector(
 
     /** Null whenever the refresh is unnecessary, impossible, or unsuccessful. */
     private fun newTokens(credentials: Map<String, String>): Map<String, String>? {
+        if (!GarminSignIn.needsRefresh(credentials, System.currentTimeMillis() / MILLIS_PER_SECOND)) return null
+        return exchangeRefreshToken(credentials)
+    }
+
+    /** Null when there is nothing to trade, or the trade was refused. */
+    private fun exchangeRefreshToken(credentials: Map<String, String>): Map<String, String>? {
         val now = System.currentTimeMillis() / MILLIS_PER_SECOND
-        if (!GarminSignIn.needsRefresh(credentials, now)) return null
         // The id the token was issued under, not the one this build would ask
         // for: Garmin refuses a refresh that names a different client.
         val clientId = credentials[GarminProtocol.TOKEN_CLIENT_ID].orEmpty()
@@ -96,5 +121,9 @@ class GarminConnector(
     private companion object {
         val ACCESS_TOKEN = CredentialField(GarminProtocol.ACCESS_TOKEN, secret = true)
         const val MILLIS_PER_SECOND = 1000L
+        const val UNAUTHORIZED = 401
+
+        /** What a network failure is reported as, so it classifies as retryable. */
+        const val SERVICE_UNAVAILABLE = 503
     }
 }
