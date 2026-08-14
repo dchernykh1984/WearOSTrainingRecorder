@@ -396,17 +396,26 @@ class RecordingViewModel(
         // write, rather than saving an empty one on top of a lost one.
         if (saved.isSuccess) {
             samples.clear()
-            // Dropped only now, once the ride exists as a file. Deleting it any
-            // earlier would leave a window where a kill loses the ride from both
-            // places at once.
-            withContext(Dispatchers.IO + NonCancellable) { journal.finish(start) }
-            // The phone's history is fed from here: it holds no workouts of its
-            // own, so a ride it is never told about is a ride it can never show.
-            withContext(Dispatchers.IO) { publisher.publish(repository) }
-            // Queued straight away rather than on the next launch: the rider
-            // closes the app the moment the ride ends, and the workout should
-            // be on its way before they do.
-            UploadWorker.schedule(getApplication())
+            // All of it uncancellable, for the same reason the save above is.
+            // The rider who swipes the app away the moment they finish cancels
+            // this scope, and a cancellable suspension anywhere in here abandons
+            // everything below it: the ride would be on disk, its journal still
+            // in the way of the next one, the phone never told, and the upload
+            // never queued - a saved workout that quietly never leaves the watch.
+            withContext(Dispatchers.IO + NonCancellable) {
+                // Dropped only now, once the ride exists as a file. Deleting it
+                // any earlier would leave a window where a kill loses the ride
+                // from both places at once.
+                journal.finish(start)
+                // Queued before the phone is told, because this is the part that
+                // matters: the workout should be on its way before the rider has
+                // put the watch down.
+                UploadWorker.schedule(getApplication())
+                // The phone's history is fed from here: it holds no workouts of
+                // its own, so a ride it is never told about is one it can never
+                // show.
+                publisher.publish(repository)
+            }
         }
         history.value = SportOrdering.record(history.value, sportId).also(settings::writeHistory)
     }
