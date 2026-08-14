@@ -57,13 +57,20 @@ fun ControlButton(
         IconButton(
             onClick = { if (!longPress) onAction(action) },
             onLongClick = if (longPress) ({ onAction(action) }) else null,
-            onLongClickLabel = if (longPress) caption else null,
+            // No label: the caption is already the button's description, and
+            // repeating it here has the screen reader say "Hold to end, button,
+            // double tap and hold to Hold to end". Without one the platform
+            // supplies its own "double tap and hold to activate", which says the
+            // same thing once.
+            onLongClickLabel = null,
             colors =
                 IconButtonDefaults.filledIconButtonColors(
                     containerColor = action.containerColour(),
-                    // White on both discs, as the platform's own controls do. The
-                    // icons are large solid shapes rather than text, so they read
-                    // at a glance on either colour.
+                    // White on both discs, as the platform's own controls do -
+                    // and both discs are dark enough for it to clear the 3:1 a
+                    // graphical object needs. The first green was the brighter one
+                    // the watch itself uses, at 2.2:1, which washes out in exactly
+                    // the daylight this change was made for.
                     contentColor = Color.White,
                 ),
             modifier = Modifier.size(BUTTON_SIZE),
@@ -157,4 +164,4 @@ private val ICON_SIZE = 30.dp
  * them without reading them.
  */
 private val STOP = Color(0xFFE5393E)
-private val GO = Color(0xFF1EC87D)
+private val GO = Color(0xFF12A163)
