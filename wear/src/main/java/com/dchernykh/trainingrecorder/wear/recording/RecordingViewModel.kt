@@ -162,17 +162,17 @@ class RecordingViewModel(
             // A journal that cannot become a workout will not become one on the
             // next launch either, and keeping it would mean trying forever.
             Log.w(TAG, "an interrupted ride could not be rebuilt from its journal")
-            journal.finish(ride.startedAtEpochMs)
+            journal.discardRecovered()
             return
         }
         val saved = runCatching { repository.save("workout-${ride.startedAtEpochMs}", workout, CONNECTORS) }
         // Kept when the save failed: the journal is still the only copy, and the
         // next launch gets another chance at it.
         if (saved.isSuccess) {
-            // Named, because the rider may well have started a new ride while
-            // this was encoding, and that ride's journal is not this one's to
-            // close.
-            journal.finish(ride.startedAtEpochMs)
+            // The claimed copy, not the live journal: the rider may well have
+            // started a new ride while this was encoding, and that one's journal
+            // is not this one's to close.
+            journal.discardRecovered()
             history.value = SportOrdering.record(history.value, ride.sportTypeId).also(settings::writeHistory)
             publisher.publish(repository)
             UploadWorker.schedule(getApplication())

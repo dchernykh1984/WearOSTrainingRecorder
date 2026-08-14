@@ -28,6 +28,15 @@ import java.io.FileOutputStream
 class TrackJournalStore(
     context: Context,
     private val file: File = File(context.filesDir, "ride-journal.tsv"),
+    /**
+     * Where an interrupted ride is moved to the moment recovery notices it.
+     *
+     * Recovery is asynchronous and encoding a FIT file takes seconds, while
+     * starting a ride is one tap. Claiming the file first - one rename, under
+     * the same lock [begin] takes - is what stops the new ride's journal from
+     * being opened over the old ride's samples before anything has read them.
+     */
+    private val claimed: File = File(file.parentFile, file.name + ".recovering"),
 ) {
     private var stream: FileOutputStream? = null
     private var sinceSync = 0
@@ -121,10 +130,25 @@ class TrackJournalStore(
      */
     @Synchronized
     fun recover(): RecoveredRide? {
-        if (openFor != null || !file.exists()) return null
+        if (openFor != null) return null
+        // A claim already there is one a previous launch made and never got to
+        // clear, which means the save failed: that ride still deserves a turn.
+        if (!claimed.exists() && !runCatching { file.renameTo(claimed) }.getOrDefault(false)) return null
         return runCatching {
-            file.useLines { TrackJournal.parse(it) }
+            claimed.useLines { TrackJournal.parse(it) }
         }.getOrNull()?.takeIf { it.points.isNotEmpty() }
+    }
+
+    /**
+     * Drops the claimed journal, once the ride it held is safely a FIT file.
+     *
+     * Separate from [finish] because it answers a different question: that one
+     * asks whether the live journal still belongs to the caller, while this one
+     * is about a file no live recording can be using.
+     */
+    @Synchronized
+    fun discardRecovered() {
+        runCatching { claimed.delete() }
     }
 
     private fun close() {
