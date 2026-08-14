@@ -262,6 +262,7 @@ fun FieldPicker(
                 items(fields, key = { it.id }) { field ->
                     Text(
                         text = stringResource(Labels.field(field.id)),
+                        style = MaterialTheme.typography.bodyLarge,
                         modifier =
                             Modifier
                                 .fillMaxWidth()
@@ -300,8 +301,19 @@ private fun CategoryHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text = stringResource(Labels.category(category.id)))
-        Text(text = if (open) "-" else "+ $fieldCount")
+        // The heading outranks the fields under it. It read the other way round
+        // before - a smaller, quieter heading over full-size field names - which
+        // is exactly backwards for a list whose headings are now the thing the
+        // rider navigates by.
+        Text(
+            text = stringResource(Labels.category(category.id)),
+            style = MaterialTheme.typography.titleLarge,
+        )
+        Text(
+            text = if (open) "-" else "+ $fieldCount",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
     HorizontalDivider()
 }
