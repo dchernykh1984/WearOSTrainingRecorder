@@ -169,10 +169,16 @@ class GarminAuthorization {
             connection.connectTimeout = CONNECT_TIMEOUT_MS
             connection.readTimeout = READ_TIMEOUT_MS
             headers.forEach { (name, value) -> connection.setRequestProperty(name, value) }
-            if (cookies.isNotEmpty()) connection.setRequestProperty("Cookie", cookies)
+            // Only to the host that issued them. The sign-in session belongs to
+            // the SSO host, and handing it to the token service would be both
+            // pointless and a leak - while letting that service's own cookies
+            // overwrite it would break the second half of an MFA sign-in, which
+            // still has to talk to SSO.
+            val ssoHost = URL(url).host == SSO_HOST
+            if (ssoHost && cookies.isNotEmpty()) connection.setRequestProperty("Cookie", cookies)
             connection.outputStream.use { it.write(body) }
             val status = connection.responseCode
-            rememberCookies(connection)
+            if (ssoHost) rememberCookies(connection)
             val stream = if (status in SUCCESS_RANGE) connection.inputStream else connection.errorStream
             Response(status, stream?.bufferedReader()?.use(BufferedReader::readText).orEmpty())
         } finally {
@@ -204,6 +210,8 @@ class GarminAuthorization {
     private fun encode(value: String): String = URLEncoder.encode(value, Charsets.UTF_8.name())
 
     private companion object {
+        /** The only host whose cookies mean anything to this flow. */
+        const val SSO_HOST = "sso.garmin.com"
         const val CONNECT_TIMEOUT_MS = 15_000
         const val READ_TIMEOUT_MS = 30_000
         const val MILLIS_PER_SECOND = 1000L
