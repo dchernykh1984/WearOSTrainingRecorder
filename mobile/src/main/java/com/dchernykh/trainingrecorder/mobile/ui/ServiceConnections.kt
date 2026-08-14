@@ -147,6 +147,10 @@ class ServiceConnections(
             return
         }
         _status.value = GarminProtocol.ID to R.string.connect_in_progress
+        // A fresh sign-in throws away the session the last one built, so a code
+        // field still standing from that attempt would post against a cookie jar
+        // that no longer exists.
+        _codeRequested.value = false
         apply(garmin.signIn(login, password))
     }
 
