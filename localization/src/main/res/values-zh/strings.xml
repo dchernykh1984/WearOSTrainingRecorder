@@ -164,6 +164,7 @@
     <string name="history_pending">等待上传</string>
     <string name="history_uploaded">已上传</string>
     <string name="history_failed">上传被拒绝</string>
+    <string name="history_attempts">尝试次数：%1$d</string>
     <string name="history_not_sent">尚未发送</string>
     <string name="settings_language">语言</string>
     <string name="language_system">系统语言</string>

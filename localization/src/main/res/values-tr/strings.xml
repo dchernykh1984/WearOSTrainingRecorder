@@ -164,6 +164,7 @@
     <string name="history_pending">Yukleme bekliyor</string>
     <string name="history_uploaded">Yuklendi</string>
     <string name="history_failed">Yukleme reddedildi</string>
+    <string name="history_attempts">deneme: %1$d</string>
     <string name="history_not_sent">Hicbir yere gonderilmedi</string>
     <string name="settings_language">Dil</string>
     <string name="language_system">Sistem dili</string>

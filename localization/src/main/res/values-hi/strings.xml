@@ -164,6 +164,7 @@
     <string name="history_pending">अपलोड की प्रतीक्षा</string>
     <string name="history_uploaded">अपलोड हो गया</string>
     <string name="history_failed">अपलोड अस्वीकृत</string>
+    <string name="history_attempts">प्रयास: %1$d</string>
     <string name="history_not_sent">कहीं नहीं भेजा</string>
     <string name="settings_language">भाषा</string>
     <string name="language_system">सिस्टम भाषा</string>

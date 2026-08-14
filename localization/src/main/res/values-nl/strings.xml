@@ -171,6 +171,7 @@
     <string name="history_pending">Wacht op upload</string>
     <string name="history_uploaded">Geupload</string>
     <string name="history_failed">Upload geweigerd</string>
+    <string name="history_attempts">pogingen: %1$d</string>
     <string name="history_not_sent">Nergens verzonden</string>
     <string name="settings_language">Taal</string>
     <string name="language_system">Systeemtaal</string>

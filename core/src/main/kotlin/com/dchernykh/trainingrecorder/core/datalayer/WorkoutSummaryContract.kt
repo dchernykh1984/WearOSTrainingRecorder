@@ -57,6 +57,8 @@ object WorkoutSummaryContract {
     private const val KEY_DISTANCE = "distance"
     private const val KEY_BYTES = "bytes"
     private const val KEY_UPLOADS = "uploads"
+    private const val KEY_ATTEMPTS = "attempts"
+    private const val KEY_REASONS = "reasons"
 
     /**
      * Newest first and truncated, so the cap keeps the rides the phone is most
@@ -85,6 +87,13 @@ object WorkoutSummaryContract {
             put(KEY_DISTANCE, summary.distanceMeters)
             put(KEY_BYTES, summary.fileSizeBytes)
             put(KEY_UPLOADS, buildJsonObject { summary.uploads.forEach { (id, state) -> put(id, state.id) } })
+            // Added without bumping the version: a phone that predates these
+            // keys ignores what it does not know, and one that expects them
+            // treats their absence as "nothing to explain". Both read the
+            // history correctly, which is the only compatibility that matters
+            // when watch and phone update on their own schedules.
+            put(KEY_ATTEMPTS, buildJsonObject { summary.uploadAttempts.forEach { (id, n) -> put(id, n) } })
+            put(KEY_REASONS, buildJsonObject { summary.uploadReasons.forEach { (id, why) -> put(id, why) } })
         }
 
     /**
@@ -122,6 +131,18 @@ object WorkoutSummaryContract {
                 distanceMeters = number(node, KEY_DISTANCE) ?: 0.0,
                 fileSizeBytes = number(node, KEY_BYTES)?.toLong() ?: 0L,
                 uploads = uploads(node),
+                uploadAttempts =
+                    (node[KEY_ATTEMPTS] as? JsonObject)
+                        ?.mapNotNull { (key, value) ->
+                            (value as? JsonPrimitive)?.content?.toIntOrNull()?.let { key to it }
+                        }?.toMap()
+                        .orEmpty(),
+                uploadReasons =
+                    (node[KEY_REASONS] as? JsonObject)
+                        ?.mapNotNull { (key, value) ->
+                            (value as? JsonPrimitive)?.takeIf { it.isString }?.let { key to it.content }
+                        }?.toMap()
+                        .orEmpty(),
             )
         }.getOrNull()
     }

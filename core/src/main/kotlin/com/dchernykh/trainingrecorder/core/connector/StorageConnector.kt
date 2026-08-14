@@ -72,6 +72,23 @@ sealed interface UploadResult {
                 is Rejected -> UploadState.FAILED
                 is Retryable -> UploadState.PENDING
             }
+
+    /**
+     * Why the ride has not arrived, in the words the service or the network
+     * used. Null on success, because a ride that is there needs no explaining.
+     *
+     * Deliberately untranslated: these are diagnostics, not prose - "session
+     * expired", "rate limited", "UnknownHostException" - and a rider comparing
+     * one against a search engine is better served by the string the service
+     * actually said.
+     */
+    val failureReason: String?
+        get() =
+            when (this) {
+                is Success -> null
+                is Rejected -> reason
+                is Retryable -> reason
+            }
 }
 
 /**

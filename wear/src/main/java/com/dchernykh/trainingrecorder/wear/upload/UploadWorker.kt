@@ -129,6 +129,7 @@ class UploadWorker(
                 state = UploadState.FAILED,
                 attempts = pending.attempts,
                 attemptedAtEpochMs = now(),
+                reason = "the recorded file is gone",
             )
             return
         }
@@ -155,6 +156,7 @@ class UploadWorker(
             state = UploadQueue.stateAfter(pending, result),
             attempts = attempts,
             attemptedAtEpochMs = now(),
+            reason = result.failureReason,
         )
     }
 

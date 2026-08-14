@@ -120,4 +120,40 @@ class WorkoutSummaryContractTest {
 
         assertTrue(decoded.single().uploads.isEmpty())
     }
+
+    @Test
+    fun theReasonARideHasNotArrivedTravelsWithIt() {
+        // The whole point of carrying it: the rider cannot read the watch's log,
+        // so the phone's history is the only place an explanation can appear.
+        val stuck =
+            WorkoutSummary(
+                id = "w1",
+                sportTypeId = "cycling_road",
+                startedAtEpochMs = 1_770_000_000_000L,
+                durationSeconds = 3600,
+                distanceMeters = 30_000.0,
+                fileSizeBytes = 2048,
+                uploads = mapOf("garmin" to UploadState.PENDING),
+                uploadAttempts = mapOf("garmin" to 4),
+                uploadReasons = mapOf("garmin" to "session expired"),
+            )
+        val decoded = WorkoutSummaryContract.decode(WorkoutSummaryContract.encode(listOf(stuck)))!!.single()
+        assertEquals("session expired", decoded.uploadReasons["garmin"])
+        assertEquals(4, decoded.uploadAttempts["garmin"])
+    }
+
+    @Test
+    fun aPayloadFromAWatchThatPredatesTheReasonsIsStillReadable() {
+        // Watch and phone update on their own schedules, so the older shape has
+        // to keep working - as an unexplained ride rather than as no ride.
+        val older =
+            """
+            {"version":1,"workouts":[{"id":"w1","sport":"cycling_road","startedAt":1770000000000,
+            "duration":600,"distance":1000.0,"bytes":512,"uploads":{"garmin":"pending"}}]}
+            """.trimIndent().replace("\n", "")
+        val decoded = WorkoutSummaryContract.decode(older)!!.single()
+        assertEquals(UploadState.PENDING, decoded.uploads["garmin"])
+        assertTrue(decoded.uploadReasons.isEmpty(), "nothing to explain is not an error")
+        assertTrue(decoded.uploadAttempts.isEmpty())
+    }
 }

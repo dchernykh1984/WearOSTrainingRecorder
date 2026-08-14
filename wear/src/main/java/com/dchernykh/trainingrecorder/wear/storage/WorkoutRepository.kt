@@ -85,6 +85,7 @@ class WorkoutRepository(
                 uploads = enabledConnectors.associateWith { UploadState.PENDING } + known?.uploads.orEmpty(),
                 uploadAttempts = known?.uploadAttempts.orEmpty(),
                 uploadAttemptedAt = known?.uploadAttemptedAt.orEmpty(),
+                uploadReasons = known?.uploadReasons.orEmpty(),
             )
         // Replaced rather than appended, so saving the same id twice lands on
         // itself. A ride recovered from its journal is deliberately saved under
@@ -109,6 +110,7 @@ class WorkoutRepository(
         state: UploadState,
         attempts: Int,
         attemptedAtEpochMs: Long,
+        reason: String? = null,
     ) = synchronized(lock) {
         writeIndex(
             loadIndex().map {
@@ -119,6 +121,15 @@ class WorkoutRepository(
                         uploads = it.uploads + (connectorId to state),
                         uploadAttempts = it.uploadAttempts + (connectorId to attempts),
                         uploadAttemptedAt = it.uploadAttemptedAt + (connectorId to attemptedAtEpochMs),
+                        // Cleared on success rather than left behind: an old
+                        // explanation next to a delivered ride is worse than
+                        // none, because it reads as a ride that failed.
+                        uploadReasons =
+                            if (reason == null) {
+                                it.uploadReasons - connectorId
+                            } else {
+                                it.uploadReasons + (connectorId to reason)
+                            },
                     )
                 }
             },
@@ -191,6 +202,12 @@ class WorkoutRepository(
                             (value as? JsonPrimitive)?.content?.toLongOrNull()?.let { key to it }
                         }?.toMap()
                         .orEmpty(),
+                uploadReasons =
+                    (node["reasons"] as? JsonObject)
+                        ?.mapNotNull { (key, value) ->
+                            (value as? JsonPrimitive)?.takeIf { it.isString }?.let { key to it.content }
+                        }?.toMap()
+                        .orEmpty(),
             )
         }.getOrNull()
     }
@@ -218,6 +235,10 @@ class WorkoutRepository(
                             put(
                                 "attemptedAt",
                                 buildJsonObject { summary.uploadAttemptedAt.forEach { (k, v) -> put(k, v) } },
+                            )
+                            put(
+                                "reasons",
+                                buildJsonObject { summary.uploadReasons.forEach { (k, v) -> put(k, v) } },
                             )
                         },
                     )

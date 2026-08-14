@@ -171,6 +171,7 @@
     <string name="history_pending">En attente d\'envoi</string>
     <string name="history_uploaded">Envoye</string>
     <string name="history_failed">Envoi refuse</string>
+    <string name="history_attempts">tentatives : %1$d</string>
     <string name="history_not_sent">Non envoye</string>
     <string name="settings_language">Langue</string>
     <string name="language_system">Langue du système</string>
