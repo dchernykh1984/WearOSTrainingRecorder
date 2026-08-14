@@ -197,8 +197,13 @@
     <string name="connect_done">接続済み</string>
     <string name="connect_failed">接続できませんでした。入力内容を確認して再試行してください。</string>
     <string name="connect_needs_application">先にアプリケーションの Client ID と Secret を入力してください。</string>
-    <string name="connect_garmin_token_hint">Garmin Connect のトークンを貼り付けてください。自動ログインはまだ利用できません。</string>
     <string name="settings_units">単位</string>
     <string name="units_metric">メートル法</string>
     <string name="units_imperial">ヤード・ポンド法</string>
+    <string name="connect_garmin_code_hint">Garmin から確認コードがメールまたは SMS で届くことがあります。届いたら下に入力してください。</string>
+    <string name="connect_needs_login">先に Garmin のログインとパスワードを入力してください。</string>
+    <string name="connect_code_sent">Garmin が確認コードを送信しました。下に入力してください。</string>
+    <string name="connect_wrong_credentials">Garmin はそのログインとパスワードを受け付けませんでした。</string>
+    <string name="connect_code_label">確認コード</string>
+    <string name="connect_submit_code">コードを確認</string>
 </resources>

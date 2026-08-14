@@ -204,8 +204,13 @@
     <string name="connect_done">Қосылды</string>
     <string name="connect_failed">Қосылу мүмкін болмады. Деректерді тексеріп, қайталаңыз.</string>
     <string name="connect_needs_application">Алдымен қолданбаңыздың Client ID және Secret мәнін енгізіңіз.</string>
-    <string name="connect_garmin_token_hint">Garmin Connect токенін қойыңыз. Автоматты кіру әзірге қолжетімсіз.</string>
     <string name="settings_units">Өлшем бірліктері</string>
     <string name="units_metric">Метрлік</string>
     <string name="units_imperial">Империялық</string>
+    <string name="connect_garmin_code_hint">Garmin поштаға немесе SMS-ке растау кодын жіберуі мүмкін. Оны төменде енгізіңіз.</string>
+    <string name="connect_needs_login">Алдымен Garmin логині мен құпия сөзін енгізіңіз.</string>
+    <string name="connect_code_sent">Garmin растау кодын жіберді. Оны төменде енгізіңіз.</string>
+    <string name="connect_wrong_credentials">Garmin бұл логин мен құпия сөзді қабылдамады.</string>
+    <string name="connect_code_label">Растау коды</string>
+    <string name="connect_submit_code">Растау</string>
 </resources>

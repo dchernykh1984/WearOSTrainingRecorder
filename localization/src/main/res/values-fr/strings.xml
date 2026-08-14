@@ -204,8 +204,13 @@
     <string name="connect_done">Connecte</string>
     <string name="connect_failed">Connexion impossible. Verifiez les informations et reessayez.</string>
     <string name="connect_needs_application">Saisissez d\'abord le Client ID et le Secret de votre application.</string>
-    <string name="connect_garmin_token_hint">Collez un jeton de Garmin Connect. La connexion automatique n\'est pas encore disponible.</string>
     <string name="settings_units">Unités</string>
     <string name="units_metric">Métrique</string>
     <string name="units_imperial">Impérial</string>
+    <string name="connect_garmin_code_hint">Garmin peut envoyer un code de verification par e-mail ou SMS. Saisissez-le ci-dessous.</string>
+    <string name="connect_needs_login">Saisissez d\'abord votre identifiant et mot de passe Garmin.</string>
+    <string name="connect_code_sent">Garmin a envoye un code de verification. Saisissez-le ci-dessous.</string>
+    <string name="connect_wrong_credentials">Garmin a refuse cet identifiant et ce mot de passe.</string>
+    <string name="connect_code_label">Code de verification</string>
+    <string name="connect_submit_code">Confirmer le code</string>
 </resources>

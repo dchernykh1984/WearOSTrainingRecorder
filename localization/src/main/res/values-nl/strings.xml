@@ -204,8 +204,13 @@
     <string name="connect_done">Verbonden</string>
     <string name="connect_failed">Verbinden mislukt. Controleer de gegevens en probeer opnieuw.</string>
     <string name="connect_needs_application">Voer eerst de Client ID en Secret van je applicatie in.</string>
-    <string name="connect_garmin_token_hint">Plak een token uit Garmin Connect. Automatisch inloggen is nog niet beschikbaar.</string>
     <string name="settings_units">Eenheden</string>
     <string name="units_metric">Metrisch</string>
     <string name="units_imperial">Imperiaal</string>
+    <string name="connect_garmin_code_hint">Garmin stuurt mogelijk een verificatiecode per e-mail of sms. Voer die hieronder in.</string>
+    <string name="connect_needs_login">Voer eerst je Garmin-login en wachtwoord in.</string>
+    <string name="connect_code_sent">Garmin heeft een verificatiecode gestuurd. Voer die hieronder in.</string>
+    <string name="connect_wrong_credentials">Garmin accepteerde deze login en dit wachtwoord niet.</string>
+    <string name="connect_code_label">Verificatiecode</string>
+    <string name="connect_submit_code">Code bevestigen</string>
 </resources>

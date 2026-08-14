@@ -220,8 +220,13 @@
     <string name="connect_done">Connected</string>
     <string name="connect_failed">Could not connect. Check the details and try again.</string>
     <string name="connect_needs_application">Enter your application\'s Client ID and Secret first.</string>
-    <string name="connect_garmin_token_hint">Paste a token from Garmin Connect. Automatic sign-in is not available yet.</string>
     <string name="settings_units">Units</string>
     <string name="units_metric">Metric</string>
     <string name="units_imperial">Imperial</string>
+    <string name="connect_garmin_code_hint">Garmin may send a verification code by email or text. Enter it below when it does.</string>
+    <string name="connect_needs_login">Enter your Garmin login and password first.</string>
+    <string name="connect_code_sent">Garmin sent a verification code. Enter it below.</string>
+    <string name="connect_wrong_credentials">Garmin did not accept that login and password.</string>
+    <string name="connect_code_label">Verification code</string>
+    <string name="connect_submit_code">Confirm code</string>
 </resources>

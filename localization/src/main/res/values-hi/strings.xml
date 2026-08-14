@@ -197,8 +197,13 @@
     <string name="connect_done">कनेक्ट हो गया</string>
     <string name="connect_failed">कनेक्ट नहीं हो सका। विवरण जाँचें और फिर से प्रयास करें।</string>
     <string name="connect_needs_application">पहले अपने ऐप्लिकेशन का Client ID और Secret दर्ज करें।</string>
-    <string name="connect_garmin_token_hint">Garmin Connect से टोकन चिपकाएँ। स्वचालित साइन-इन अभी उपलब्ध नहीं है।</string>
     <string name="settings_units">इकाइयाँ</string>
     <string name="units_metric">मीट्रिक</string>
     <string name="units_imperial">इंपीरियल</string>
+    <string name="connect_garmin_code_hint">Garmin ईमेल या SMS से सत्यापन कोड भेज सकता है। मिलने पर उसे नीचे दर्ज करें।</string>
+    <string name="connect_needs_login">पहले अपना Garmin लॉगिन और पासवर्ड दर्ज करें।</string>
+    <string name="connect_code_sent">Garmin ने सत्यापन कोड भेजा है। उसे नीचे दर्ज करें।</string>
+    <string name="connect_wrong_credentials">Garmin ने यह लॉगिन और पासवर्ड स्वीकार नहीं किया।</string>
+    <string name="connect_code_label">सत्यापन कोड</string>
+    <string name="connect_submit_code">कोड की पुष्टि करें</string>
 </resources>

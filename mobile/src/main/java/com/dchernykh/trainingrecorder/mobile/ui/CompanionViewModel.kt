@@ -1,16 +1,12 @@
 package com.dchernykh.trainingrecorder.mobile.ui
 
 import android.app.Application
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.dchernykh.trainingrecorder.core.config.ScreenConfiguration
 import com.dchernykh.trainingrecorder.core.config.ScreenSet
-import com.dchernykh.trainingrecorder.core.connector.CredentialField
-import com.dchernykh.trainingrecorder.core.connector.GarminProtocol
-import com.dchernykh.trainingrecorder.core.connector.StravaProtocol
 import com.dchernykh.trainingrecorder.core.datalayer.WatchSettings
 import com.dchernykh.trainingrecorder.core.format.UnitSystem
 import com.dchernykh.trainingrecorder.core.race.RaceStatsConfig
@@ -18,7 +14,7 @@ import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.core.workout.WorkoutSummary
 import com.dchernykh.trainingrecorder.localization.AppLanguage
 import com.dchernykh.trainingrecorder.localization.R
-import com.dchernykh.trainingrecorder.mobile.connect.AuthorizationResult
+import com.dchernykh.trainingrecorder.mobile.connect.GarminAuthorization
 import com.dchernykh.trainingrecorder.mobile.connect.StravaAuthorization
 import com.dchernykh.trainingrecorder.mobile.settings.PhoneSettingsStore
 import com.dchernykh.trainingrecorder.mobile.sync.SettingsPublisher
@@ -38,12 +34,6 @@ enum class Section(
     SETTINGS(R.string.nav_settings),
 }
 
-/** A service the rider can connect, and the fields its setup screen shows. */
-data class ConnectorSetup(
-    val id: String,
-    val credentialFields: List<CredentialField>,
-)
-
 /**
  * Holds what the companion app is editing, and pushes it to the watch.
  *
@@ -56,8 +46,10 @@ class CompanionViewModel(
     application: Application,
     private val store: PhoneSettingsStore = PhoneSettingsStore(application),
     private val publisher: SettingsPublisher = SettingsPublisher(application),
-    private val authorization: StravaAuthorization = StravaAuthorization(application),
     private val history: WorkoutHistoryStore = WorkoutHistoryStore(application),
+    /** Credentials and sign-ins, which have their own lifecycle entirely. */
+    val connections: ServiceConnections =
+        ServiceConnections(store, publisher, StravaAuthorization(application), GarminAuthorization()),
 ) : AndroidViewModel(application) {
     /**
      * Kotlin default arguments do not emit a one-argument constructor, and
@@ -68,7 +60,6 @@ class CompanionViewModel(
         application,
         PhoneSettingsStore(application),
         SettingsPublisher(application),
-        StravaAuthorization(application),
         WorkoutHistoryStore(application),
     )
 
@@ -92,34 +83,6 @@ class CompanionViewModel(
     private val _workouts = mutableStateOf<List<WorkoutSummary>>(emptyList())
     val workouts: State<List<WorkoutSummary>> = _workouts
 
-    /**
-     * What each service needs the rider to type. Taken from the protocols rather
-     * than from the connectors: the phone collects credentials and never uploads
-     * anything, so it has no business holding a transport.
-     */
-    val connectors: List<ConnectorSetup> =
-        listOf(
-            // Strava's client id and secret are all the rider types; the access
-            // token is obtained by the authorization below and never entered.
-            ConnectorSetup(StravaProtocol.ID, StravaProtocol.credentialFields),
-            // Garmin takes the token itself, because its sign-in is an
-            // undocumented SSO exchange this app does not attempt. A pasted
-            // token works today; guessing at that flow would not.
-            ConnectorSetup(GarminProtocol.ID, GarminProtocol.credentialFields),
-        )
-
-    private val credentials: MutableState<Map<String, Map<String, String>>> = mutableStateOf(emptyMap())
-
-    /**
-     * Which connector last reported something, and what. Connecting opens a
-     * browser and comes back minutes later, so a screen that said nothing would
-     * leave the rider wondering whether the button worked.
-     */
-    private val _connectionStatus = mutableStateOf<Pair<String, Int>?>(null)
-    val connectionStatus: State<Pair<String, Int>?> = _connectionStatus
-
-    fun statusFor(connectorId: String): Int? = _connectionStatus.value?.takeIf { it.first == connectorId }?.second
-
     init {
         store.readSettings()?.let {
             _configuration.value = it.screens
@@ -127,7 +90,6 @@ class CompanionViewModel(
             _units.value = it.units
             _language.value = AppLanguage.byTag(it.languageTag)
         }
-        credentials.value = store.readCredentials()
         // From disk first, so the screen has something the moment it opens rather
         // than after the Data Layer gets round to answering.
         _workouts.value = history.read()
@@ -147,56 +109,6 @@ class CompanionViewModel(
                 withContext(Dispatchers.IO) { history.write(payload) }
             }
             _workouts.value = withContext(Dispatchers.IO) { history.read() }
-        }
-    }
-
-    fun credentialsFor(connectorId: String): Map<String, String> = credentials.value[connectorId].orEmpty()
-
-    fun updateCredential(
-        connectorId: String,
-        key: String,
-        value: String,
-    ) {
-        val fields = credentials.value[connectorId].orEmpty() + (key to value)
-        credentials.value = credentials.value + (connectorId to fields)
-        save { store.writeCredentials(credentials.value) }
-    }
-
-    /**
-     * Connects a service: Strava runs its authorization, everything else simply
-     * publishes what the rider typed.
-     *
-     * Sent only when asked, unlike everything else here. A token typed one
-     * character at a time would otherwise be published half-finished on every
-     * keystroke, and the watch would spend the typing failing to log in.
-     */
-    fun connect(connectorId: String) {
-        if (connectorId != StravaProtocol.ID) {
-            save { publisher.publishCredentials(credentials.value) }
-            return
-        }
-        val fields = credentials.value[connectorId].orEmpty()
-        val clientId = fields["client_id"].orEmpty()
-        val clientSecret = fields["client_secret"].orEmpty()
-        if (clientId.isBlank() || clientSecret.isBlank()) {
-            _connectionStatus.value = connectorId to R.string.connect_needs_application
-            return
-        }
-        _connectionStatus.value = connectorId to R.string.connect_in_progress
-        viewModelScope.launch {
-            when (val result = authorization.authorize(clientId, clientSecret)) {
-                is AuthorizationResult.Authorized -> {
-                    // The refresh token and expiry travel with the access token:
-                    // Strava's tokens last hours, and the watch can only renew
-                    // one if it was given something to renew it with.
-                    result.tokens.forEach { (key, value) -> updateCredential(connectorId, key, value) }
-                    publisher.publishCredentials(credentials.value)
-                    _connectionStatus.value = connectorId to R.string.connect_done
-                }
-                is AuthorizationResult.Failed -> {
-                    _connectionStatus.value = connectorId to R.string.connect_failed
-                }
-            }
         }
     }
 
@@ -247,6 +159,23 @@ class CompanionViewModel(
     fun updateLanguage(language: AppLanguage) {
         _language.value = language
         persist()
+    }
+
+    /** Runs a sign-in on the model's scope; the work itself is [connections]'. */
+    fun connect(connectorId: String) {
+        viewModelScope.launch { connections.connect(connectorId) }
+    }
+
+    fun submitGarminCode(code: String) {
+        viewModelScope.launch { connections.submitCode(code) }
+    }
+
+    fun updateCredential(
+        connectorId: String,
+        key: String,
+        value: String,
+    ) {
+        viewModelScope.launch { connections.updateCredential(connectorId, key, value) }
     }
 
     private fun persist() {

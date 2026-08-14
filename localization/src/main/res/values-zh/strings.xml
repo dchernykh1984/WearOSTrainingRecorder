@@ -197,8 +197,13 @@
     <string name="connect_done">已连接</string>
     <string name="connect_failed">无法连接。请检查信息后重试。</string>
     <string name="connect_needs_application">请先填写应用的 Client ID 和 Secret。</string>
-    <string name="connect_garmin_token_hint">请粘贴 Garmin Connect 的令牌。暂不支持自动登录。</string>
     <string name="settings_units">单位</string>
     <string name="units_metric">公制</string>
     <string name="units_imperial">英制</string>
+    <string name="connect_garmin_code_hint">Garmin 可能会通过邮件或短信发送验证码。收到后请在下方输入。</string>
+    <string name="connect_needs_login">请先输入您的 Garmin 账号和密码。</string>
+    <string name="connect_code_sent">Garmin 已发送验证码，请在下方输入。</string>
+    <string name="connect_wrong_credentials">Garmin 未接受该账号和密码。</string>
+    <string name="connect_code_label">验证码</string>
+    <string name="connect_submit_code">确认验证码</string>
 </resources>
