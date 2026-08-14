@@ -129,7 +129,6 @@
     <string name="action_pause">Pauze</string>
     <string name="action_resume">Hervatten</string>
     <string name="action_hold_to_end">Houd vast om te stoppen</string>
-    <string name="action_discard">Verwijderen</string>
     <string name="action_hold_to_discard">Houd vast om te verwijderen</string>
 
     <string name="config_level_default">Standaard</string>

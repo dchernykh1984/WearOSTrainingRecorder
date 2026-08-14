@@ -129,7 +129,6 @@
     <string name="action_pause">Pausa</string>
     <string name="action_resume">Reanudar</string>
     <string name="action_hold_to_end">Manten para terminar</string>
-    <string name="action_discard">Descartar</string>
     <string name="action_hold_to_discard">Manten para descartar</string>
 
     <string name="config_level_default">Predeterminado</string>
