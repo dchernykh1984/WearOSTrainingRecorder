@@ -61,9 +61,14 @@ data class RecoveredRide(
  */
 object TrackJournal {
     /**
-     * Bumped when the column order changes. A journal from a newer version is
-     * refused rather than misread - recovering a ride with the altitude in the
-     * heart rate column would be worse than admitting the file cannot be read.
+     * Bumped when the column order changes.
+     *
+     * A journal from any other version is refused rather than misread, in both
+     * directions: the columns are positional, so a reader that guessed would
+     * recover a ride with the altitude in the heart rate column, which is worse
+     * than admitting the file cannot be read. Refusing an older one costs at
+     * most a single interrupted ride, and only for a rider who is upgrading at
+     * the exact moment they were interrupted.
      */
     const val VERSION = 1
 

@@ -2,6 +2,7 @@ package com.dchernykh.trainingrecorder.core.fit
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -96,12 +97,20 @@ class TrackJournalTest {
     /**
      * A future version may reorder the columns, and reading those positions as if
      * they were this version's would recover a ride with the wrong numbers in it.
+     *
+     * Built by rewriting a real header rather than by hand: a hand-written one
+     * without the end marker is refused for being truncated, which would leave
+     * the version guard untested and free to be deleted.
      */
     @Test
-    fun `refuses a journal from a newer version`() {
-        val newer = "ride\t${TrackJournal.VERSION + 1}\tcycling_road\t$start"
+    fun `refuses a journal from another version`() {
+        val header = TrackJournal.header("cycling_road", start)
+        val newer = header.replaceFirst("\t${TrackJournal.VERSION}\t", "\t${TrackJournal.VERSION + 1}\t")
+        val older = header.replaceFirst("\t${TrackJournal.VERSION}\t", "\t${TrackJournal.VERSION - 1}\t")
 
+        assertNotEquals(header, newer)
         assertNull(TrackJournal.parse(sequenceOf(newer, TrackJournal.line(point(0), 1000L))))
+        assertNull(TrackJournal.parse(sequenceOf(older, TrackJournal.line(point(0), 1000L))))
     }
 
     @Test
