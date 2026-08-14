@@ -24,6 +24,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dchernykh.trainingrecorder.core.config.ConfigLevel
 import com.dchernykh.trainingrecorder.core.config.ScreenConfiguration
@@ -72,10 +75,18 @@ fun CompanionApp(
             // for, and one that only appeared after navigating away and back
             // would read as the sync being broken. The effect ends with the
             // section, so nothing polls behind the other four tabs.
-            LaunchedEffect(section) {
-                while (section == Section.HISTORY) {
-                    model.refreshWorkouts()
-                    delay(HISTORY_REFRESH_MS)
+            val lifecycle = LocalLifecycleOwner.current.lifecycle
+            LaunchedEffect(section, lifecycle) {
+                if (section != Section.HISTORY) return@LaunchedEffect
+                // Only while the app is actually in front of the rider. Keyed on
+                // the section alone, a phone left on this tab in a pocket would
+                // wake the Data Layer every ten seconds for a screen nobody is
+                // looking at.
+                lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    while (true) {
+                        model.refreshWorkouts()
+                        delay(HISTORY_REFRESH_MS)
+                    }
                 }
             }
 

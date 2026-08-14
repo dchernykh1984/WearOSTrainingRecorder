@@ -58,7 +58,20 @@ class ServiceConnections(
             ConnectorSetup(GarminProtocol.ID, GarminProtocol.credentialFields),
         )
 
-    private val credentials: MutableState<Map<String, Map<String, String>>> = mutableStateOf(store.readCredentials())
+    /**
+     * Empty until [load] fills it in. Reading and decoding the file where the
+     * initializer stands would put it on the main thread during the first frame,
+     * and the screen that needs it is four taps away.
+     */
+    private val credentials: MutableState<Map<String, Map<String, String>>> = mutableStateOf(emptyMap())
+
+    /** Reads what the rider has already entered, off the main thread. */
+    suspend fun load() {
+        val stored = withContext(Dispatchers.IO) { runCatching { store.readCredentials() }.getOrDefault(emptyMap()) }
+        // Merged under what has been typed since, so a slow read cannot undo an
+        // edit the rider made while it was happening.
+        credentials.value = stored + credentials.value
+    }
 
     /**
      * Which connector last reported something, and what. Connecting opens a
