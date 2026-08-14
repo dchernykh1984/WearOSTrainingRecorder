@@ -141,6 +141,8 @@
     <string name="editor_slot_number">字段 %1$d</string>
     <string name="editor_empty_slot">空</string>
     <string name="editor_field_count">字段数</string>
+    <string name="editor_expand">展开</string>
+    <string name="editor_collapse">收起</string>
     <string name="editor_add_screen">添加页面</string>
     <string name="editor_remove_screen">移除</string>
     <string name="permissions_explanation">记录需要定位、传感器和蓝牙权限。</string>

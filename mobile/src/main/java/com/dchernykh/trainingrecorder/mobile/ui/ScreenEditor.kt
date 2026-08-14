@@ -17,6 +17,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,6 +30,7 @@ import com.dchernykh.trainingrecorder.core.config.ConfigLevel
 import com.dchernykh.trainingrecorder.core.config.Screen
 import com.dchernykh.trainingrecorder.core.config.ScreenSet
 import com.dchernykh.trainingrecorder.core.field.FieldCatalogue
+import com.dchernykh.trainingrecorder.core.field.FieldCategory
 import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.localization.Labels
 import com.dchernykh.trainingrecorder.localization.R
@@ -224,7 +229,13 @@ fun FieldPicker(
     onFieldChosen: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val available = FieldCatalogue.forDiscipline(sport.discipline).groupBy { it.category }
+    val available = FieldCatalogue.forDisciplineByCategory(sport.discipline)
+    // One category open at a time, and none to begin with. Sixty fields laid out
+    // flat is a screen the rider scrolls through hunting for a heading; twelve
+    // headings is a screen they read. An accordion rather than free toggling
+    // because the complaint was the scrolling, and leaving every category a rider
+    // ever opened expanded brings it straight back.
+    var openCategory by rememberSaveable { mutableStateOf<String?>(null) }
     LazyColumn(modifier = modifier.fillMaxSize()) {
         item {
             Text(
@@ -238,25 +249,61 @@ fun FieldPicker(
             HorizontalDivider()
         }
         available.forEach { (category, fields) ->
-            item {
-                Text(
-                    text = stringResource(Labels.category(category.id)),
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            val open = openCategory == category.id
+            item(key = "category-${category.id}") {
+                CategoryHeader(
+                    category = category,
+                    fieldCount = fields.size,
+                    open = open,
+                    onClick = { openCategory = if (open) null else category.id },
                 )
             }
-            items(fields, key = { it.id }) { field ->
-                Text(
-                    text = stringResource(Labels.field(field.id)),
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable { onFieldChosen(field.id) }
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                )
+            if (open) {
+                items(fields, key = { it.id }) { field ->
+                    Text(
+                        text = stringResource(Labels.field(field.id)),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable { onFieldChosen(field.id) }
+                                .padding(start = 32.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
+                    )
+                }
             }
         }
     }
+}
+
+/**
+ * One category, opened by tapping it.
+ *
+ * The marker is a character rather than an icon on purpose: the icon library is
+ * only on the debug classpath here, so drawing one would build in development
+ * and fail the release. The field count earns its place too - it tells the rider
+ * whether opening this heading is worth the tap.
+ */
+@Composable
+private fun CategoryHeader(
+    category: FieldCategory,
+    fieldCount: Int,
+    open: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(
+                    onClickLabel = stringResource(if (open) R.string.editor_collapse else R.string.editor_expand),
+                    onClick = onClick,
+                ).padding(horizontal = 16.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = stringResource(Labels.category(category.id)))
+        Text(text = if (open) "-" else "+ $fieldCount")
+    }
+    HorizontalDivider()
 }
 
 /** Room for two digits, so the count cannot nudge the buttons about. */

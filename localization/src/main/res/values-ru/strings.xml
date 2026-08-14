@@ -147,6 +147,8 @@
     <string name="editor_slot_number">Поле %1$d</string>
     <string name="editor_empty_slot">Пусто</string>
     <string name="editor_field_count">Полей</string>
+    <string name="editor_expand">Развернуть</string>
+    <string name="editor_collapse">Свернуть</string>
     <string name="editor_add_screen">Добавить экран</string>
     <string name="editor_remove_screen">Удалить</string>
 
