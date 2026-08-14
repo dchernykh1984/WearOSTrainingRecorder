@@ -145,16 +145,22 @@ private fun SectionContent(
         section == Section.HISTORY ->
             WorkoutHistory(workouts = model.workouts.value, units = model.units.value, modifier = modifier)
         section == Section.SETTINGS ->
-            LanguageSettings(
-                current = model.language.value,
-                onLanguageChosen = {
-                    model.updateLanguage(it)
-                    // Recreated rather than recomposed: the strings come from the
-                    // Activity's resources, which are fixed at attach time.
-                    onLanguageChanged()
-                },
-                modifier = modifier,
-            )
+            Column(modifier = modifier.fillMaxSize()) {
+                UnitSettings(current = model.units.value, onUnitsChosen = model::updateUnits)
+                HorizontalDivider()
+                // Weighted, so the fifteen-language list scrolls in what is left
+                // rather than pushing the unit choice off the top of the screen.
+                LanguageSettings(
+                    current = model.language.value,
+                    onLanguageChosen = {
+                        model.updateLanguage(it)
+                        // Recreated rather than recomposed: the strings come from
+                        // the Activity's resources, fixed at attach time.
+                        onLanguageChanged()
+                    },
+                    modifier = Modifier.weight(1f),
+                )
+            }
     }
 }
 

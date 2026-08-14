@@ -198,4 +198,7 @@
     <string name="connect_failed">कनेक्ट नहीं हो सका। विवरण जाँचें और फिर से प्रयास करें।</string>
     <string name="connect_needs_application">पहले अपने ऐप्लिकेशन का Client ID और Secret दर्ज करें।</string>
     <string name="connect_garmin_token_hint">Garmin Connect से टोकन चिपकाएँ। स्वचालित साइन-इन अभी उपलब्ध नहीं है।</string>
+    <string name="settings_units">इकाइयाँ</string>
+    <string name="units_metric">मीट्रिक</string>
+    <string name="units_imperial">इंपीरियल</string>
 </resources>

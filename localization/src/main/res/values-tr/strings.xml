@@ -198,4 +198,7 @@
     <string name="connect_failed">Baglanilamadi. Bilgileri kontrol edip tekrar deneyin.</string>
     <string name="connect_needs_application">Once uygulamanizin Client ID ve Secret bilgisini girin.</string>
     <string name="connect_garmin_token_hint">Garmin Connect\'ten bir belirtec yapistirin. Otomatik giris henuz kullanilamiyor.</string>
+    <string name="settings_units">Birimler</string>
+    <string name="units_metric">Metrik</string>
+    <string name="units_imperial">İngiliz</string>
 </resources>

@@ -231,6 +231,18 @@ class CompanionViewModel(
         persist()
     }
 
+    /**
+     * Metric or imperial, for every field at once.
+     *
+     * Chosen on the phone and carried to the watch with the rest of the settings,
+     * so the two never disagree - a watch still counting kilometres after the
+     * rider switched the phone to miles reads as a bug, not as two settings.
+     */
+    fun updateUnits(system: UnitSystem) {
+        _units.value = system
+        persist()
+    }
+
     /** Persisted here; the Activity applies it by recreating itself. */
     fun updateLanguage(language: AppLanguage) {
         _language.value = language
