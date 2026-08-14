@@ -33,6 +33,19 @@ class TrackJournalStore(
     private var sinceSync = 0
 
     /**
+     * Which ride the open journal belongs to, so a late caller cannot close
+     * someone else's.
+     *
+     * Recovery runs on a launch and takes as long as encoding a FIT file - long
+     * enough for the rider to have tapped a sport and started riding again by
+     * the time it finishes. Without this, the tidy-up at the end of recovery
+     * would close and delete the journal of the ride that is happening now, and
+     * every sample after that would be written nowhere: the exact loss this
+     * class exists to prevent, caused by the thing meant to prevent it.
+     */
+    private var openFor: Long? = null
+
+    /**
      * Starts a new journal, replacing whatever was there.
      *
      * Replacing rather than appending matters: a journal left by a ride that was
@@ -54,6 +67,7 @@ class TrackJournalStore(
             opened.fd.sync()
             stream = opened
             sinceSync = 0
+            openFor = startedAtEpochMs
         }
     }
 
@@ -82,10 +96,18 @@ class TrackJournalStore(
         }
     }
 
-    /** Closes the journal and drops it, once the ride is safely a FIT file. */
+    /**
+     * Closes the journal and drops it, once that ride is safely a FIT file.
+     *
+     * Named ride rather than "whatever is open": the caller is finishing a
+     * particular recording, and if the watch has moved on to another one since,
+     * the right answer is to do nothing at all.
+     */
     @Synchronized
-    fun finish() {
+    fun finish(startedAtEpochMs: Long) {
+        if (openFor != null && openFor != startedAtEpochMs) return
         close()
+        openFor = null
         runCatching { file.delete() }
     }
 
@@ -99,7 +121,7 @@ class TrackJournalStore(
      */
     @Synchronized
     fun recover(): RecoveredRide? {
-        if (!file.exists()) return null
+        if (openFor != null || !file.exists()) return null
         return runCatching {
             file.useLines { TrackJournal.parse(it) }
         }.getOrNull()?.takeIf { it.points.isNotEmpty() }

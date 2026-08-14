@@ -162,14 +162,17 @@ class RecordingViewModel(
             // A journal that cannot become a workout will not become one on the
             // next launch either, and keeping it would mean trying forever.
             Log.w(TAG, "an interrupted ride could not be rebuilt from its journal")
-            journal.finish()
+            journal.finish(ride.startedAtEpochMs)
             return
         }
         val saved = runCatching { repository.save("workout-${ride.startedAtEpochMs}", workout, CONNECTORS) }
         // Kept when the save failed: the journal is still the only copy, and the
         // next launch gets another chance at it.
         if (saved.isSuccess) {
-            journal.finish()
+            // Named, because the rider may well have started a new ride while
+            // this was encoding, and that ride's journal is not this one's to
+            // close.
+            journal.finish(ride.startedAtEpochMs)
             history.value = SportOrdering.record(history.value, ride.sportTypeId).also(settings::writeHistory)
             publisher.publish(repository)
             UploadWorker.schedule(getApplication())
@@ -396,7 +399,7 @@ class RecordingViewModel(
             // Dropped only now, once the ride exists as a file. Deleting it any
             // earlier would leave a window where a kill loses the ride from both
             // places at once.
-            withContext(Dispatchers.IO + NonCancellable) { journal.finish() }
+            withContext(Dispatchers.IO + NonCancellable) { journal.finish(start) }
             // The phone's history is fed from here: it holds no workouts of its
             // own, so a ride it is never told about is a ride it can never show.
             withContext(Dispatchers.IO) { publisher.publish(repository) }
@@ -443,14 +446,16 @@ class RecordingViewModel(
     }
 
     fun discard() {
+        val discarded = _state.value.startedAtEpochMs
         viewModelScope.launch { runCatching { recorder.end() } }
         stopCollecting()
         _state.value = RecordingState()
         samples.clear()
         // A discarded ride is thrown away deliberately, so its journal goes with
         // it - left behind, the next launch would helpfully recover the very
-        // thing the rider just decided not to keep.
-        CoroutineScope(Dispatchers.IO).launch { journal.finish() }
+        // thing the rider just decided not to keep. Named, so a discard that
+        // lands late cannot take a newer ride's journal with it.
+        discarded?.let { CoroutineScope(Dispatchers.IO).launch { journal.finish(it) } }
         busy = false
         RecordingService.stop(getApplication())
     }
