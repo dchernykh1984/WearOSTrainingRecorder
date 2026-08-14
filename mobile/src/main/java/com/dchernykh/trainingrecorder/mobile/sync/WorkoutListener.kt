@@ -47,13 +47,26 @@ class WorkoutHistoryStore(
     context: Context,
     private val file: File = File(context.filesDir, "workouts.json"),
 ) {
+    /**
+     * Writes through a temporary file of its own, then moves it into place.
+     *
+     * Its own, not a shared `.part`: the listener service and the screen's own
+     * refresh can both land here at the same moment, and two writers sharing one
+     * temporary file interleave into a truncated one - which is then renamed
+     * over the real history and decodes as no rides at all.
+     */
     fun write(payload: String) {
         if (WorkoutSummaryContract.decode(payload) == null) return
-        val temporary = File(file.parentFile, file.name + ".part")
-        temporary.writeText(payload)
-        // Replaced atomically: a phone killed mid-write would otherwise leave a
-        // half-file that reads back as no history at all.
-        temporary.renameTo(file)
+        val temporary = File.createTempFile(file.name, ".part", file.parentFile)
+        val moved =
+            runCatching {
+                temporary.writeText(payload)
+                temporary.renameTo(file)
+            }.getOrDefault(false)
+        // Checked, because a rename that failed leaves the stale file in place
+        // while looking like a successful write, and cleaning up after it is the
+        // difference between a wasted file and one that accumulates per ride.
+        if (!moved) temporary.delete()
     }
 
     fun read(): List<WorkoutSummary> =
