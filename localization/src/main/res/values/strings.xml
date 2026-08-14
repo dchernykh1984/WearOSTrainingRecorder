@@ -137,7 +137,6 @@
     <string name="action_start">Start</string>
     <string name="action_pause">Pause</string>
     <string name="action_resume">Resume</string>
-    <string name="action_finish">Finish</string>
     <string name="action_hold_to_end">Hold to end</string>
     <string name="action_discard">Discard</string>
     <string name="action_hold_to_discard">Hold to discard</string>
