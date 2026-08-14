@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -83,12 +82,7 @@ private fun InheritanceBanner(
     onResetToInherited: () -> Unit,
 ) {
     Row(
-        // Tall enough for the Reset button before there is one. The banner grows
-        // by a button's height the moment a sport forks from its parent, and
-        // everything below it - including the field count the rider is tapping -
-        // used to jump down a row at exactly that moment, so the second tap of
-        // "raise this screen from three fields to six" landed on nothing.
-        modifier = Modifier.fillMaxWidth().padding(16.dp).heightIn(min = BANNER_MIN_HEIGHT),
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -104,9 +98,19 @@ private fun InheritanceBanner(
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.weight(1f),
         )
-        if (level == ConfigLevel.SPORT_TYPE) {
-            TextButton(onClick = onResetToInherited) { Text(stringResource(R.string.editor_reset)) }
-        }
+        // Always here, disabled until there is something to reset.
+        //
+        // Showing it only after a sport forks made the banner change size at the
+        // exact moment the rider was tapping the field count below it, so the
+        // second tap of "three fields to six" landed on nothing. Reserving the
+        // height alone was not enough: the button takes width too, and the text
+        // beside it re-wraps in the longer languages. A control that is always
+        // there cannot move anything, and a greyed Reset also says something
+        // true - this sport has nothing of its own yet.
+        TextButton(
+            onClick = onResetToInherited,
+            enabled = level == ConfigLevel.SPORT_TYPE,
+        ) { Text(stringResource(R.string.editor_reset)) }
     }
 }
 
@@ -233,12 +237,3 @@ fun FieldPicker(
         }
     }
 }
-
-/**
- * The height a text button occupies, reserved whether or not one is shown.
- *
- * 48 dp rather than the button's own 40: Compose expands anything clickable to
- * the minimum interactive size, so the row a button lands in is 48 dp tall and
- * reserving the smaller number leaves a jump of exactly the difference.
- */
-private val BANNER_MIN_HEIGHT = 48.dp
