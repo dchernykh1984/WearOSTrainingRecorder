@@ -1,20 +1,26 @@
 package com.dchernykh.trainingrecorder.mobile.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -61,15 +67,13 @@ fun ConnectionSetup(
             modifier = Modifier.padding(top = 8.dp),
         )
         fields.forEach { field ->
-            OutlinedTextField(
-                value = values[field.key].orEmpty(),
-                onValueChange = { onValueChanged(field.key, it) },
-                label = { Text(field.key) },
-                singleLine = true,
-                visualTransformation =
-                    if (field.secret) PasswordVisualTransformation() else VisualTransformation.None,
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-            )
+            key(field.key) {
+                CredentialEntry(
+                    field = field,
+                    value = values[field.key].orEmpty(),
+                    onValueChanged = { onValueChanged(field.key, it) },
+                )
+            }
         }
         Button(
             onClick = onConnect,
@@ -91,6 +95,57 @@ fun ConnectionSetup(
         // on the screen rather than a dialog, so the rider can leave the app to
         // go and read the code and find it still waiting when they come back.
         if (codeRequested) VerificationCode(onCodeSubmitted = onCodeSubmitted)
+    }
+}
+
+/**
+ * One credential, with a way to read back what was typed.
+ *
+ * A masked field is the right default for a password over someone's shoulder,
+ * and the wrong one for a forty-character client secret pasted from a browser:
+ * dots tell the rider nothing about why the sign-in was refused. So the mask
+ * comes off on request, per field - revealing the secret should not also reveal
+ * the password next to it - and goes back on by itself when the rider leaves
+ * the screen, because nothing here re-hides it for them.
+ */
+@Composable
+private fun CredentialEntry(
+    field: CredentialField,
+    value: String,
+    onValueChanged: (String) -> Unit,
+) {
+    var revealed by rememberSaveable { mutableStateOf(false) }
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChanged,
+        label = { Text(field.key) },
+        singleLine = true,
+        visualTransformation =
+            if (field.secret && !revealed) PasswordVisualTransformation() else VisualTransformation.None,
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+    )
+    if (!field.secret) return
+    Row(
+        // The whole row toggles, not just the box: a 20 dp checkbox is a small
+        // target, and the words beside it are what the thumb aims at anyway.
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .toggleable(
+                    value = revealed,
+                    role = Role.Checkbox,
+                    onValueChange = { revealed = it },
+                ).padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // Null: the row above carries the toggle, and a checkbox with its own
+        // handler would be a second control saying the same thing to TalkBack.
+        Checkbox(checked = revealed, onCheckedChange = null)
+        Text(
+            text = stringResource(R.string.connect_show_secret),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(start = 8.dp),
+        )
     }
 }
 

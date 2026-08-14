@@ -180,6 +180,7 @@
     <string name="connect_strava_callback">Set the Authorization Callback Domain to: localhost</string>
     <string name="connect_garmin_explanation">Sign in with your own Garmin Connect account. Garmin has no public API for uploads, so the app signs in the way the desktop tools do; your password stays in this app\'s private storage on the phone and is never sent to the watch.</string>
     <string name="connect_action">Connect</string>
+    <string name="connect_show_secret">Show</string>
 
     <!-- Workout history -->
     <string name="history_empty">No workouts yet.</string>

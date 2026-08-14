@@ -165,6 +165,7 @@
     <string name="connect_strava_callback">Establece Authorization Callback Domain en localhost</string>
     <string name="connect_garmin_explanation">Inicia sesion con tu cuenta de Garmin Connect. La contrasena queda en el almacenamiento privado de la app en este telefono y nunca se envia al reloj.</string>
     <string name="connect_action">Conectar</string>
+    <string name="connect_show_secret">Mostrar</string>
 
     <string name="history_empty">Aun no hay entrenamientos.</string>
     <string name="history_pending">Esperando envio</string>

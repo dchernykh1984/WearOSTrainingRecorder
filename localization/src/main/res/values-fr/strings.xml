@@ -165,6 +165,7 @@
     <string name="connect_strava_callback">Definissez Authorization Callback Domain sur localhost</string>
     <string name="connect_garmin_explanation">Connectez-vous avec votre compte Garmin Connect. Le mot de passe reste dans le stockage prive de l\'application sur ce telephone et n\'est jamais envoye a la montre.</string>
     <string name="connect_action">Connecter</string>
+    <string name="connect_show_secret">Afficher</string>
 
     <string name="history_empty">Aucune seance pour l\'instant.</string>
     <string name="history_pending">En attente d\'envoi</string>
