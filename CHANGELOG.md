@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.2](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.3.1...v0.3.2) (2026-08-14)
+
+
+### Bug Fixes
+
+* keep the protobuf field names R8 was renaming out from under Health Services ([7b50268](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/7b502684d648e185162324bdc3ddba384d9db1bc))
+* keep the R8 rules where they are needed and say what CI actually does ([a881787](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/a881787f84c7b20626a389b8e862fb3af6efd7f8))
+
 ## [0.3.1](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.3.0...v0.3.1) (2026-08-14)
 
 
