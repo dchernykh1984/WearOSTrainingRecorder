@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -127,30 +128,20 @@ private fun RoundBands(
     // reach further out than its centre line does.
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val diameter = maxHeight.value.toDouble()
-        // Measured against the inset content, not the whole face. Taken against
-        // the diameter, the first band's top sits exactly on the rim, where the
-        // chord is zero wide - and the band vanishes, which is what happened.
-        val contentTop = ROUND_VERTICAL_INSET.value.toDouble()
-        val bandHeight = (diameter - contentTop * 2) / bands.size
         var consumed = 0
         Column(
             modifier = Modifier.fillMaxSize().padding(vertical = ROUND_VERTICAL_INSET),
             verticalArrangement = Arrangement.SpaceEvenly,
         ) {
             bands.forEachIndexed { index, band ->
-                val span =
-                    LayoutPlanner.spanFor(
-                        radius = diameter / 2,
-                        top = contentTop + index * bandHeight,
-                        bottom = contentTop + (index + 1) * bandHeight,
-                    )
+                val inset = bandInset(diameter = diameter, bandCount = bands.size, index = index)
                 val bandSlots = slots.drop(consumed).take(band.columns)
                 consumed += band.columns
                 Row(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = maxOf(span.start.toFloat().dp, ROUND_INSET))
+                            .padding(horizontal = inset)
                             .weight(1f),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
@@ -162,6 +153,39 @@ private fun RoundBands(
             }
         }
     }
+}
+
+/**
+ * How far a band has to keep back from the rim.
+ *
+ * Measured across what the band actually draws rather than the whole cell it was
+ * given: a slot centres its caption and value and caps them at
+ * [MAX_SLOT_HEIGHT], so on a one-field screen the ink occupies a strip through
+ * the middle of the face while the cell is the whole face. Measuring the cell
+ * there would keep the text back from a rim it comes nowhere near.
+ *
+ * Falls back to the plain inset when there is nothing to measure - a zero or
+ * unbounded height reaches [LayoutPlanner.spanFor] as a bottom above its top, or
+ * as a NaN, and layout would fail on a requirement rather than draw something
+ * slightly wrong.
+ */
+private fun bandInset(
+    diameter: Double,
+    bandCount: Int,
+    index: Int,
+): Dp {
+    val usable = diameter - ROUND_VERTICAL_INSET.value * 2
+    if (!usable.isFinite() || usable <= 0.0) return ROUND_INSET
+    val bandHeight = usable / bandCount
+    val centre = ROUND_VERTICAL_INSET.value + bandHeight * (index + 0.5)
+    val ink = minOf(bandHeight, MAX_SLOT_HEIGHT.value.toDouble())
+    val span =
+        LayoutPlanner.spanFor(
+            radius = diameter / 2,
+            top = centre - ink / 2,
+            bottom = centre + ink / 2,
+        )
+    return maxOf(span.start.toFloat().dp, ROUND_INSET)
 }
 
 @Composable

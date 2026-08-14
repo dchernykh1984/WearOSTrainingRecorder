@@ -100,7 +100,11 @@ private fun InheritanceBanner(
             // forks - and gets longer in German and Kazakh - so on a narrow phone
             // it can gain a line at the moment the rider is tapping the field
             // count below it, which moves the control out from under the tap.
+            // Exactly two, not at least two: a floor alone still lets a longer
+            // sentence take a third line in Kazakh or German, or at a large font
+            // scale, and the banner grows again at the worst moment.
             minLines = 2,
+            maxLines = 2,
             modifier = Modifier.weight(1f),
         )
         // Always here, disabled until there is something to reset.
