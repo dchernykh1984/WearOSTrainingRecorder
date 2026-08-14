@@ -128,7 +128,6 @@
     <string name="action_start">Start</string>
     <string name="action_pause">Pause</string>
     <string name="action_resume">Fortsetzen</string>
-    <string name="action_finish">Beenden</string>
     <string name="action_hold_to_end">Halten zum Beenden</string>
     <string name="action_discard">Verwerfen</string>
     <string name="action_hold_to_discard">Halten zum Verwerfen</string>

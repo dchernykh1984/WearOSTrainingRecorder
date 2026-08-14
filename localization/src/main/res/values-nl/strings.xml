@@ -128,7 +128,6 @@
     <string name="action_start">Starten</string>
     <string name="action_pause">Pauze</string>
     <string name="action_resume">Hervatten</string>
-    <string name="action_finish">Beeindigen</string>
     <string name="action_hold_to_end">Houd vast</string>
     <string name="action_discard">Verwijderen</string>
     <string name="action_hold_to_discard">Houd vast om te verwijderen</string>
