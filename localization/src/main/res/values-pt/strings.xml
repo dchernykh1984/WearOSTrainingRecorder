@@ -205,4 +205,7 @@
     <string name="connect_failed">Nao foi possivel conectar. Verifique os dados e tente novamente.</string>
     <string name="connect_needs_application">Informe primeiro o Client ID e o Secret do seu aplicativo.</string>
     <string name="connect_garmin_token_hint">Cole um token do Garmin Connect. O login automatico ainda nao esta disponivel.</string>
+    <string name="settings_units">Unidades</string>
+    <string name="units_metric">Métrico</string>
+    <string name="units_imperial">Imperial</string>
 </resources>

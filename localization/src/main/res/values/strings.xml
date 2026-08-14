@@ -221,4 +221,7 @@
     <string name="connect_failed">Could not connect. Check the details and try again.</string>
     <string name="connect_needs_application">Enter your application\'s Client ID and Secret first.</string>
     <string name="connect_garmin_token_hint">Paste a token from Garmin Connect. Automatic sign-in is not available yet.</string>
+    <string name="settings_units">Units</string>
+    <string name="units_metric">Metric</string>
+    <string name="units_imperial">Imperial</string>
 </resources>

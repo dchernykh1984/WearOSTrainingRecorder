@@ -205,4 +205,7 @@
     <string name="connect_failed">Verbindung fehlgeschlagen. Daten prufen und erneut versuchen.</string>
     <string name="connect_needs_application">Gib zuerst Client ID und Secret deiner Anwendung ein.</string>
     <string name="connect_garmin_token_hint">Fuge ein Token aus Garmin Connect ein. Automatische Anmeldung ist noch nicht verfugbar.</string>
+    <string name="settings_units">Einheiten</string>
+    <string name="units_metric">Metrisch</string>
+    <string name="units_imperial">Imperial</string>
 </resources>

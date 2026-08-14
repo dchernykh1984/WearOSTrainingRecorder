@@ -205,4 +205,7 @@
     <string name="connect_failed">Verbinden mislukt. Controleer de gegevens en probeer opnieuw.</string>
     <string name="connect_needs_application">Voer eerst de Client ID en Secret van je applicatie in.</string>
     <string name="connect_garmin_token_hint">Plak een token uit Garmin Connect. Automatisch inloggen is nog niet beschikbaar.</string>
+    <string name="settings_units">Eenheden</string>
+    <string name="units_metric">Metrisch</string>
+    <string name="units_imperial">Imperiaal</string>
 </resources>
