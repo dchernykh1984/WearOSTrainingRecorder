@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dchernykh.trainingrecorder.core.config.ConfigLevel
 import com.dchernykh.trainingrecorder.core.config.Screen
@@ -161,10 +163,20 @@ private fun SlotCountRow(
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        // Without this the row aligns to the top, and the count - a bare line of
+        // text between two buttons that are three times its height - floats up
+        // away from them.
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(text = stringResource(R.string.editor_field_count), modifier = Modifier.weight(1f))
         OutlinedButton(onClick = { onChange(current - 1) }, enabled = current > 1) { Text("-") }
-        Text(text = current.toString())
+        Text(
+            text = current.toString(),
+            textAlign = TextAlign.Center,
+            // Wide enough for two digits, so the buttons do not shuffle sideways
+            // when the count crosses from nine to ten.
+            modifier = Modifier.widthIn(min = COUNT_WIDTH),
+        )
         OutlinedButton(onClick = { onChange(current + 1) }, enabled = current < Screen.MAX_SLOTS) { Text("+") }
     }
 }
@@ -246,3 +258,6 @@ fun FieldPicker(
         }
     }
 }
+
+/** Room for two digits, so the count cannot nudge the buttons about. */
+private val COUNT_WIDTH = 24.dp
