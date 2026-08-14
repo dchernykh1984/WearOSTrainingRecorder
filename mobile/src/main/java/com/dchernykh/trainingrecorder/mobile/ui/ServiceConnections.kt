@@ -158,7 +158,12 @@ class ServiceConnections(
     }
 
     private suspend fun apply(result: GarminAuthResult) {
-        _codeRequested.value = result is GarminAuthResult.NeedsCode
+        // Raised when Garmin asks, lowered only when it is finally satisfied.
+        // Clearing it on a refusal would take the field away the moment the
+        // rider mistyped the code, leaving them to start the whole sign-in
+        // again to be sent another one.
+        if (result is GarminAuthResult.NeedsCode) _codeRequested.value = true
+        if (result is GarminAuthResult.Authorized) _codeRequested.value = false
         _status.value =
             GarminProtocol.ID to
             when (result) {
