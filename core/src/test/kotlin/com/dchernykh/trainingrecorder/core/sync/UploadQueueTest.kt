@@ -210,4 +210,48 @@ class UploadQueueTest {
         assertFailsWith<IllegalArgumentException> { PendingUpload("w1", "") }
         assertFailsWith<IllegalArgumentException> { PendingUpload("w1", "strava", attempts = -1) }
     }
+
+    @Test
+    fun aRideWaitingOutItsBackoffIsStillOutstanding() {
+        // The bug this exists for: a drain that asks "what is due" finds nothing
+        // during the hour a failed ride is backing off, reports itself finished,
+        // and ends the retry chain with the ride still pending.
+        val backingOff =
+            workout(
+                "w1",
+                uploads = mapOf("garmin" to UploadState.PENDING),
+                attempts = mapOf("garmin" to 8),
+                attemptedAt = mapOf("garmin" to now),
+            )
+        val queue = UploadQueue.from(listOf(backingOff), setOf("garmin"), now)
+        assertTrue(UploadQueue.due(queue, now).isEmpty(), "nothing should be due yet")
+        assertEquals(1, UploadQueue.outstanding(queue).size, "the ride is still owed")
+    }
+
+    @Test
+    fun nothingIsOutstandingOnceEveryPairHasGivenUp() {
+        // The other half of the same decision: the drain has to stop eventually,
+        // or a service that is down keeps the watch retrying forever.
+        val exhausted =
+            workout(
+                "w1",
+                uploads = mapOf("garmin" to UploadState.PENDING),
+                attempts = mapOf("garmin" to UploadQueue.MAX_ATTEMPTS),
+                attemptedAt = mapOf("garmin" to now),
+            )
+        val queue = UploadQueue.from(listOf(exhausted), setOf("garmin"), now)
+        assertTrue(UploadQueue.outstanding(queue).isEmpty(), "a queue that gave up owes nothing")
+    }
+
+    @Test
+    fun anUploadedRideOwesNothingAndAFreshOneOwesEveryService() {
+        val done = workout("done", uploads = connectors.associateWith { UploadState.UPLOADED })
+        val fresh = workout("fresh")
+        val queue = UploadQueue.from(listOf(done, fresh), connectors, now)
+        assertEquals(
+            connectors.sorted(),
+            UploadQueue.outstanding(queue).map { it.connectorId }.sorted(),
+            "only the unsent ride is owed",
+        )
+    }
 }

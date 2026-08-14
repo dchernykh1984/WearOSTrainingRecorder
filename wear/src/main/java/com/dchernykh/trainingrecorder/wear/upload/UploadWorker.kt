@@ -81,13 +81,12 @@ class UploadWorker(
             val workouts = repository.all().associateBy { it.id }
             val due = UploadQueue.due(UploadQueue.from(workouts.values.toList(), configured, now()), now())
 
-            var deferred = false
             due.forEach { pending ->
                 // Re-read per attempt: a refresh rotates Strava's token and
                 // writes it back, and a snapshot taken before the drain would
                 // send every later upload of the same pass a token that has
                 // already been spent.
-                if (attempt(pending, workouts[pending.workoutId], credentials.read())) deferred = true
+                attempt(pending, workouts[pending.workoutId], credentials.read())
             }
             // Anything the queue has given up on can now be reclaimed.
             repository.prune(configured)
@@ -95,21 +94,31 @@ class UploadWorker(
             // shows one line per ride, and the rider watching it cares that the
             // ride arrived, not which of the two services answered first.
             publisher.publish(repository)
+
+            // Rebuilt from what is now on disk, because the attempts above have
+            // just changed it, and asked about *everything* still owed rather
+            // than what was due this pass. Asking only about this pass is what
+            // stranded rides: WorkManager's retry can come round sooner than the
+            // queue's own backoff, and a drain that then finds nothing due used
+            // to report itself finished - ending the retry chain with the ride
+            // still pending and nothing left to wake it. This cannot spin: every
+            // pair gives up after MAX_ATTEMPTS, and the delay between passes is
+            // WorkManager's, not ours.
+            val remaining = UploadQueue.outstanding(UploadQueue.from(repository.all(), configured, now()))
             // Retried through WorkManager rather than looping here, so a watch
             // that goes back into a tunnel is not holding a wakelock while it
             // waits. The queue's own backoff still gates the next attempt.
-            if (deferred) Result.retry() else Result.success()
+            if (remaining.isEmpty()) Result.success() else Result.retry()
         }
 
-    /** True when the attempt should be tried again later. */
     private suspend fun attempt(
         pending: PendingUpload,
         workout: WorkoutSummary?,
         stored: Map<String, Map<String, String>>,
-    ): Boolean {
+    ) {
         val connector = registry.byId(pending.connectorId)
         val file = repository.fileFor(pending.workoutId)
-        if (connector == null || workout == null) return false
+        if (connector == null || workout == null) return
         if (!file.exists()) {
             // The index outlives the file if a prune was interrupted. Recorded as
             // failed rather than skipped: left pending it would never give up,
@@ -121,7 +130,7 @@ class UploadWorker(
                 attempts = pending.attempts,
                 attemptedAtEpochMs = now(),
             )
-            return false
+            return
         }
 
         val result =
@@ -147,7 +156,6 @@ class UploadWorker(
             attempts = attempts,
             attemptedAtEpochMs = now(),
         )
-        return result is UploadResult.Retryable && !UploadQueue.hasGivenUp(pending.copy(attempts = attempts))
     }
 
     /**
