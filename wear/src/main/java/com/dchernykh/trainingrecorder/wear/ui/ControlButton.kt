@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material3.Icon
@@ -78,16 +79,26 @@ fun ControlButton(
             text = caption,
             style = MaterialTheme.typography.labelSmall,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    // Hidden from the screen reader: the button above already
+                    // carries these exact words as its description, and leaving
+                    // both would have TalkBack say every control twice.
+                    .clearAndSetSemantics {},
         )
     }
 }
 
 /**
- * Red for the two that end a ride, green for the two that keep it going.
+ * Red for the two that end the ride, green for the three the ride survives.
  *
- * Colour carries the meaning before the icon does: a rider glancing down sees
- * which side is which before they have read anything.
+ * Not "stop" against "go": pausing stops the timer and is still green, because
+ * what the colour divides is what the rider can undo. Red is the side there is
+ * no coming back from, which is why it is also the side that takes a long press.
+ * The distinction reads before the icon does - a rider glancing down knows which
+ * half is dangerous before they have recognised a shape.
  */
 private fun RecordingAction.containerColour(): Color =
     when (this) {
