@@ -68,6 +68,11 @@ class TrackJournalStore(
         startedAtEpochMs: Long,
     ) {
         close()
+        // Cleared before the attempt, not after it. If opening the file fails,
+        // the previous ride must not be left owning a journal that is no longer
+        // open: the new ride's finish would then decline to delete it, and the
+        // next launch would recover a ride that was already saved.
+        openFor = null
         runCatching {
             file.parentFile?.mkdirs()
             val opened = FileOutputStream(file, false)
