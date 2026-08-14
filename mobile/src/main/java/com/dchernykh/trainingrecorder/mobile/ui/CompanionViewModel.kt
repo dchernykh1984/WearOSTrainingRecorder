@@ -22,8 +22,10 @@ import com.dchernykh.trainingrecorder.mobile.connect.AuthorizationResult
 import com.dchernykh.trainingrecorder.mobile.connect.StravaAuthorization
 import com.dchernykh.trainingrecorder.mobile.settings.PhoneSettingsStore
 import com.dchernykh.trainingrecorder.mobile.sync.SettingsPublisher
+import com.dchernykh.trainingrecorder.mobile.sync.WorkoutHistoryStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** The five places the companion app can be. */
 enum class Section(
@@ -55,6 +57,7 @@ class CompanionViewModel(
     private val store: PhoneSettingsStore = PhoneSettingsStore(application),
     private val publisher: SettingsPublisher = SettingsPublisher(application),
     private val authorization: StravaAuthorization = StravaAuthorization(application),
+    private val history: WorkoutHistoryStore = WorkoutHistoryStore(application),
 ) : AndroidViewModel(application) {
     /**
      * Kotlin default arguments do not emit a one-argument constructor, and
@@ -66,6 +69,7 @@ class CompanionViewModel(
         PhoneSettingsStore(application),
         SettingsPublisher(application),
         StravaAuthorization(application),
+        WorkoutHistoryStore(application),
     )
 
     private val _configuration = mutableStateOf(ScreenConfiguration.initial())
@@ -81,9 +85,9 @@ class CompanionViewModel(
     val language: State<AppLanguage> = _language
 
     /**
-     * The phone shows the history but does not hold it: the workouts are on the
-     * watch. Empty until it syncs one over, which is honest - an empty list here
-     * means "nothing has arrived", not "you have never ridden".
+     * The phone shows the history but does not own it: the workouts live on the
+     * watch, and this is the last list it published. Empty means "the watch has
+     * not told us anything yet", not "you have never ridden".
      */
     private val _workouts = mutableStateOf<List<WorkoutSummary>>(emptyList())
     val workouts: State<List<WorkoutSummary>> = _workouts
@@ -124,6 +128,26 @@ class CompanionViewModel(
             _language.value = AppLanguage.byTag(it.languageTag)
         }
         credentials.value = store.readCredentials()
+        // From disk first, so the screen has something the moment it opens rather
+        // than after the Data Layer gets round to answering.
+        _workouts.value = history.read()
+        refreshWorkouts()
+    }
+
+    /**
+     * Asks the Data Layer for the watch's current list.
+     *
+     * Needed alongside the listener because the listener only hears *changes*: a
+     * phone reinstalled after a season of rides would otherwise show nothing
+     * until the next ride finished.
+     */
+    fun refreshWorkouts() {
+        viewModelScope.launch {
+            WorkoutHistoryStore.fetchExisting(getApplication())?.let { payload ->
+                withContext(Dispatchers.IO) { history.write(payload) }
+            }
+            _workouts.value = withContext(Dispatchers.IO) { history.read() }
+        }
     }
 
     fun credentialsFor(connectorId: String): Map<String, String> = credentials.value[connectorId].orEmpty()

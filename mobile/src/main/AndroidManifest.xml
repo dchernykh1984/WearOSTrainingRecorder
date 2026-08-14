@@ -31,6 +31,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- The one path that runs watch-to-phone. Without this declaration the
+             watch publishes its workouts and nothing on the phone is ever woken
+             to receive them, which is precisely how the history screen came to
+             be fully written and permanently empty. -->
+        <service
+            android:name=".sync.WorkoutListener"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/workouts" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
