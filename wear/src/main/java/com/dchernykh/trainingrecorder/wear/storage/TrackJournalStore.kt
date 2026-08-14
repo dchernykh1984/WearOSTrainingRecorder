@@ -136,8 +136,13 @@ class TrackJournalStore(
     @Synchronized
     fun recover(): RecoveredRide? {
         if (openFor != null) return null
-        // A claim already there is one a previous launch made and never got to
-        // clear, which means the save failed: that ride still deserves a turn.
+        // A claim already there is one a previous launch made and never cleared,
+        // which means its save failed. It gets another turn - but not at the
+        // expense of a newer ride: if a live journal is waiting behind it, that
+        // one is the ride the rider actually just did, and a claim that cannot
+        // be saved must not keep the slot forever and let every later
+        // interrupted ride be truncated by the next start.
+        if (claimed.exists() && file.exists()) runCatching { claimed.delete() }
         if (!claimed.exists() && !runCatching { file.renameTo(claimed) }.getOrDefault(false)) return null
         val ride =
             runCatching {
