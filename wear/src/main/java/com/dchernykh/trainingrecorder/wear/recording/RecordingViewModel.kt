@@ -383,26 +383,20 @@ class RecordingViewModel(
         // Encoding a six-hour ride is thousands of messages plus a file write and
         // an index rewrite; on the main thread that is an ANR at exactly the
         // moment the rider is waiting to see their ride saved.
-        val saved =
-            // NonCancellable because this is the last chance the ride has. A
-            // rider who long-presses Finish and immediately swipes the app away
-            // cancels the scope, and without this the FIT file is never written
-            // and the whole workout goes with the view model.
-            withContext(Dispatchers.IO + NonCancellable) {
-                runCatching { repository.save("workout-$start", recorded(finished, start), CONNECTORS) }
-            }
-        // The samples are the only copy of the ride until the file exists, so
-        // they are kept if the write failed: the next FINISH still has a ride to
-        // write, rather than saving an empty one on top of a lost one.
-        if (saved.isSuccess) {
-            samples.clear()
-            // All of it uncancellable, for the same reason the save above is.
-            // The rider who swipes the app away the moment they finish cancels
-            // this scope, and a cancellable suspension anywhere in here abandons
-            // everything below it: the ride would be on disk, its journal still
-            // in the way of the next one, the phone never told, and the upload
-            // never queued - a saved workout that quietly never leaves the watch.
-            withContext(Dispatchers.IO + NonCancellable) {
+        // One uncancellable block, not several. A rider who long-presses Finish
+        // and immediately swipes the app away cancels this scope, and every
+        // return from a withContext resumes on it: split into two, the first
+        // block would run and the resumption between them would throw, leaving
+        // the ride on disk but never queued, never published, and its journal
+        // still in the way of the next one.
+        withContext(Dispatchers.IO + NonCancellable) {
+            val saved = runCatching { repository.save("workout-$start", recorded(finished, start), CONNECTORS) }
+            // The samples are the only copy of the ride until the file exists,
+            // so they are kept if the write failed: the next FINISH still has a
+            // ride to write, rather than saving an empty one on top of a lost
+            // one.
+            if (saved.isSuccess) {
+                samples.clear()
                 // Dropped only now, once the ride exists as a file. Deleting it
                 // any earlier would leave a window where a kill loses the ride
                 // from both places at once.
@@ -416,8 +410,8 @@ class RecordingViewModel(
                 // show.
                 publisher.publish(repository)
             }
+            history.value = SportOrdering.record(history.value, sportId).also(settings::writeHistory)
         }
-        history.value = SportOrdering.record(history.value, sportId).also(settings::writeHistory)
     }
 
     /**
