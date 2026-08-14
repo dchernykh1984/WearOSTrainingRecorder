@@ -21,6 +21,7 @@ import com.dchernykh.trainingrecorder.localization.Labels
 import com.dchernykh.trainingrecorder.wear.connector.GarminConnector
 import com.dchernykh.trainingrecorder.wear.connector.StravaConnector
 import com.dchernykh.trainingrecorder.wear.storage.WorkoutRepository
+import com.dchernykh.trainingrecorder.wear.sync.WorkoutPublisher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -43,6 +44,7 @@ class UploadWorker(
     parameters: WorkerParameters,
 ) : CoroutineWorker(context, parameters) {
     private val repository = WorkoutRepository(context)
+    private val publisher = WorkoutPublisher(context)
     private val credentials = CredentialStore(context)
     private val registry =
         ConnectorRegistry(
@@ -80,6 +82,10 @@ class UploadWorker(
             }
             // Anything the queue has given up on can now be reclaimed.
             repository.prune(configured)
+            // Told once per drain rather than per upload: the phone's history
+            // shows one line per ride, and the rider watching it cares that the
+            // ride arrived, not which of the two services answered first.
+            publisher.publish(repository)
             // Retried through WorkManager rather than looping here, so a watch
             // that goes back into a tunnel is not holding a wakelock while it
             // waits. The queue's own backoff still gates the next attempt.
