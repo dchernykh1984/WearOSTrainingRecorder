@@ -1,6 +1,7 @@
 package com.dchernykh.trainingrecorder.wear.upload
 
 import android.content.Context
+import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
@@ -25,6 +26,7 @@ import com.dchernykh.trainingrecorder.wear.storage.WorkoutRepository
 import com.dchernykh.trainingrecorder.wear.sync.WorkoutPublisher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
 
 /**
  * Sends finished workouts to the services the rider has set up.
@@ -176,6 +178,9 @@ class UploadWorker(
     companion object {
         private const val WORK_NAME = "upload-workouts"
 
+        /** Grows a minute per retry; the queue's own backoff still gates each try. */
+        private const val RETRY_DELAY_MINUTES = 1L
+
         /**
          * Asks for a drain as soon as the watch has a network.
          *
@@ -186,6 +191,15 @@ class UploadWorker(
             val request =
                 OneTimeWorkRequestBuilder<UploadWorker>()
                     .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+                    // Linear, and from a minute rather than the default thirty
+                    // seconds doubling. The drain now stays in retry for as long
+                    // as anything is owed, so the default would have the chain
+                    // drifting to hours between passes - and because the work is
+                    // unique and KEEP, a ride finished during one of those gaps
+                    // would wait it out before anything looked at it. A pass
+                    // that finds nothing due is a small file read, so a steady
+                    // few minutes costs nothing and keeps the watch responsive.
+                    .setBackoffCriteria(BackoffPolicy.LINEAR, RETRY_DELAY_MINUTES, TimeUnit.MINUTES)
                     .build()
             WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, request)
         }
