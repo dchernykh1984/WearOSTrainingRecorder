@@ -3,6 +3,7 @@ package com.dchernykh.trainingrecorder.mobile.sync
 import android.content.Context
 import com.dchernykh.trainingrecorder.core.datalayer.WorkoutSummaryContract
 import com.dchernykh.trainingrecorder.core.workout.WorkoutSummary
+import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.Wearable
@@ -23,6 +24,11 @@ class WorkoutListener : WearableListenerService() {
     override fun onDataChanged(events: DataEventBuffer) {
         events.forEach { event ->
             if (event.dataItem.uri.path != WorkoutSummaryContract.PATH) return@forEach
+            // A deleted item carries no data, and reading its map throws - which
+            // on a listener service means the phone's process dies rather than
+            // one event being skipped. Nothing deletes this path today, but the
+            // watch app being uninstalled does.
+            if (event.type == DataEvent.TYPE_DELETED) return@forEach
             DataMapItem
                 .fromDataItem(event.dataItem)
                 .dataMap
