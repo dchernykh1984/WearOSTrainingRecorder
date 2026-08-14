@@ -22,6 +22,7 @@ import com.dchernykh.trainingrecorder.wear.ble.SensorHub
 import com.dchernykh.trainingrecorder.wear.health.ExerciseRecorder
 import com.dchernykh.trainingrecorder.wear.race.RaceStatsPoller
 import com.dchernykh.trainingrecorder.wear.service.RecordingService
+import com.dchernykh.trainingrecorder.wear.storage.TrackJournalStore
 import com.dchernykh.trainingrecorder.wear.storage.WorkoutRepository
 import com.dchernykh.trainingrecorder.wear.sync.SettingsStore
 import com.dchernykh.trainingrecorder.wear.upload.CredentialStore
@@ -80,6 +81,14 @@ class RecordingViewModel(
         SensorHub(application),
     )
 
+    /**
+     * Owned outright rather than injected like the collaborators above. Nothing
+     * outside this model ever writes the journal - it is opened, appended to and
+     * dropped entirely within one recording - and the constructor is already as
+     * long as it should get.
+     */
+    private val journal = TrackJournalStore(application)
+
     private val _state = MutableStateFlow(RecordingState())
     val state: StateFlow<RecordingState> = _state.asStateFlow()
 
@@ -124,6 +133,42 @@ class RecordingViewModel(
 
     init {
         applySettings()
+        // On the first construction after a launch, which is exactly when a ride
+        // the last process never got to finish is sitting on disk waiting to be
+        // noticed.
+        viewModelScope.launch(Dispatchers.IO) { recoverInterruptedRide() }
+    }
+
+    /**
+     * Saves the ride a previous run was killed in the middle of.
+     *
+     * Recovered rather than offered: a dialog asking whether to keep a ride the
+     * rider has already ridden is a question with one sensible answer, and the
+     * one moment it would be asked - the next time they open the app, probably to
+     * start something else - is the worst moment to ask it.
+     *
+     * The workout id is derived from the start time, the same way a normal save
+     * derives it, so a ride that was in fact written out before the process died
+     * lands on itself rather than beside itself.
+     */
+    private fun recoverInterruptedRide() {
+        val ride = journal.recover() ?: return
+        val workout = runCatching { ride.toWorkout() }.getOrNull()
+        if (workout == null) {
+            // A journal that cannot become a workout will not become one on the
+            // next launch either, and keeping it would mean trying forever.
+            Log.w(TAG, "an interrupted ride could not be rebuilt from its journal")
+            journal.finish()
+            return
+        }
+        val saved = runCatching { repository.save("workout-${ride.startedAtEpochMs}", workout, CONNECTORS) }
+        // Kept when the save failed: the journal is still the only copy, and the
+        // next launch gets another chance at it.
+        if (saved.isSuccess) {
+            journal.finish()
+            history.value = SportOrdering.record(history.value, ride.sportTypeId).also(settings::writeHistory)
+            UploadWorker.schedule(getApplication())
+        }
     }
 
     /**
@@ -166,7 +211,12 @@ class RecordingViewModel(
         builtIn.clear()
         samples.clear()
         sensors.value = SensorSnapshot()
-        _state.update { it.prepare(sport.id, now()) }
+        val startedAt = now()
+        _state.update { it.prepare(sport.id, startedAt) }
+        // Opened with the same start time the save will use for the id, so a ride
+        // recovered from this journal is the same workout the finish would have
+        // written rather than a second copy of it.
+        viewModelScope.launch(Dispatchers.IO) { journal.begin(sport.id, startedAt) }
         RecordingService.start(getApplication())
         // Started with the workout, not held open between rides: a GATT link to
         // a power meter kept alive all day is a flat battery on both ends.
@@ -235,7 +285,7 @@ class RecordingViewModel(
             // straight line between where the rider stopped and where they
             // started again.
             if (_state.value.phase == RecordingPhase.RECORDING) {
-                samples +=
+                val point =
                     TrackPoint(
                         timestampEpochMs = timestamp,
                         latitudeDeg = sample.latitudeDeg,
@@ -247,6 +297,14 @@ class RecordingViewModel(
                         powerWatts = sensors.value.value("power")?.toInt(),
                         distanceMeters = sensors.value.value("distance_total"),
                     )
+                samples += point
+                // Off the main thread, but awaited rather than launched: a sample
+                // a second is nothing to wait for, and launching each append
+                // separately would let two of them race and interleave halfway
+                // through a line.
+                withContext(Dispatchers.IO) {
+                    journal.append(point, _state.value.movingMillisAt(timestamp))
+                }
             }
             recomputeValues()
         }
@@ -330,6 +388,10 @@ class RecordingViewModel(
         // write, rather than saving an empty one on top of a lost one.
         if (saved.isSuccess) {
             samples.clear()
+            // Dropped only now, once the ride exists as a file. Deleting it any
+            // earlier would leave a window where a kill loses the ride from both
+            // places at once.
+            withContext(Dispatchers.IO + NonCancellable) { journal.finish() }
             // Queued straight away rather than on the next launch: the rider
             // closes the app the moment the ride ends, and the workout should
             // be on its way before they do.
@@ -377,6 +439,10 @@ class RecordingViewModel(
         stopCollecting()
         _state.value = RecordingState()
         samples.clear()
+        // A discarded ride is thrown away deliberately, so its journal goes with
+        // it - left behind, the next launch would helpfully recover the very
+        // thing the rider just decided not to keep.
+        CoroutineScope(Dispatchers.IO).launch { journal.finish() }
         busy = false
         RecordingService.stop(getApplication())
     }
