@@ -77,6 +77,19 @@ private fun WorkoutRow(
                     " - " + stringResource(uploadLabel(workout)),
             style = MaterialTheme.typography.bodySmall,
         )
+        // Why it has not arrived, for every service that has something to say.
+        // "Waiting to upload" on its own is unactionable - it looks identical
+        // whether the watch has no signal, the token has expired, or the service
+        // is refusing outright - and the rider cannot read the watch's log.
+        workout.uploadReasons.toSortedMap().forEach { (connectorId, reason) ->
+            Text(
+                text =
+                    connectorId + ": " + reason + " - " +
+                        stringResource(R.string.history_attempts, workout.uploadAttempts[connectorId] ?: 0),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

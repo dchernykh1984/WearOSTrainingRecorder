@@ -171,6 +171,7 @@
     <string name="history_pending">Ceka na odeslani</string>
     <string name="history_uploaded">Odeslano</string>
     <string name="history_failed">Odeslani odmitnuto</string>
+    <string name="history_attempts">pokusy: %1$d</string>
     <string name="history_not_sent">Nikam neodeslano</string>
     <string name="settings_language">Jazyk</string>
     <string name="language_system">Jazyk systému</string>

@@ -171,6 +171,7 @@
     <string name="history_pending">Жіберуді күтуде</string>
     <string name="history_uploaded">Жіберілді</string>
     <string name="history_failed">Жіберу қабылданбады</string>
+    <string name="history_attempts">әрекет саны: %1$d</string>
     <string name="history_not_sent">Ешқайда жіберілмеген</string>
     <string name="settings_language">Тіл</string>
     <string name="language_system">Жүйе тілі</string>

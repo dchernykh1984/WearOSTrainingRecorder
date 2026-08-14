@@ -171,6 +171,7 @@
     <string name="history_pending">Ожидает отправки</string>
     <string name="history_uploaded">Отправлено</string>
     <string name="history_failed">Отправка отклонена</string>
+    <string name="history_attempts">попыток: %1$d</string>
     <string name="history_not_sent">Никуда не отправлено</string>
     <string name="settings_language">Язык</string>
     <string name="language_system">Язык системы</string>

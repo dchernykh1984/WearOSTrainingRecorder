@@ -164,6 +164,7 @@
     <string name="history_pending">アップロード待ち</string>
     <string name="history_uploaded">アップロード済み</string>
     <string name="history_failed">アップロード拒否</string>
+    <string name="history_attempts">試行回数: %1$d</string>
     <string name="history_not_sent">未送信</string>
     <string name="settings_language">言語</string>
     <string name="language_system">システムの言語</string>

@@ -187,6 +187,7 @@
     <string name="history_pending">Waiting to upload</string>
     <string name="history_uploaded">Uploaded</string>
     <string name="history_failed">Upload refused</string>
+    <string name="history_attempts">attempts: %1$d</string>
     <string name="history_not_sent">Not sent anywhere</string>
     <string name="settings_language">Language</string>
     <string name="language_system">System language</string>

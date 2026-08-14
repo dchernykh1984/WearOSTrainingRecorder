@@ -42,6 +42,16 @@ data class WorkoutSummary(
      * forever - pending, unretried, and therefore undeletable.
      */
     val uploadAttemptedAt: Map<String, Long> = emptyMap(),
+    /**
+     * What each service said last time, when it did not take the ride.
+     *
+     * Kept because "waiting to upload" on its own is unactionable: it looks the
+     * same whether the watch has no signal, the token has expired, or the
+     * service is refusing every request. The rider cannot read a logcat, so the
+     * one place this can be shown is the phone's history - which means it has
+     * to be written down here first.
+     */
+    val uploadReasons: Map<String, String> = emptyMap(),
 ) {
     init {
         require(id.isNotBlank()) { "a workout needs an id" }

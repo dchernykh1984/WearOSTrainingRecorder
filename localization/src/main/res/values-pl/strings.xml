@@ -171,6 +171,7 @@
     <string name="history_pending">Oczekuje na wyslanie</string>
     <string name="history_uploaded">Wyslano</string>
     <string name="history_failed">Wysylka odrzucona</string>
+    <string name="history_attempts">proby: %1$d</string>
     <string name="history_not_sent">Nigdzie nie wyslano</string>
     <string name="settings_language">Język</string>
     <string name="language_system">Język systemu</string>
