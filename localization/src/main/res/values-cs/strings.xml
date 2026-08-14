@@ -204,8 +204,13 @@
     <string name="connect_done">Pripojeno</string>
     <string name="connect_failed">Pripojeni se nezdarilo. Zkontrolujte udaje a zkuste to znovu.</string>
     <string name="connect_needs_application">Nejprve zadejte Client ID a Secret sve aplikace.</string>
-    <string name="connect_garmin_token_hint">Vlozte token z Garmin Connect. Automaticke prihlaseni zatim neni k dispozici.</string>
     <string name="settings_units">Jednotky</string>
     <string name="units_metric">Metrické</string>
     <string name="units_imperial">Imperiální</string>
+    <string name="connect_garmin_code_hint">Garmin muze poslat overovaci kod e-mailem nebo SMS. Zadejte jej nize.</string>
+    <string name="connect_needs_login">Nejprve zadejte prihlaseni a heslo Garmin.</string>
+    <string name="connect_code_sent">Garmin poslal overovaci kod. Zadejte jej nize.</string>
+    <string name="connect_wrong_credentials">Garmin toto prihlaseni a heslo neprijal.</string>
+    <string name="connect_code_label">Overovaci kod</string>
+    <string name="connect_submit_code">Potvrdit kod</string>
 </resources>

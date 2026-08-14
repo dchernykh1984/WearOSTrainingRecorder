@@ -204,8 +204,13 @@
     <string name="connect_done">Verbunden</string>
     <string name="connect_failed">Verbindung fehlgeschlagen. Daten prufen und erneut versuchen.</string>
     <string name="connect_needs_application">Gib zuerst Client ID und Secret deiner Anwendung ein.</string>
-    <string name="connect_garmin_token_hint">Fuge ein Token aus Garmin Connect ein. Automatische Anmeldung ist noch nicht verfugbar.</string>
     <string name="settings_units">Einheiten</string>
     <string name="units_metric">Metrisch</string>
     <string name="units_imperial">Imperial</string>
+    <string name="connect_garmin_code_hint">Garmin sendet moglicherweise einen Bestatigungscode per E-Mail oder SMS. Gib ihn unten ein.</string>
+    <string name="connect_needs_login">Gib zuerst deinen Garmin-Login und dein Passwort ein.</string>
+    <string name="connect_code_sent">Garmin hat einen Bestatigungscode gesendet. Gib ihn unten ein.</string>
+    <string name="connect_wrong_credentials">Garmin hat diesen Login und dieses Passwort nicht akzeptiert.</string>
+    <string name="connect_code_label">Bestatigungscode</string>
+    <string name="connect_submit_code">Code bestatigen</string>
 </resources>

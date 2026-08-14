@@ -204,8 +204,13 @@
     <string name="connect_done">Polaczono</string>
     <string name="connect_failed">Nie udalo sie polaczyc. Sprawdz dane i sprobuj ponownie.</string>
     <string name="connect_needs_application">Najpierw podaj Client ID i Secret swojej aplikacji.</string>
-    <string name="connect_garmin_token_hint">Wklej token z Garmin Connect. Automatyczne logowanie nie jest jeszcze dostepne.</string>
     <string name="settings_units">Jednostki</string>
     <string name="units_metric">Metryczne</string>
     <string name="units_imperial">Imperialne</string>
+    <string name="connect_garmin_code_hint">Garmin moze wyslac kod weryfikacyjny e-mailem lub SMS-em. Wpisz go ponizej.</string>
+    <string name="connect_needs_login">Najpierw podaj login i haslo Garmin.</string>
+    <string name="connect_code_sent">Garmin wyslal kod weryfikacyjny. Wpisz go ponizej.</string>
+    <string name="connect_wrong_credentials">Garmin nie zaakceptowal tego loginu i hasla.</string>
+    <string name="connect_code_label">Kod weryfikacyjny</string>
+    <string name="connect_submit_code">Potwierdz kod</string>
 </resources>

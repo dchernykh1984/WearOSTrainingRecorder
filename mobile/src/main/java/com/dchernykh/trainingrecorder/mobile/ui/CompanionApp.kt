@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dchernykh.trainingrecorder.core.config.ConfigLevel
 import com.dchernykh.trainingrecorder.core.config.ScreenConfiguration
+import com.dchernykh.trainingrecorder.core.connector.GarminProtocol
 import com.dchernykh.trainingrecorder.core.sport.SportCatalogue
 import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.localization.Labels
@@ -170,15 +171,18 @@ private fun ConnectionList(
     model: CompanionViewModel,
     modifier: Modifier = Modifier,
 ) {
+    val connections = model.connections
     LazyColumn(modifier = modifier.fillMaxSize()) {
-        items(model.connectors, key = { it.id }) { connector ->
+        items(connections.connectors, key = { it.id }) { connector ->
             ConnectionSetup(
                 connectorId = connector.id,
                 fields = connector.credentialFields,
-                values = model.credentialsFor(connector.id),
+                values = connections.credentialsFor(connector.id),
                 onValueChanged = { key, value -> model.updateCredential(connector.id, key, value) },
                 onConnect = { model.connect(connector.id) },
-                status = model.statusFor(connector.id),
+                status = connections.statusFor(connector.id),
+                codeRequested = connector.id == GarminProtocol.ID && connections.codeRequested.value,
+                onCodeSubmitted = model::submitGarminCode,
             )
             HorizontalDivider()
         }
