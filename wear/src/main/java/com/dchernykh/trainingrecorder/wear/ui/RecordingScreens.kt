@@ -2,24 +2,27 @@ package com.dchernykh.trainingrecorder.wear.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -113,32 +116,21 @@ private fun RoundBands(
     values: (String) -> String,
     modifier: Modifier = Modifier,
 ) {
-    // Measured, because the text has to be sized to the room it actually gets.
-    // Ten fields is six bands on a face that fits one comfortably, and drawing
-    // them all at one size is how a screen the app offers came out unreadable.
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val type = slotTypeFor((maxHeight - ROUND_VERTICAL_INSET * 2) / bands.size)
-        var consumed = 0
-        Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = ROUND_INSET, vertical = ROUND_VERTICAL_INSET),
-            verticalArrangement = Arrangement.SpaceEvenly,
-        ) {
-            bands.forEach { band ->
-                val bandSlots = slots.drop(consumed).take(band.columns)
-                consumed += band.columns
-                Row(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    bandSlots.forEach { fieldId ->
-                        Slot(
-                            fieldId = fieldId,
-                            values = values,
-                            type = type,
-                            modifier = Modifier.weight(1f).fillMaxHeight(),
-                        )
-                    }
+    var consumed = 0
+    Column(
+        modifier = modifier.fillMaxSize().padding(horizontal = ROUND_INSET, vertical = ROUND_VERTICAL_INSET),
+        verticalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        bands.forEach { band ->
+            val bandSlots = slots.drop(consumed).take(band.columns)
+            consumed += band.columns
+            Row(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                bandSlots.forEach { fieldId ->
+                    Slot(fieldId = fieldId, values = values, modifier = Modifier.weight(1f).fillMaxHeight())
                 }
             }
         }
@@ -154,56 +146,22 @@ private fun SquareGrid(
     // Two columns once there are enough slots; the planner's pixel thresholds
     // belong to the drawing code, so the shape decision here is by count alone.
     val columns = if (slots.size >= LayoutPlanner.MIN_SLOTS_FOR_TWO_COLUMNS) 2 else 1
-    val rows = slots.chunked(columns)
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val type = slotTypeFor((maxHeight - SQUARE_INSET * 2) / rows.size)
-        Column(
-            modifier = Modifier.fillMaxSize().padding(SQUARE_INSET),
-            verticalArrangement = Arrangement.SpaceEvenly,
-        ) {
-            rows.forEach { row ->
-                Row(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    row.forEach { fieldId ->
-                        Slot(
-                            fieldId = fieldId,
-                            values = values,
-                            type = type,
-                            modifier = Modifier.weight(1f).fillMaxHeight(),
-                        )
-                    }
+    Column(
+        modifier = modifier.fillMaxSize().padding(SQUARE_INSET),
+        verticalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        slots.chunked(columns).forEach { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                row.forEach { fieldId ->
+                    Slot(fieldId = fieldId, values = values, modifier = Modifier.weight(1f).fillMaxHeight())
                 }
             }
         }
     }
-}
-
-/**
- * How large a slot's caption and value may be drawn.
- *
- * Derived from the height the slot actually has rather than fixed by the theme.
- * A watch face is a fixed thing that has to hold between one and ten fields, so
- * the only quantity that can give is the type.
- */
-private data class SlotType(
-    val value: TextUnit,
-    val label: TextUnit,
-)
-
-/**
- * The value takes a bit under half the row and the caption a fifth, which leaves
- * room between them at every count. The floors are what stays readable at arm's
- * length; the ceilings stop a single field from filling the screen edge to edge.
- */
-private fun slotTypeFor(slotHeight: Dp): SlotType {
-    val available = slotHeight.value
-    return SlotType(
-        value = (available * VALUE_SHARE).coerceIn(MIN_VALUE_SP, MAX_VALUE_SP).sp,
-        label = (available * LABEL_SHARE).coerceIn(MIN_LABEL_SP, MAX_LABEL_SP).sp,
-    )
 }
 
 /** A caption above its value, or nothing at all when the slot is unassigned. */
@@ -211,55 +169,77 @@ private fun slotTypeFor(slotHeight: Dp): SlotType {
 private fun Slot(
     fieldId: String?,
     values: (String) -> String,
-    type: SlotType,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        if (fieldId == null) {
-            Text(text = "", textAlign = TextAlign.Center)
-            return@Column
-        }
-        val label = Labels.field(fieldId)
-        if (label != 0) {
-            Text(
-                text = stringResource(label),
-                style =
-                    MaterialTheme.typography.labelSmall.copy(
-                        fontSize = type.label,
-                        // Set with the size: a line box left at the theme's height
-                        // keeps the spacing of type three times as large, which is
-                        // most of what made ten fields overlap.
-                        lineHeight = type.label * LINE_HEIGHT_RATIO,
-                    ),
-                maxLines = 1,
-                textAlign = TextAlign.Center,
+    if (fieldId == null) return
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Column(
+            // Capped before it is filled, so a slot with the whole face to itself
+            // keeps its caption next to its value instead of pushing the two to
+            // opposite ends of the screen. The cap has to come first: a
+            // fillMaxHeight ahead of it hands down an exact height that heightIn
+            // can only agree with.
+            modifier = Modifier.heightIn(max = MAX_SLOT_HEIGHT).fillMaxHeight().fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            val label = Labels.field(fieldId)
+            // Weighted rather than sized: the caption gets a third of the slot and
+            // the value the rest, whatever the slot turns out to be. That is what
+            // makes one field and ten fields both work - the proportion is fixed and
+            // the type follows.
+            if (label != 0) {
+                FittedText(
+                    text = stringResource(label),
+                    style = MaterialTheme.typography.labelSmall,
+                    minFontSize = MIN_LABEL,
+                    maxFontSize = MAX_LABEL,
+                    modifier = Modifier.fillMaxWidth().weight(LABEL_SHARE),
+                )
+            }
+            FittedText(
+                text = values(fieldId),
+                style = MaterialTheme.typography.numeralSmall,
+                minFontSize = MIN_VALUE,
+                maxFontSize = MAX_VALUE,
+                modifier = Modifier.fillMaxWidth().weight(VALUE_SHARE),
             )
         }
-        Text(
-            text = values(fieldId),
-            style =
-                MaterialTheme.typography.numeralSmall.copy(
-                    fontSize = type.value,
-                    lineHeight = type.value * LINE_HEIGHT_RATIO,
-                ),
-            maxLines = 1,
-            textAlign = TextAlign.Center,
-        )
     }
 }
 
 /**
- * The controls, laid out like the watch's own workout screen: what is being
- * recorded, then one large disc per action with its word underneath.
+ * One line that shrinks until it fits the box it was given.
  *
- * Centred as a column rather than pinned to the middle of the screen, because the
- * pair of buttons and their captions is taller than it is deep - and on a round
- * face, anything that grows downwards from the centre runs into the rim.
+ * The alternative - computing a size from the number of bands - was wrong in two
+ * ways at once. It read a dp measurement as an sp one, so every size was off by
+ * whatever font scale the rider had set, and it never looked at width at all: a
+ * value like "1:23:45" in a two-column band was clipped to something that still
+ * looked like a time and was not one. Measuring is the platform's job, and it
+ * measures both dimensions and honours the font scale for free.
  */
+@Composable
+private fun FittedText(
+    text: String,
+    style: TextStyle,
+    minFontSize: TextUnit,
+    maxFontSize: TextUnit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        BasicText(
+            text = text,
+            style =
+                style.copy(
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center,
+                ),
+            maxLines = 1,
+            autoSize = TextAutoSize.StepBased(minFontSize = minFontSize, maxFontSize = maxFontSize),
+        )
+    }
+}
+
 @Composable
 private fun ControlsPage(
     sportLabelRes: Int,
@@ -310,13 +290,18 @@ private val ROUND_INSET = 16.dp
 private val ROUND_VERTICAL_INSET = 12.dp
 private val SQUARE_INSET = 8.dp
 
-private const val VALUE_SHARE = 0.42f
-private const val LABEL_SHARE = 0.20f
-private const val MIN_VALUE_SP = 14f
-private const val MAX_VALUE_SP = 44f
-private const val MIN_LABEL_SP = 9f
-private const val MAX_LABEL_SP = 16f
-private const val LINE_HEIGHT_RATIO = 1.08f
+/** As tall as a caption and value need together, and no taller. */
+private val MAX_SLOT_HEIGHT = 104.dp
+
+/** The caption takes a third of a slot, the value the rest. */
+private const val LABEL_SHARE = 0.34f
+private const val VALUE_SHARE = 0.66f
+
+/** Floors keep a ten-field screen readable; ceilings stop one field filling the face. */
+private val MIN_LABEL = 8.sp
+private val MAX_LABEL = 16.sp
+private val MIN_VALUE = 12.sp
+private val MAX_VALUE = 44.sp
 private val CONTROLS_INSET = 16.dp
 
 /** Two comfortable slots on a large face; the row shares the width below that. */
