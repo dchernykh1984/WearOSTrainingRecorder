@@ -103,7 +103,11 @@ object WorkoutSummaryContract {
         val version = (root[KEY_VERSION] as? JsonPrimitive)?.content?.toIntOrNull() ?: return null
         if (version > VERSION) return null
         val workouts = root[KEY_WORKOUTS] as? JsonArray ?: return null
-        return workouts.mapNotNull { toSummary(it as? JsonObject) }
+        // Distinct, because the phone's list is keyed by id and Compose throws
+        // outright on a repeat. The watch should never send one - saving is
+        // idempotent by id - but a crash on the receiving end is a poor way to
+        // find out that it did.
+        return workouts.mapNotNull { toSummary(it as? JsonObject) }.distinctBy { it.id }
     }
 
     private fun toSummary(node: JsonObject?): WorkoutSummary? {
