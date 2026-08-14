@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -60,6 +61,14 @@ fun CompanionApp(
             // a screen whose only way out is a control they have to find.
             BackHandler(enabled = editing != null) {
                 if (picking != null) picking = null else editingId = null
+            }
+
+            // Re-read when the rider opens the history, because the listener
+            // writes the watch's list to disk from a service the screen knows
+            // nothing about - without this, a ride that arrived while the app was
+            // open would only appear on the next launch.
+            LaunchedEffect(section) {
+                if (section == Section.HISTORY) model.refreshWorkouts()
             }
 
             Scaffold(
