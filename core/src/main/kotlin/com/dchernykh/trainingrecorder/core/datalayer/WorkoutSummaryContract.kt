@@ -1,0 +1,141 @@
+package com.dchernykh.trainingrecorder.core.datalayer
+
+import com.dchernykh.trainingrecorder.core.workout.UploadState
+import com.dchernykh.trainingrecorder.core.workout.WorkoutSummary
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+
+/**
+ * What the watch tells the phone about the rides it holds.
+ *
+ * The only thing that travels watch-to-phone. Everything else on the Data Layer
+ * goes the other way - the phone owns the configuration and the credentials, the
+ * watch consumes them - but the workouts exist only on the watch, and the history
+ * screen the rider asked for is on the phone. Without this path that screen is
+ * written, rendered, and permanently empty.
+ *
+ * Summaries only, never the FIT files. The phone is not a second copy of the
+ * rides: it shows what was recorded and whether it has reached the services, and
+ * pushing megabytes of track over Bluetooth to answer that question would cost
+ * the rider's battery for something no screen displays.
+ */
+object WorkoutSummaryContract {
+    /** The Data Layer path the watch writes and the phone listens on. */
+    const val PATH = "/workouts"
+
+    const val KEY_PAYLOAD = "payload"
+
+    /**
+     * Bumped when the shape changes incompatibly. A phone that reads a newer
+     * version keeps the list it already has rather than showing a wrong one.
+     */
+    const val VERSION = 1
+
+    /**
+     * The most recent rides, and no more.
+     *
+     * A Data Layer item is capped at 100 KB and the watch may hold two hundred
+     * workouts. Sending the newest fifty keeps the payload around ten kilobytes,
+     * and a history screen is scrolled from the top - the ride from four months
+     * ago is not what the rider opened it for.
+     */
+    const val MAX_SUMMARIES = 50
+
+    private val json = Json { ignoreUnknownKeys = true }
+
+    private const val KEY_VERSION = "version"
+    private const val KEY_WORKOUTS = "workouts"
+    private const val KEY_ID = "id"
+    private const val KEY_SPORT = "sport"
+    private const val KEY_STARTED_AT = "startedAt"
+    private const val KEY_DURATION = "duration"
+    private const val KEY_DISTANCE = "distance"
+    private const val KEY_BYTES = "bytes"
+    private const val KEY_UPLOADS = "uploads"
+
+    /**
+     * Newest first and truncated, so the cap keeps the rides the phone is most
+     * likely to be asked about rather than whichever the index listed first.
+     */
+    fun encode(summaries: List<WorkoutSummary>): String =
+        buildJsonObject {
+            put(KEY_VERSION, VERSION)
+            put(
+                KEY_WORKOUTS,
+                buildJsonArray {
+                    summaries
+                        .sortedByDescending { it.startedAtEpochMs }
+                        .take(MAX_SUMMARIES)
+                        .forEach { add(encodeSummary(it)) }
+                },
+            )
+        }.toString()
+
+    private fun encodeSummary(summary: WorkoutSummary) =
+        buildJsonObject {
+            put(KEY_ID, summary.id)
+            put(KEY_SPORT, summary.sportTypeId)
+            put(KEY_STARTED_AT, summary.startedAtEpochMs)
+            put(KEY_DURATION, summary.durationSeconds)
+            put(KEY_DISTANCE, summary.distanceMeters)
+            put(KEY_BYTES, summary.fileSizeBytes)
+            put(KEY_UPLOADS, buildJsonObject { summary.uploads.forEach { (id, state) -> put(id, state.id) } })
+        }
+
+    /**
+     * Null when the payload is unusable, so the phone keeps the history it has
+     * rather than replacing it with nothing. An entry that cannot be read is
+     * dropped on its own - one damaged row is not a reason to blank the list.
+     *
+     * Four guard clauses, one per way a payload can be unusable, following the
+     * shape [SyncContract] uses in the other direction. Each one means "keep the
+     * history you already have", and saying that where it is discovered reads
+     * better than threading a nullable result to the end.
+     */
+    @Suppress("ReturnCount")
+    fun decode(payload: String): List<WorkoutSummary>? {
+        val root = runCatching { json.parseToJsonElement(payload) as? JsonObject }.getOrNull() ?: return null
+        val version = (root[KEY_VERSION] as? JsonPrimitive)?.content?.toIntOrNull() ?: return null
+        if (version > VERSION) return null
+        val workouts = root[KEY_WORKOUTS] as? JsonArray ?: return null
+        return workouts.mapNotNull { toSummary(it as? JsonObject) }
+    }
+
+    private fun toSummary(node: JsonObject?): WorkoutSummary? {
+        val id = node?.let { text(it, KEY_ID) } ?: return null
+        val startedAt = number(node, KEY_STARTED_AT)?.toLong() ?: return null
+        return runCatching {
+            WorkoutSummary(
+                id = id,
+                sportTypeId = text(node, KEY_SPORT).orEmpty(),
+                startedAtEpochMs = startedAt,
+                durationSeconds = number(node, KEY_DURATION)?.toLong() ?: 0L,
+                distanceMeters = number(node, KEY_DISTANCE) ?: 0.0,
+                fileSizeBytes = number(node, KEY_BYTES)?.toLong() ?: 0L,
+                uploads = uploads(node),
+            )
+        }.getOrNull()
+    }
+
+    private fun uploads(node: JsonObject): Map<String, UploadState> =
+        (node[KEY_UPLOADS] as? JsonObject)
+            ?.mapNotNull { (key, value) ->
+                UploadState.byId((value as? JsonPrimitive)?.content.orEmpty())?.let { key to it }
+            }?.toMap()
+            .orEmpty()
+
+    private fun text(
+        node: JsonObject,
+        key: String,
+    ): String? = (node[key] as? JsonPrimitive)?.takeIf { it.isString }?.content
+
+    private fun number(
+        node: JsonObject,
+        key: String,
+    ): Double? = (node[key] as? JsonPrimitive)?.content?.toDoubleOrNull()
+}
