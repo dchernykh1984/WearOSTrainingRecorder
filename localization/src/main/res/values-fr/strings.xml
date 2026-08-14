@@ -147,6 +147,8 @@
     <string name="editor_slot_number">Champ %1$d</string>
     <string name="editor_empty_slot">Vide</string>
     <string name="editor_field_count">Champs</string>
+    <string name="editor_expand">Deplier</string>
+    <string name="editor_collapse">Replier</string>
     <string name="editor_add_screen">Ajouter un ecran</string>
     <string name="editor_remove_screen">Supprimer</string>
 

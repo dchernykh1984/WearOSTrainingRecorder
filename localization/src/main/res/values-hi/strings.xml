@@ -141,6 +141,8 @@
     <string name="editor_slot_number">फ़ील्ड %1$d</string>
     <string name="editor_empty_slot">खाली</string>
     <string name="editor_field_count">फ़ील्ड</string>
+    <string name="editor_expand">विस्तार करें</string>
+    <string name="editor_collapse">संक्षिप्त करें</string>
     <string name="editor_add_screen">स्क्रीन जोड़ें</string>
     <string name="editor_remove_screen">हटाएं</string>
     <string name="permissions_explanation">रिकॉर्डिंग के लिए स्थान, सेंसर और ब्लूटूथ चाहिए।</string>

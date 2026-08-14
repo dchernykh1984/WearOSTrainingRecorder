@@ -159,6 +159,8 @@
     <string name="editor_slot_number">Slot %1$d</string>
     <string name="editor_empty_slot">Empty</string>
     <string name="editor_field_count">Fields</string>
+    <string name="editor_expand">Expand</string>
+    <string name="editor_collapse">Collapse</string>
     <string name="editor_add_screen">Add screen</string>
     <string name="editor_remove_screen">Remove</string>
 

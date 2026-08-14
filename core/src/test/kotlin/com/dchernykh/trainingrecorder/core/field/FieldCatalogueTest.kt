@@ -23,6 +23,33 @@ class FieldCatalogueTest {
     }
 
     @Test
+    fun noHeadingOpensOntoAnEmptyList() {
+        Discipline.entries.forEach { discipline ->
+            FieldCatalogue.forDisciplineByCategory(discipline).forEach { (category, fields) ->
+                assertTrue(fields.isNotEmpty(), "${category.id} is empty for $discipline")
+            }
+        }
+    }
+
+    @Test
+    fun groupingLosesNothingAndKeepsCatalogueOrder() {
+        Discipline.entries.forEach { discipline ->
+            val grouped = FieldCatalogue.forDisciplineByCategory(discipline).values.flatten()
+            assertEquals(FieldCatalogue.forDiscipline(discipline), grouped, "regrouping changed $discipline")
+        }
+    }
+
+    @Test
+    fun everySportOffersEveryFieldItCanUseUnderSomeHeading() {
+        Discipline.entries.forEach { discipline ->
+            val headings = FieldCatalogue.forDisciplineByCategory(discipline).keys
+            FieldCatalogue.forDiscipline(discipline).forEach { field ->
+                assertTrue(field.category in headings, "${field.id} has nowhere to appear for $discipline")
+            }
+        }
+    }
+
+    @Test
     fun categoryListsPartitionTheCatalogue() {
         val regrouped = FieldCategory.entries.flatMap { FieldCatalogue.forCategory(it) }
         assertEquals(FieldCatalogue.all.size, regrouped.size)

@@ -141,6 +141,8 @@
     <string name="editor_slot_number">Alan %1$d</string>
     <string name="editor_empty_slot">Bos</string>
     <string name="editor_field_count">Alanlar</string>
+    <string name="editor_expand">Genislet</string>
+    <string name="editor_collapse">Daralt</string>
     <string name="editor_add_screen">Ekran ekle</string>
     <string name="editor_remove_screen">Kaldir</string>
     <string name="permissions_explanation">Kayit icin konum, sensorler ve Bluetooth gerekir.</string>

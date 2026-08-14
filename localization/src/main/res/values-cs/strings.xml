@@ -147,6 +147,8 @@
     <string name="editor_slot_number">Pole %1$d</string>
     <string name="editor_empty_slot">Prazdne</string>
     <string name="editor_field_count">Pole</string>
+    <string name="editor_expand">Rozbalit</string>
+    <string name="editor_collapse">Sbalit</string>
     <string name="editor_add_screen">Pridat obrazovku</string>
     <string name="editor_remove_screen">Odebrat</string>
 

@@ -141,6 +141,8 @@
     <string name="editor_slot_number">項目 %1$d</string>
     <string name="editor_empty_slot">空</string>
     <string name="editor_field_count">項目数</string>
+    <string name="editor_expand">展開</string>
+    <string name="editor_collapse">折りたたむ</string>
     <string name="editor_add_screen">画面を追加</string>
     <string name="editor_remove_screen">削除</string>
     <string name="permissions_explanation">記録には位置情報、センサー、Bluetoothが必要です。</string>

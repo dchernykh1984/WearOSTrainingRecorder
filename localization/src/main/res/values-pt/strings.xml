@@ -147,6 +147,8 @@
     <string name="editor_slot_number">Campo %1$d</string>
     <string name="editor_empty_slot">Vazio</string>
     <string name="editor_field_count">Campos</string>
+    <string name="editor_expand">Expandir</string>
+    <string name="editor_collapse">Recolher</string>
     <string name="editor_add_screen">Adicionar ecra</string>
     <string name="editor_remove_screen">Remover</string>
 

@@ -177,6 +177,17 @@ object FieldCatalogue {
 
     fun forDiscipline(discipline: Discipline): List<DataFieldDef> = all.filter { it.availableFor(discipline) }
 
+    /**
+     * The same fields, gathered under their headings and in catalogue order.
+     *
+     * The picker shows these headings closed, so a category that filters down to
+     * nothing for a given sport would be a heading that opens onto blank space.
+     * Grouping after filtering is what keeps that from happening - and doing it
+     * here rather than in the screen is what lets a test say so.
+     */
+    fun forDisciplineByCategory(discipline: Discipline): Map<FieldCategory, List<DataFieldDef>> =
+        forDiscipline(discipline).groupBy { it.category }
+
     private fun powerField(id: String) =
         DataFieldDef(
             id = id,
