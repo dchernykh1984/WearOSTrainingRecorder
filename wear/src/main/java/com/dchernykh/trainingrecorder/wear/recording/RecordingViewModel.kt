@@ -16,13 +16,20 @@ import com.dchernykh.trainingrecorder.core.recording.RecordingAction
 import com.dchernykh.trainingrecorder.core.recording.RecordingPhase
 import com.dchernykh.trainingrecorder.core.recording.RecordingState
 import com.dchernykh.trainingrecorder.core.sensor.FixStatus
+import com.dchernykh.trainingrecorder.core.sensor.SensorOrigin
 import com.dchernykh.trainingrecorder.core.sensor.SensorReading
 import com.dchernykh.trainingrecorder.core.sensor.SensorSnapshot
 import com.dchernykh.trainingrecorder.core.solar.SolarEvents
 import com.dchernykh.trainingrecorder.core.solar.SolarTimes
 import com.dchernykh.trainingrecorder.core.sport.SportType
+import com.dchernykh.trainingrecorder.core.track.AltitudeFusion
+import com.dchernykh.trainingrecorder.core.track.ClimbTotal
+import com.dchernykh.trainingrecorder.core.track.Fix
+import com.dchernykh.trainingrecorder.core.track.RideAggregates
+import com.dchernykh.trainingrecorder.core.track.RideTrack
 import com.dchernykh.trainingrecorder.core.workout.SportOrdering
 import com.dchernykh.trainingrecorder.wear.ble.SensorHub
+import com.dchernykh.trainingrecorder.wear.health.BuiltInSample
 import com.dchernykh.trainingrecorder.wear.health.ExerciseRecorder
 import com.dchernykh.trainingrecorder.wear.race.RaceStatsPoller
 import com.dchernykh.trainingrecorder.wear.service.RecordingService
@@ -179,6 +186,20 @@ class RecordingViewModel(
     private val samples = mutableListOf<TrackPoint>()
 
     /**
+     * What the ride works out for itself from its own positions.
+     *
+     * Not a second opinion: for distance, speed and climb these *are* the
+     * answer whenever there are fixes to compute them from. Health Services
+     * reported zero metres across an hour of real cycling with a green
+     * satellite indicator beside it, and a confident zero is indistinguishable
+     * from a rider who did not move - so the app stopped asking it.
+     */
+    private val track = RideTrack()
+    private val altitude = AltitudeFusion()
+    private val climb = ClimbTotal()
+    private val aggregates = RideAggregates()
+
+    /**
      * When the sun rises and sets where the ride is, and when that was worked
      * out.
      *
@@ -294,6 +315,11 @@ class RecordingViewModel(
         // it if Health Services had not sent a fresh batch by the finish.
         builtIn.clear()
         samples.clear()
+        // Everything the ride works out for itself goes with the ride.
+        track.clear()
+        altitude.clear()
+        climb.clear()
+        aggregates.clear()
         // Cleared with the ride: the sun's timetable belongs to where and when
         // that ride was, and a ride started somewhere else tomorrow must not
         // inherit it.
@@ -363,6 +389,7 @@ class RecordingViewModel(
             // without the distance aggregate would blank the field - and, at the
             // end of a ride, save a workout that says it covered nothing.
             builtIn += sample.readings
+            builtIn += derived(sample, timestamp)
             sensors.value =
                 SensorSnapshot.merge(
                     external = hub.readings.value,
@@ -597,6 +624,53 @@ class RecordingViewModel(
                         solar = solar,
                     ),
             )
+    }
+
+    /**
+     * What the ride knows that Health Services does not: distance and speed from
+     * the positions, altitude from the barometer against the sky, climb from
+     * that altitude, and the averages and maxima nothing else ever computed.
+     *
+     * Folded in after the platform's own readings and therefore on top of them,
+     * because where both have an answer this one is the answer the saved track
+     * agrees with.
+     */
+    private fun derived(
+        sample: BuiltInSample,
+        nowEpochMs: Long,
+    ): Map<String, SensorReading> {
+        val latitude = sample.latitudeDeg
+        val longitude = sample.longitudeDeg
+        if (latitude != null && longitude != null) {
+            track.record(Fix(latitude, longitude, nowEpochMs))
+        }
+        // The barometer arrives as an ordinary reading; the fix carries its own.
+        // Which is used, and how the two are reconciled, is AltitudeFusion's.
+        val fused = altitude.altitude(sample.readings["altitude"]?.value, sample.altitudeMeters, nowEpochMs)
+        fused?.let(climb::record)
+        aggregates.record(sensors.value.readings.mapValues { it.value.value })
+
+        val moving = _state.value.movingMillisAt(nowEpochMs) / MILLIS_PER_SECOND
+        val values =
+            buildMap {
+                // Only where there is a track to measure. Indoors there is none,
+                // and Health Services' own distance - from the accelerometer on
+                // a treadmill - is then the better answer and the one left in
+                // place.
+                if (track.distanceMeters > 0) put("distance_total", track.distanceMeters)
+                track.speedMps?.let { put("speed_current", it) }
+                fused?.let { put("altitude", it) }
+                if (climb.ascentMeters > 0) put("ascent_total", climb.ascentMeters)
+                if (climb.descentMeters > 0) put("descent_total", climb.descentMeters)
+                putAll(
+                    aggregates.snapshot(
+                        distanceMeters = track.distanceMeters,
+                        movingSeconds = moving,
+                        maxSpeedMps = track.maxSpeedMps,
+                    ),
+                )
+            }
+        return values.mapValues { SensorReading(it.value, SensorOrigin.BUILT_IN, nowEpochMs) }
     }
 
     /**
