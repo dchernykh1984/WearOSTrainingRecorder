@@ -35,6 +35,7 @@ fun SensorPairing(
     paired: List<PairedSensor>,
     discovered: List<DiscoveredSensor>,
     connected: Set<String>,
+    reporting: Set<String>,
     scanning: Boolean,
     onPair: (DiscoveredSensor) -> Unit,
     onForget: (PairedSensor) -> Unit,
@@ -85,9 +86,8 @@ fun SensorPairing(
                     // only way to tell them apart is to start a ride and see
                     // whether the number appears.
                     CentredLabel(
-                        stringResource(
-                            if (linked) R.string.sensors_connected else R.string.sensors_connecting,
-                        ) + SEPARATOR + describe(sensor.profiles),
+                        stringResource(statusOf(linked, sensor.address in reporting)) +
+                            SEPARATOR + describe(sensor.profiles),
                     )
                 },
             )
@@ -114,6 +114,26 @@ fun SensorPairing(
         }
     }
 }
+
+/**
+ * Three states, because two were not enough to be useful.
+ *
+ * A power meter on a parked bike is connected and silent until a pedal turns,
+ * and a wheel sensor until the wheel does - so judging the row by whether a
+ * reading has arrived left both of them reading "Connecting..." indefinitely
+ * while the watch was in fact talking to them perfectly well. The link and the
+ * data are now separate answers, and the middle one is the useful one: the
+ * sensor is there, and it is waiting for the bike to move.
+ */
+private fun statusOf(
+    linked: Boolean,
+    reporting: Boolean,
+): Int =
+    when {
+        reporting -> R.string.sensors_connected
+        linked -> R.string.sensors_no_data
+        else -> R.string.sensors_connecting
+    }
 
 /**
  * Everything the sensor can report, not just the first thing it mentioned.

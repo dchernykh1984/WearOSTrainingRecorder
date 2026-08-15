@@ -95,6 +95,7 @@ private fun SensorPairingScreen(
     val discovered by model.discovered.collectAsStateWithLifecycle()
     val scanning by model.scanning.collectAsStateWithLifecycle()
     val connected by model.connected.collectAsStateWithLifecycle()
+    val reporting by model.reporting.collectAsStateWithLifecycle()
     DisposableEffect(Unit) {
         model.startScan()
         onDispose { model.stopScan() }
@@ -104,6 +105,7 @@ private fun SensorPairingScreen(
         paired = paired,
         discovered = discovered,
         connected = connected,
+        reporting = reporting,
         scanning = scanning,
         onPair = model::pair,
         onForget = model::forget,

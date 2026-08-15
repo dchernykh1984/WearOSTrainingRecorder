@@ -211,6 +211,7 @@
     <string name="action_remove">Entfernen</string>
     <string name="action_cancel">Abbrechen</string>
     <string name="sensors_connected">Verbunden</string>
+    <string name="sensors_no_data">Verbunden, noch keine Daten</string>
     <string name="sensors_connecting">Verbinde...</string>
     <string name="profile_heart_rate">Herzfrequenz</string>
     <string name="profile_csc">Trittfrequenz und Tempo (Rad)</string>

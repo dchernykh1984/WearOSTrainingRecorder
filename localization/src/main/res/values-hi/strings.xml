@@ -204,6 +204,7 @@
     <string name="action_remove">हटाएं</string>
     <string name="action_cancel">रद्द करें</string>
     <string name="sensors_connected">कनेक्टेड</string>
+    <string name="sensors_no_data">कनेक्टेड, अभी डेटा नहीं</string>
     <string name="sensors_connecting">कनेक्ट हो रहा है...</string>
     <string name="profile_heart_rate">हृदय गति</string>
     <string name="profile_csc">कैडेंस और गति (साइकिल)</string>

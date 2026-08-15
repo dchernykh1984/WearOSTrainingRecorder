@@ -132,15 +132,26 @@ class SensorHub(
     val connected: StateFlow<Set<SensorProfile>> = _connected.asStateFlow()
 
     /**
-     * Which sensors are linked right now, by address.
+     * Which sensors have sent something, by address.
      *
-     * By address rather than by profile because that is the question the pairing
-     * screen asks: a rider looking at a row wants to know whether *that strap* is
-     * talking, and a screen that cannot say is one they have to test by starting
-     * a ride.
+     * Not the same as being connected, and the difference is the whole reason
+     * both exist: a power meter on a parked bike is connected and says nothing
+     * until a pedal turns, and a wheel sensor says nothing until the wheel does.
      */
-    private val _connectedAddresses = MutableStateFlow<Set<String>>(emptySet())
-    val connectedAddresses: StateFlow<Set<String>> = _connectedAddresses.asStateFlow()
+    private val _reportingAddresses = MutableStateFlow<Set<String>>(emptySet())
+    val reportingAddresses: StateFlow<Set<String>> = _reportingAddresses.asStateFlow()
+
+    /**
+     * Which sensors the watch has a working link to, by address.
+     *
+     * Raised when the device's services have been read, which is the moment the
+     * connection is genuinely usable. This is what the pairing screen should
+     * say: a rider standing over a bike wants to know whether the watch found
+     * the sensor, and answering that with "has it sent a number yet" leaves a
+     * perfectly connected power meter reading "Connecting..." until they pedal.
+     */
+    private val _linkedAddresses = MutableStateFlow<Set<String>>(emptySet())
+    val linkedAddresses: StateFlow<Set<String>> = _linkedAddresses.asStateFlow()
 
     /**
      * What each sensor turned out to be once its services were read, which can
@@ -184,7 +195,8 @@ class SensorHub(
         jobs.clear()
         _readings.value = emptyMap()
         _connected.value = emptySet()
-        _connectedAddresses.value = emptySet()
+        _reportingAddresses.value = emptySet()
+        _linkedAddresses.value = emptySet()
     }
 
     /** Corrects what was stored at pairing time, once the sensor has said so itself. */
@@ -209,18 +221,22 @@ class SensorHub(
             // not reported any yet, and it is a reading, not a capability, that
             // takes a field away from the watch.
             remember(event.address, event.profiles)
+            _linkedAddresses.update { it + event.address }
             return
         }
         if (!event.connected) {
             _connected.update { it - event.profiles }
-            _connectedAddresses.update { it - event.address }
+            _reportingAddresses.update { it - event.address }
+            _linkedAddresses.update { it - event.address }
             // The readings are left in place rather than cleared: the snapshot
             // ages them out on its own timer, and wiping them here would blank a
             // field on a momentary dropout that reconnects a second later.
             return
         }
         _connected.update { it + event.profiles }
-        _connectedAddresses.update { it + event.address }
+        _reportingAddresses.update { it + event.address }
+        // A reading is proof of a link even if the discovery event was missed.
+        _linkedAddresses.update { it + event.address }
         _readings.update { it + event.readings }
     }
 }

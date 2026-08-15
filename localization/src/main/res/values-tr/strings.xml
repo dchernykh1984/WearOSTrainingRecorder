@@ -204,6 +204,7 @@
     <string name="action_remove">Cikar</string>
     <string name="action_cancel">Iptal</string>
     <string name="sensors_connected">Bagli</string>
+    <string name="sensors_no_data">Bagli, henuz veri yok</string>
     <string name="sensors_connecting">Baglaniyor...</string>
     <string name="profile_heart_rate">Kalp atış hızı</string>
     <string name="profile_csc">Kadans ve hiz (bisiklet)</string>

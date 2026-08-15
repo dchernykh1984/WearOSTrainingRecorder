@@ -211,6 +211,7 @@
     <string name="action_remove">Убрать</string>
     <string name="action_cancel">Отмена</string>
     <string name="sensors_connected">Подключён</string>
+    <string name="sensors_no_data">Подключён, данных пока нет</string>
     <string name="sensors_connecting">Подключение...</string>
     <string name="profile_heart_rate">Пульс</string>
     <string name="profile_csc">Каденс и скорость (вело)</string>

@@ -45,7 +45,10 @@ class SensorPairingViewModel(
      * whether a strap is talking. Tied to the screen the same way the scan is:
      * a rider who leaves takes the connections with them.
      */
-    val connected: StateFlow<Set<String>> get() = hub.connectedAddresses
+    val connected: StateFlow<Set<String>> get() = hub.linkedAddresses
+
+    /** Which of the linked sensors have actually sent a reading yet. */
+    val reporting: StateFlow<Set<String>> get() = hub.reportingAddresses
 
     private val _paired = MutableStateFlow(store.read())
     val paired: StateFlow<List<PairedSensor>> = _paired.asStateFlow()
