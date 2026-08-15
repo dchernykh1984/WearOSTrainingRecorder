@@ -27,6 +27,15 @@ data class SensorEvent(
     val profiles: Set<SensorProfile>,
     val readings: Map<String, SensorReading>,
     val connected: Boolean = true,
+    /**
+     * True for the one event sent when the device's services have been read.
+     *
+     * It carries what the sensor turned out to be, which is not necessarily what
+     * it advertised. Kept apart from a reading because the two mean different
+     * things: this says the sensor *can* report something, a reading says it
+     * just did - and only the second may take a field away from the watch.
+     */
+    val discovery: Boolean = false,
 )
 
 /**
@@ -42,11 +51,19 @@ data class SensorEvent(
  * rate *and* running speed and cadence; a bike computer sensor may speak power
  * and cadence. Reading only one of them is how a heart-rate strap ends up
  * connected, described as a running sensor, and reporting no heart rate at all.
+ *
+ * Which profiles those are is decided here, from the device's own service table,
+ * and not from what it said while advertising. An advertisement is a few dozen
+ * bytes a sensor chooses what to put in - a Garmin HRM-Pro+ leads with running
+ * cadence and does not have to mention heart rate at all - so trusting it means
+ * subscribing to whichever service the strap happened to name and calling the
+ * strap by that name afterwards. The service table is the sensor telling the
+ * truth about itself, and reading it costs nothing: it has to be read to
+ * subscribe to anything.
  */
 class SensorConnection(
     private val context: Context,
     private val address: String,
-    private val profiles: Set<SensorProfile>,
 ) {
     /**
      * Cadence needs the previous sample to compute a rate, so the state is
@@ -84,11 +101,6 @@ class SensorConnection(
     @SuppressLint("MissingPermission")
     fun events(): Flow<SensorEvent> =
         callbackFlow {
-            val readable = profiles.filter { it in supportedProfiles }.toSet()
-            if (readable.isEmpty()) {
-                close(IllegalArgumentException("no measurement characteristic for any of $profiles"))
-                return@callbackFlow
-            }
             val device =
                 BluetoothAdapter.getDefaultAdapter()?.getRemoteDevice(address)
                     ?: run {
@@ -101,6 +113,10 @@ class SensorConnection(
             // acknowledged is simply dropped - which would leave a two-profile
             // strap reporting only whichever characteristic happened to win.
             val pending = ArrayDeque<SensorProfile>()
+
+            // Filled in once the services are read, and used from then on: what
+            // this sensor actually offers.
+            var found = emptySet<SensorProfile>()
             val callback =
                 object : BluetoothGattCallback() {
                     override fun onConnectionStateChange(
@@ -117,7 +133,7 @@ class SensorConnection(
                             // spike this class exists to avoid.
                             baseline.clear()
                             pending.clear()
-                            trySend(SensorEvent(address, readable, emptyMap(), connected = false))
+                            trySend(SensorEvent(address, found, emptyMap(), connected = false))
                         }
                     }
 
@@ -126,11 +142,12 @@ class SensorConnection(
                         status: Int,
                     ) {
                         pending.clear()
-                        // Only the profiles this device actually carries: a strap
-                        // that advertises a service it does not implement would
-                        // otherwise stall the queue on a characteristic that is
-                        // never found.
-                        readable.filter { characteristicFor(gatt, it) != null }.forEach { pending.addLast(it) }
+                        // Everything this build can read that the device actually
+                        // carries. Not what it advertised: that is a marketing
+                        // slot, this is the device's own service table.
+                        found = supportedProfiles.filter { characteristicFor(gatt, it) != null }.toSet()
+                        trySend(SensorEvent(address, found, emptyMap(), discovery = true))
+                        found.forEach { pending.addLast(it) }
                         armNext(gatt)
                     }
 
@@ -178,7 +195,7 @@ class SensorConnection(
                         characteristic: BluetoothGattCharacteristic,
                         value: ByteArray,
                     ) {
-                        val source = readable.firstOrNull { measurementUuid(it) == characteristic.uuid } ?: return
+                        val source = found.firstOrNull { measurementUuid(it) == characteristic.uuid } ?: return
                         trySend(SensorEvent(address, setOf(source), readingsFrom(source, value, baseline)))
                     }
                 }
