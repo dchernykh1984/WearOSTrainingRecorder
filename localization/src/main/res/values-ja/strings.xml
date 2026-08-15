@@ -193,6 +193,14 @@
     <string name="sensors_none">センサーが見つかりません</string>
     <string name="sensors_paired">ペアリング済み</string>
     <string name="sensors_forget">削除</string>
+    <string name="sports_favourites">お気に入り</string>
+    <string name="sports_all">すべての種目</string>
+    <string name="favourite_remove_question">お気に入りから削除しますか？</string>
+    <string name="sensors_forget_question">このセンサーを削除しますか？</string>
+    <string name="action_remove">削除</string>
+    <string name="action_cancel">キャンセル</string>
+    <string name="sensors_connected">接続済み</string>
+    <string name="sensors_connecting">接続中...</string>
     <string name="profile_heart_rate">心拍数</string>
     <string name="profile_csc">ケイデンスと速度</string>
     <string name="profile_cps">パワー</string>

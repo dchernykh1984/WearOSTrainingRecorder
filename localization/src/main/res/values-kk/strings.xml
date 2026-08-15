@@ -200,6 +200,14 @@
     <string name="sensors_none">Сенсорлар табылмады</string>
     <string name="sensors_paired">Жұптастырылған</string>
     <string name="sensors_forget">Ұмыту</string>
+    <string name="sports_favourites">Таңдаулылар</string>
+    <string name="sports_all">Барлық түрлері</string>
+    <string name="favourite_remove_question">Таңдаулылардан алып тастау керек пе?</string>
+    <string name="sensors_forget_question">Бұл сенсорды ұмыту керек пе?</string>
+    <string name="action_remove">Алып тастау</string>
+    <string name="action_cancel">Бас тарту</string>
+    <string name="sensors_connected">Қосылған</string>
+    <string name="sensors_connecting">Қосылуда...</string>
     <string name="profile_heart_rate">Жүрек соғысы</string>
     <string name="profile_csc">Каденс және жылдамдық</string>
     <string name="profile_cps">Қуат</string>

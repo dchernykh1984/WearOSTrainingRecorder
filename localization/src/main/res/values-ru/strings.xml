@@ -200,6 +200,14 @@
     <string name="sensors_none">Датчики не найдены</string>
     <string name="sensors_paired">Спарен</string>
     <string name="sensors_forget">Забыть</string>
+    <string name="sports_favourites">Избранное</string>
+    <string name="sports_all">Все виды</string>
+    <string name="favourite_remove_question">Убрать из избранного?</string>
+    <string name="sensors_forget_question">Забыть этот датчик?</string>
+    <string name="action_remove">Убрать</string>
+    <string name="action_cancel">Отмена</string>
+    <string name="sensors_connected">Подключён</string>
+    <string name="sensors_connecting">Подключение...</string>
     <string name="profile_heart_rate">Пульс</string>
     <string name="profile_csc">Каденс и скорость</string>
     <string name="profile_cps">Мощность</string>

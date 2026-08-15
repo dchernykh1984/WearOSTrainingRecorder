@@ -131,6 +131,20 @@ class RecordingViewModel(
             .map { SportOrdering.order(it) }
             .stateIn(viewModelScope, SharingStarted.Eagerly, SportOrdering.order(history.value))
 
+    /**
+     * The sports worth a single tap, which is what the picker leads with. The
+     * rest of the catalogue is browsed by discipline and needs no state here.
+     */
+    val favourites: StateFlow<List<SportType>> =
+        history
+            .map { SportOrdering.favourites(it) }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, SportOrdering.favourites(history.value))
+
+    /** Drops a sport from the shortcut list. It stays in the catalogue. */
+    fun forgetFavourite(sport: SportType) {
+        history.value = SportOrdering.forget(history.value, sport.id).also(settings::writeHistory)
+    }
+
     private var screens: ScreenConfiguration = ScreenConfiguration.initial()
     private var units: UnitSystem = UnitSystem.METRIC
     private var race: RaceStatsConfig = RaceStatsConfig()
