@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.5.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.4.0...v0.5.0) (2026-08-15)
+
+
+### Features
+
+* **core:** separate the sports worth one tap from the whole catalogue ([9889bc7](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/9889bc7c30fcb62523141331dedf89477f3a7b10))
+* **mobile:** edit the default layout, and group the sports by discipline ([9701fba](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/9701fbacce6dfbd2d4ebae9d1962f10754e943b5))
+* **wear:** let a layout change reach the ride already in progress ([2ecbf26](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/2ecbf26ff4852623c3bd5c3c7a4ce67f78a0e60c))
+* **wear:** let a ride be thrown away without saving it first ([7b82180](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/7b8218042dc2fcd773454c8f255fcf4bab53ad74))
+* **wear:** pick a sport through its discipline, with favourites on top ([d615c36](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/d615c36f0840bb11b0450c12c41a960ea1072e85))
+* **wear:** say whether a paired sensor is connected, and hold to forget it ([8c5228b](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/8c5228b0cbcc793e7604ca6fe99924485e66954f))
+
+
+### Bug Fixes
+
+* **core:** let a connected sensor take its fields over from the watch ([d79d2af](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/d79d2af9c0fa1fcea4a82368ca02c0cf6321de83))
+* **mobile:** keep the app running while the browser holds the Strava sign-in ([3767edf](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/3767edfbfb75ce38b2c909ab97114cbb42425323))
+* **mobile:** offer Reset only where there is something of its own to drop ([cd5d5a3](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/cd5d5a3ea8dde4ddbe9285e8ab516077fe376776))
+* stop blanking a heart rate that is merely batched ([7e72100](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/7e72100bead90f65426242f7b52097514c170114))
+* **wear:** give the discard control a target a thumb can find ([aee27d2](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/aee27d2cb193b1fffc559af0a5a5b458a1902d7b))
+* **wear:** let back answer no to a confirmation ([14d85a4](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/14d85a4c186dde5bce5f6181338cb5b1d7fb1d69))
+* **wear:** let the controls page scroll if it ever outgrows the face ([e313e44](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/e313e445c6bc90dce93cce11364c15170685c807))
+* **wear:** pair a sensor with every profile it advertises, not one ([7696b7c](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/7696b7c22dde29f7e5673b780a05fe7a7cbabfc3))
+
+
+### Performance Improvements
+
+* **wear:** apply settings off the main thread ([4ac1fef](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/4ac1fefcfa47d05972c3b2b9aced607285eb5484))
+
 ## [0.4.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.3.3...v0.4.0) (2026-08-14)
 
 
