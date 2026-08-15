@@ -195,6 +195,19 @@ class RecordingViewModel(
      * from a rider who did not move - so the app stopped asking it.
      */
     private val track = RideTrack()
+
+    /**
+     * The last position the platform reported, held between its batches.
+     *
+     * The track is written every second and fixes do not arrive every second, so
+     * a point takes the most recent one. Repeating a position the rider has not
+     * moved from is what a head unit does too; inventing one they might be at is
+     * not.
+     */
+    private var lastFix: Fix? = null
+
+    /** When the last point was written, so a second cannot be recorded twice. */
+    private var lastPointAtEpochMs = 0L
     private val altitude = AltitudeFusion()
     private val climb = ClimbTotal()
     private val aggregates = RideAggregates()
@@ -317,6 +330,8 @@ class RecordingViewModel(
         samples.clear()
         // Everything the ride works out for itself goes with the ride.
         track.clear()
+        lastFix = null
+        lastPointAtEpochMs = 0
         altitude.clear()
         climb.clear()
         aggregates.clear()
@@ -397,29 +412,15 @@ class RecordingViewModel(
                     nowEpochMs = timestamp,
                     connectedProfiles = hub.connected.value,
                 )
-            // Only recorded while running: a paused ride must not lay down a
-            // straight line between where the rider stopped and where they
-            // started again.
             refreshSolar(sample.latitudeDeg, sample.longitudeDeg, timestamp)
-            if (_state.value.phase == RecordingPhase.RECORDING) {
-                val point =
-                    TrackPoint(
-                        timestampEpochMs = timestamp,
-                        latitudeDeg = sample.latitudeDeg,
-                        longitudeDeg = sample.longitudeDeg,
-                        altitudeMeters = sample.altitudeMeters,
-                        heartRateBpm = sensors.value.value("hr")?.toInt(),
-                        cadenceRpm = sensors.value.value("cadence")?.toInt(),
-                        speedMps = sensors.value.value("speed_current"),
-                        powerWatts = sensors.value.value("power")?.toInt(),
-                        distanceMeters = sensors.value.value("distance_total"),
-                    )
-                samples += point
-                // Queued rather than awaited: the journal thread keeps them in
-                // order behind the begin that opened the file, and the collector
-                // has no reason to wait for a write it does not read back.
-                val moving = _state.value.movingMillisAt(timestamp)
-                viewModelScope.launch(journalContext) { journal.append(point, moving) }
+            // Where the ride is, kept for the recorder to stamp on the points it
+            // writes between batches. A fix stays true until the next one
+            // arrives - a rider does not stop existing because the platform is
+            // saving power.
+            sample.latitudeDeg?.let { latitude ->
+                sample.longitudeDeg?.let { longitude ->
+                    lastFix = Fix(latitude, longitude, timestamp)
+                }
             }
             recomputeValues()
         }
@@ -598,6 +599,53 @@ class RecordingViewModel(
         super.onCleared()
     }
 
+    /**
+     * The track point for this second.
+     *
+     * Written on the clock rather than when Health Services delivers, which is
+     * the bug this replaced. That platform batches - with the screen off, a
+     * minute or more at a time - so an hour of riding was recorded as a few
+     * dozen points, and each was stamped with the moment its batch happened to
+     * be processed rather than the moment it described. The values were right,
+     * which is why nothing on the watch looked wrong: it was the clock that was
+     * missing. Downstream the damage was total, because a services reading the
+     * file sees only the points - an hour's ride arrived at Strava as fifty-two
+     * seconds, and its average heart rate was computed over a handful of
+     * clustered samples.
+     *
+     * A second is what every head unit records at, and it is the same tick the
+     * screen is drawn from, so what is written is by construction what the rider
+     * was shown.
+     */
+    private fun recordTrackPoint(nowEpochMs: Long) {
+        // A paused ride must not lay down a straight line between where the
+        // rider stopped and where they started again.
+        if (_state.value.phase != RecordingPhase.RECORDING) return
+        // One point per second, whoever asked. The values are recomputed both on
+        // the tick and whenever a batch lands, and two points sharing a second
+        // is a duplicate sample in the file for no gain.
+        if (nowEpochMs - lastPointAtEpochMs < TICK_MS) return
+        lastPointAtEpochMs = nowEpochMs
+        val point =
+            TrackPoint(
+                timestampEpochMs = nowEpochMs,
+                latitudeDeg = lastFix?.latitudeDeg,
+                longitudeDeg = lastFix?.longitudeDeg,
+                altitudeMeters = sensors.value.value("altitude"),
+                heartRateBpm = sensors.value.value("hr")?.toInt(),
+                cadenceRpm = sensors.value.value("cadence")?.toInt(),
+                speedMps = sensors.value.value("speed_current"),
+                powerWatts = sensors.value.value("power")?.toInt(),
+                distanceMeters = sensors.value.value("distance_total"),
+            )
+        samples += point
+        // Queued rather than awaited: the journal thread keeps them in order
+        // behind the begin that opened the file, and the ticker has no reason to
+        // wait for a write it does not read back.
+        val moving = _state.value.movingMillisAt(nowEpochMs)
+        viewModelScope.launch(journalContext) { journal.append(point, moving) }
+    }
+
     private fun recomputeValues() {
         val now = now()
         // Re-merged on the tick, not only when Health Services delivers a batch:
@@ -624,6 +672,9 @@ class RecordingViewModel(
                         solar = solar,
                     ),
             )
+        // After the merge, so the point carries exactly the values the screen is
+        // about to show.
+        recordTrackPoint(now)
     }
 
     /**
