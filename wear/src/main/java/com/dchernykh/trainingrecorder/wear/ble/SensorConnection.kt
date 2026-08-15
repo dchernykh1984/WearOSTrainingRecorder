@@ -81,6 +81,37 @@ class SensorConnection(
         }
     }
 
+    /**
+     * What this connection has found and what is left to arm.
+     *
+     * Synchronised because GATT callbacks are not promised to arrive on one
+     * thread: services are discovered on one, descriptor writes acknowledged on
+     * another, notifications delivered on a third. Plain fields would let a
+     * notification arrive against an empty [found] and be dropped as belonging
+     * to no profile - the same silent half-subscription the descriptor queue
+     * exists to prevent, arriving by a different route.
+     */
+    private class Subscriptions {
+        private val pending = ArrayDeque<SensorProfile>()
+        private var found = emptySet<SensorProfile>()
+
+        @Synchronized
+        fun offer(profiles: Set<SensorProfile>) {
+            found = profiles
+            pending.clear()
+            pending.addAll(profiles)
+        }
+
+        @Synchronized
+        fun next(): SensorProfile? = pending.removeFirstOrNull()
+
+        @Synchronized
+        fun profiles(): Set<SensorProfile> = found
+
+        @Synchronized
+        fun clearPending() = pending.clear()
+    }
+
     private class CrankBaseline {
         val crank = Counter()
         val wheel = Counter()
@@ -108,15 +139,11 @@ class SensorConnection(
                         return@callbackFlow
                     }
             val baseline = CrankBaseline()
-            // What is left to arm. Android's GATT queue holds one operation at a
-            // time, so a second descriptor written before the first is
-            // acknowledged is simply dropped - which would leave a two-profile
-            // strap reporting only whichever characteristic happened to win.
-            val pending = ArrayDeque<SensorProfile>()
-
-            // Filled in once the services are read, and used from then on: what
-            // this sensor actually offers.
-            var found = emptySet<SensorProfile>()
+            // Android's GATT queue holds one operation at a time, so a second
+            // descriptor written before the first is acknowledged is simply
+            // dropped - which would leave a two-profile strap reporting only
+            // whichever characteristic happened to win.
+            val subscriptions = Subscriptions()
             val callback =
                 object : BluetoothGattCallback() {
                     override fun onConnectionStateChange(
@@ -132,8 +159,8 @@ class SensorConnection(
                             // that wraps every 64 seconds is exactly the bogus
                             // spike this class exists to avoid.
                             baseline.clear()
-                            pending.clear()
-                            trySend(SensorEvent(address, found, emptyMap(), connected = false))
+                            subscriptions.clearPending()
+                            trySend(SensorEvent(address, subscriptions.profiles(), emptyMap(), connected = false))
                         }
                     }
 
@@ -141,11 +168,11 @@ class SensorConnection(
                         gatt: BluetoothGatt,
                         status: Int,
                     ) {
-                        pending.clear()
                         // Everything this build can read that the device actually
                         // carries. Not what it advertised: that is a marketing
                         // slot, this is the device's own service table.
-                        found = supportedProfiles.filter { characteristicFor(gatt, it) != null }.toSet()
+                        val found = supportedProfiles.filter { characteristicFor(gatt, it) != null }.toSet()
+                        subscriptions.offer(found)
                         if (found.isEmpty()) {
                             // Nothing here this build can read - but only say so
                             // when the table was actually read. A failed
@@ -158,7 +185,6 @@ class SensorConnection(
                             return
                         }
                         trySend(SensorEvent(address, found, emptyMap(), discovery = true))
-                        found.forEach { pending.addLast(it) }
                         armNext(gatt)
                     }
 
@@ -175,7 +201,7 @@ class SensorConnection(
 
                     /** Arms the next characteristic in the queue, if any. */
                     private fun armNext(gatt: BluetoothGatt) {
-                        val next = pending.removeFirstOrNull() ?: return
+                        val next = subscriptions.next() ?: return
                         val characteristic = characteristicFor(gatt, next) ?: return armNext(gatt)
                         gatt.setCharacteristicNotification(characteristic, true)
                         // Notifications only start once the client configuration
@@ -206,7 +232,10 @@ class SensorConnection(
                         characteristic: BluetoothGattCharacteristic,
                         value: ByteArray,
                     ) {
-                        val source = found.firstOrNull { measurementUuid(it) == characteristic.uuid } ?: return
+                        val source =
+                            subscriptions.profiles().firstOrNull {
+                                measurementUuid(it) == characteristic.uuid
+                            } ?: return
                         trySend(SensorEvent(address, setOf(source), readingsFrom(source, value, baseline)))
                     }
                 }
