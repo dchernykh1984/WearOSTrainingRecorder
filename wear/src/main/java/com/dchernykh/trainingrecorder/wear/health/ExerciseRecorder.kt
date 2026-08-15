@@ -33,6 +33,15 @@ data class BuiltInSample(
     val latitudeDeg: Double? = null,
     val longitudeDeg: Double? = null,
     val altitudeMeters: Double? = null,
+    /**
+     * The altitude the fix itself carried, kept apart from [altitudeMeters].
+     *
+     * The two must not be confused: [altitudeMeters] already falls back to the
+     * barometer, so anything calibrating a barometer against "the altitude"
+     * would, with no fix to hand, calibrate it against itself and record a
+     * perfect agreement that means nothing.
+     */
+    val gnssAltitudeMeters: Double? = null,
 )
 
 /**
@@ -229,13 +238,15 @@ internal fun ExerciseUpdate.toSample(): BuiltInSample {
     record("ascent_total", metrics.getData(DataType.ELEVATION_GAIN_TOTAL)?.total)
 
     val location: LocationData? = metrics.getData(DataType.LOCATION).lastOrNull()?.value
+    val gnssAltitude = location?.altitude?.real()
     return BuiltInSample(
         readings = readings,
         latitudeDeg = location?.latitude?.real(),
         longitudeDeg = location?.longitude?.real(),
         // The barometer as a fallback, which is usually the better number
         // anyway: a fix's altitude is the weakest thing GNSS produces.
-        altitudeMeters = location?.altitude?.real() ?: readings["altitude"]?.value,
+        altitudeMeters = gnssAltitude ?: readings["altitude"]?.value,
+        gnssAltitudeMeters = gnssAltitude,
     )
 }
 
