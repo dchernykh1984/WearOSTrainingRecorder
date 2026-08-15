@@ -209,9 +209,9 @@
     <string name="sensors_connected">Verbunden</string>
     <string name="sensors_connecting">Verbinde...</string>
     <string name="profile_heart_rate">Herzfrequenz</string>
-    <string name="profile_csc">Trittfrequenz und Tempo</string>
+    <string name="profile_csc">Trittfrequenz und Tempo (Rad)</string>
     <string name="profile_cps">Leistung</string>
-    <string name="profile_rsc">Laufsensor</string>
+    <string name="profile_rsc">Schrittfrequenz und Tempo (Laufen)</string>
     <string name="connect_in_progress">Verbinden...</string>
     <string name="connect_done">Verbunden</string>
     <string name="connect_failed">Verbindung fehlgeschlagen. Daten prufen und erneut versuchen.</string>

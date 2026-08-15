@@ -225,9 +225,9 @@
     <string name="sensors_connected">Connected</string>
     <string name="sensors_connecting">Connecting...</string>
     <string name="profile_heart_rate">Heart rate</string>
-    <string name="profile_csc">Cadence and speed</string>
+    <string name="profile_csc">Cadence and speed (bike)</string>
     <string name="profile_cps">Power</string>
-    <string name="profile_rsc">Running sensor</string>
+    <string name="profile_rsc">Cadence and speed (running)</string>
     <string name="connect_in_progress">Connecting...</string>
     <string name="connect_done">Connected</string>
     <string name="connect_failed">Could not connect. Check the details and try again.</string>

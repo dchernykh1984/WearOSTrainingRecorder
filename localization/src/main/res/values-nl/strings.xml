@@ -209,9 +209,9 @@
     <string name="sensors_connected">Verbonden</string>
     <string name="sensors_connecting">Verbinden...</string>
     <string name="profile_heart_rate">Hartslag</string>
-    <string name="profile_csc">Cadans en snelheid</string>
+    <string name="profile_csc">Cadans en snelheid (fiets)</string>
     <string name="profile_cps">Vermogen</string>
-    <string name="profile_rsc">Loopsensor</string>
+    <string name="profile_rsc">Cadans en snelheid (hardlopen)</string>
     <string name="connect_in_progress">Verbinden...</string>
     <string name="connect_done">Verbonden</string>
     <string name="connect_failed">Verbinden mislukt. Controleer de gegevens en probeer opnieuw.</string>

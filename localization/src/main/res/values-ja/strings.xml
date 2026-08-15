@@ -202,9 +202,9 @@
     <string name="sensors_connected">接続済み</string>
     <string name="sensors_connecting">接続中...</string>
     <string name="profile_heart_rate">心拍数</string>
-    <string name="profile_csc">ケイデンスと速度</string>
+    <string name="profile_csc">ケイデンスと速度（自転車）</string>
     <string name="profile_cps">パワー</string>
-    <string name="profile_rsc">ランニングセンサー</string>
+    <string name="profile_rsc">ピッチと速度（ランニング）</string>
     <string name="connect_in_progress">接続中...</string>
     <string name="connect_done">接続済み</string>
     <string name="connect_failed">接続できませんでした。入力内容を確認して再試行してください。</string>

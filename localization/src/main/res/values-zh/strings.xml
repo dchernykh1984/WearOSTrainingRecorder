@@ -202,9 +202,9 @@
     <string name="sensors_connected">已连接</string>
     <string name="sensors_connecting">连接中…</string>
     <string name="profile_heart_rate">心率</string>
-    <string name="profile_csc">踏频和速度</string>
+    <string name="profile_csc">踏频与速度（骑行）</string>
     <string name="profile_cps">功率</string>
-    <string name="profile_rsc">跑步传感器</string>
+    <string name="profile_rsc">步频与速度（跑步）</string>
     <string name="connect_in_progress">正在连接...</string>
     <string name="connect_done">已连接</string>
     <string name="connect_failed">无法连接。请检查信息后重试。</string>

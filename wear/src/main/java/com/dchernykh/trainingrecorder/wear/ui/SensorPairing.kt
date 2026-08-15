@@ -1,18 +1,17 @@
 package com.dchernykh.trainingrecorder.wear.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material3.Button
+import androidx.wear.compose.material3.ButtonDefaults
 import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
@@ -34,27 +33,59 @@ import com.dchernykh.trainingrecorder.wear.ble.PairedSensor
 fun SensorPairing(
     paired: List<PairedSensor>,
     discovered: List<DiscoveredSensor>,
+    connected: Set<String>,
     scanning: Boolean,
     onPair: (DiscoveredSensor) -> Unit,
     onForget: (PairedSensor) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 8.dp, vertical = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
+    var pendingForget by rememberSaveable { mutableStateOf<String?>(null) }
+    val forgetting = pendingForget?.let { address -> paired.firstOrNull { it.address == address } }
+    if (forgetting != null) {
+        Confirmation(
+            question = stringResource(R.string.sensors_forget_question),
+            subject = forgetting.name ?: forgetting.address,
+            confirmLabel = stringResource(R.string.sensors_forget),
+            onConfirm = {
+                onForget(forgetting)
+                pendingForget = null
+            },
+            onCancel = { pendingForget = null },
+        )
+        return
+    }
+
+    WatchList(modifier = modifier) {
         ListHeader { Text(stringResource(R.string.sensors_title)) }
         paired.forEach { sensor ->
+            val linked = sensor.address in connected
             Button(
-                onClick = { onForget(sensor) },
+                // Tapping does nothing destructive: this row is here to be read.
+                // Forgetting is held, and asks - a rider checking whether their
+                // strap is talking should not be able to unpair it by tapping
+                // the row that tells them.
+                onClick = {},
+                onLongClick = { pendingForget = sensor.address },
+                onLongClickLabel = stringResource(R.string.sensors_forget),
+                colors =
+                    if (linked) {
+                        ButtonDefaults.filledTonalButtonColors()
+                    } else {
+                        ButtonDefaults.outlinedButtonColors()
+                    },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(sensor.name ?: sensor.address) },
-                secondaryLabel = { Text(stringResource(R.string.sensors_forget)) },
+                label = { CentredLabel(sensor.name ?: sensor.address) },
+                secondaryLabel = {
+                    // The question this screen is opened to answer. Without it a
+                    // paired sensor and a working one look identical, and the
+                    // only way to tell them apart is to start a ride and see
+                    // whether the number appears.
+                    CentredLabel(
+                        stringResource(
+                            if (linked) R.string.sensors_connected else R.string.sensors_connecting,
+                        ) + SEPARATOR + describe(sensor.profiles),
+                    )
+                },
             )
         }
 
@@ -73,8 +104,8 @@ fun SensorPairing(
             Button(
                 onClick = { onPair(sensor) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(sensor.name ?: sensor.address) },
-                secondaryLabel = { Text(describe(sensor.profiles)) },
+                label = { CentredLabel(sensor.name ?: sensor.address) },
+                secondaryLabel = { CentredLabel(describe(sensor.profiles)) },
             )
         }
     }

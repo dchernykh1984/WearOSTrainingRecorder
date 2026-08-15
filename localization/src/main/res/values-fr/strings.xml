@@ -209,9 +209,9 @@
     <string name="sensors_connected">Connecte</string>
     <string name="sensors_connecting">Connexion...</string>
     <string name="profile_heart_rate">Fréquence cardiaque</string>
-    <string name="profile_csc">Cadence et vitesse</string>
+    <string name="profile_csc">Cadence et vitesse (velo)</string>
     <string name="profile_cps">Puissance</string>
-    <string name="profile_rsc">Capteur de course</string>
+    <string name="profile_rsc">Cadence et vitesse (course)</string>
     <string name="connect_in_progress">Connexion...</string>
     <string name="connect_done">Connecte</string>
     <string name="connect_failed">Connexion impossible. Verifiez les informations et reessayez.</string>
