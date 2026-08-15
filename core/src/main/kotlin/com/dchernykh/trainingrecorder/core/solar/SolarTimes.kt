@@ -83,7 +83,11 @@ object SolarTimes {
                 (cos(latitude) * cos(declination))
         // Outside +/-1 the sun never reaches the horizon that day: polar day one
         // way, polar night the other. There is no time to print for either.
-        if (abs(hourAngleCos) > 1) return null
+        //
+        // NaN is checked as well as the range, because it fails the range test:
+        // exactly at a pole the divisor is a rounding error away from zero, and
+        // 0/0 would sail past `> 1` and come out as a pair of times in 1970.
+        if (hourAngleCos.isNaN() || abs(hourAngleCos) > 1) return null
         val hourAngleFraction = toDegrees(acos(hourAngleCos)) / DEGREES_PER_DAY
 
         return SolarEvents(

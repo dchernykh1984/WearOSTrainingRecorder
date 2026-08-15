@@ -140,4 +140,15 @@ class SolarTimesTest {
         /** 2026-03-20 12:00 UTC. */
         const val MARCH_EQUINOX_2026 = 1_774_008_000_000L
     }
+
+    @Test
+    fun standingExactlyOnAPoleIsAnsweredRatherThanApproximated() {
+        // The divisor is a rounding error from zero there, and the arithmetic
+        // can produce a value that is neither in range nor out of it. Nothing to
+        // print is the correct answer at a pole in any case.
+        listOf(90.0, -90.0).forEach { pole ->
+            assertNull(SolarTimes.at(pole, 0.0, JUNE_SOLSTICE_2026), "no sunrise at $pole")
+            assertNull(SolarTimes.at(pole, 0.0, DECEMBER_SOLSTICE_2026), "no sunrise at $pole")
+        }
+    }
 }
