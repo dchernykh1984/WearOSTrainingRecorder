@@ -18,18 +18,12 @@ import com.dchernykh.trainingrecorder.core.sensor.FixStatus
 import com.dchernykh.trainingrecorder.core.sensor.SensorOrigin
 import com.dchernykh.trainingrecorder.core.sensor.SensorReading
 import com.dchernykh.trainingrecorder.core.sport.SportCatalogue
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.guava.await
 
@@ -52,8 +46,6 @@ data class BuiltInSample(
 class ExerciseRecorder(
     context: Context,
     private val client: ExerciseClient = HealthServices.getClient(context).exerciseClient,
-    /** Where [fix] is kept alive; the caller's scope, so it ends with the caller. */
-    scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) {
     private val availability = MutableStateFlow<Map<String, Availability>>(emptyMap())
 
@@ -67,10 +59,7 @@ class ExerciseRecorder(
      * coordinates have arrived: a watch that is still acquiring has not sent any
      * either, and the two are worth telling apart.
      */
-    val fix: StateFlow<FixStatus> =
-        availability
-            .map { fixStatusOf(it[DataType.LOCATION.name]) }
-            .stateIn(scope, SharingStarted.Eagerly, FixStatus.NONE)
+    val fix: Flow<FixStatus> = availability.map { fixStatusOf(it[DataType.LOCATION.name]) }
 
     suspend fun start(
         sportTypeId: String,

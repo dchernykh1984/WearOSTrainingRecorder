@@ -15,6 +15,7 @@ import androidx.wear.compose.material3.MaterialTheme
 import com.dchernykh.trainingrecorder.core.field.FieldCatalogue
 import com.dchernykh.trainingrecorder.core.layout.ScreenShape
 import com.dchernykh.trainingrecorder.core.recording.RecordingPhase
+import com.dchernykh.trainingrecorder.core.sensor.FixStatus
 import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.localization.Labels
 import com.dchernykh.trainingrecorder.wear.recording.RecordingViewModel
@@ -64,7 +65,7 @@ fun TrainingRecorderApp(
                 // Only where there is a position to have: an indoor ride is not
                 // failing to find satellites, it never asked for any, and a red
                 // GPS on a turbo trainer is a bug report waiting to be filed.
-                val fix by model.fix.collectAsStateWithLifecycle()
+                val fix by model.fix.collectAsStateWithLifecycle(FixStatus.NONE)
                 RecordingPager(
                     screens = configuration.resolve(requireNotNull(sport)),
                     shape = currentShape(),

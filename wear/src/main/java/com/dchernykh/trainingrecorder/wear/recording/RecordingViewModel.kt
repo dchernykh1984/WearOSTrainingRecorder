@@ -36,6 +36,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -147,7 +148,7 @@ class RecordingViewModel(
      * Straight from the recorder: the fix is the platform's answer, and there is
      * nothing for this class to add to it.
      */
-    val fix: StateFlow<FixStatus> get() = recorder.fix
+    val fix: Flow<FixStatus> get() = recorder.fix
 
     /** Whether this sport has a position to track, and so an indicator to show. */
     fun tracksPosition(sport: SportType): Boolean = recorder.needsGps(sport.id)
