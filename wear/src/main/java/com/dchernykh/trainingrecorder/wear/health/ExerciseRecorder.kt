@@ -192,8 +192,22 @@ internal fun ExerciseUpdate.toSample(): BuiltInSample {
     val location: LocationData? = metrics.getData(DataType.LOCATION).lastOrNull()?.value
     return BuiltInSample(
         readings = readings,
-        latitudeDeg = location?.latitude,
-        longitudeDeg = location?.longitude,
-        altitudeMeters = location?.altitude ?: readings["altitude"]?.value,
+        latitudeDeg = location?.latitude?.real(),
+        longitudeDeg = location?.longitude?.real(),
+        // The barometer as a fallback, which is usually the better number
+        // anyway: a fix's altitude is the weakest thing GNSS produces.
+        altitudeMeters = location?.altitude?.real() ?: readings["altitude"]?.value,
     )
 }
+
+/**
+ * Null for a coordinate that is not one.
+ *
+ * Health Services fills a missing part of a fix with `Double.MAX_VALUE` rather
+ * than leaving it out, and the value passes every null check on the way to the
+ * FIT file. It showed up as an altitude of 1.8e308 in a recorded track - a
+ * number that is either rejected by the service the ride is uploaded to or,
+ * worse, accepted. A fix with no altitude is ordinary; writing down a fake one
+ * is not.
+ */
+private fun Double.real(): Double? = takeIf { it.isFinite() && it != Double.MAX_VALUE }
