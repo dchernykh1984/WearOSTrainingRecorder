@@ -186,4 +186,62 @@ class SensorSnapshotTest {
     private companion object {
         const val HOUR_MS = 3_600_000L
     }
+
+    @Test
+    fun aConnectedStrapSilencesTheWatchsOwnHeartRate() {
+        // What the rider asked for by pairing a strap and taking the watch off:
+        // the optical sensor must not fill the gaps between the strap's beats.
+        // Half a ride of numbers alternating between two disagreeing sensors is
+        // worse than either of them alone.
+        val merged =
+            SensorSnapshot.merge(
+                external = emptyMap(),
+                builtIn = mapOf("hr" to SensorReading(70.0, SensorOrigin.BUILT_IN, now)),
+                nowEpochMs = now,
+                connectedProfiles = setOf(SensorProfile.HEART_RATE),
+            )
+        assertNull(merged.value("hr"), "the watch's own reading should be ignored entirely")
+    }
+
+    @Test
+    fun theWatchsOwnReadingStandsWhenNothingIsConnected() {
+        val merged =
+            SensorSnapshot.merge(
+                external = emptyMap(),
+                builtIn = mapOf("hr" to SensorReading(70.0, SensorOrigin.BUILT_IN, now)),
+                nowEpochMs = now,
+            )
+        assertEquals(70.0, merged.value("hr"))
+    }
+
+    @Test
+    fun aConnectedStrapTakesOverOnlyItsOwnFields() {
+        // A heart-rate strap says nothing about altitude, and silencing the
+        // barometer because a strap connected would be a strange way to lose a
+        // climb.
+        val merged =
+            SensorSnapshot.merge(
+                external = mapOf("hr" to SensorReading(150.0, SensorOrigin.EXTERNAL, now)),
+                builtIn =
+                    mapOf(
+                        "hr" to SensorReading(70.0, SensorOrigin.BUILT_IN, now),
+                        "altitude" to SensorReading(300.0, SensorOrigin.BUILT_IN, now),
+                    ),
+                nowEpochMs = now,
+                connectedProfiles = setOf(SensorProfile.HEART_RATE),
+            )
+        assertEquals(150.0, merged.value("hr"))
+        assertEquals(300.0, merged.value("altitude"))
+    }
+
+    @Test
+    fun everyFieldASensorCoversNamesItsOwnProfile() {
+        // The takeover is derived from the catalogue, so this is the check that
+        // the catalogue actually says which sensor supplies what.
+        val covered = SensorSnapshot.fieldsCoveredBy(setOf(SensorProfile.HEART_RATE))
+        assertTrue(covered.contains("hr"), "heart rate should be covered by a heart-rate strap")
+        covered.forEach {
+            assertEquals(SensorProfile.HEART_RATE, FieldCatalogue.byId(it)?.preferredProfile, it)
+        }
+    }
 }
