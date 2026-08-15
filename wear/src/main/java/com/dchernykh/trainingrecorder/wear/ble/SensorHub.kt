@@ -141,6 +141,13 @@ class SensorHub(
     private val _connectedAddresses = MutableStateFlow<Set<String>>(emptySet())
     val connectedAddresses: StateFlow<Set<String>> = _connectedAddresses.asStateFlow()
 
+    /**
+     * What each sensor turned out to be once its services were read, which can
+     * differ from what it advertised at pairing time.
+     */
+    private val _profiles = MutableStateFlow<Map<String, Set<SensorProfile>>>(emptyMap())
+    val profiles: StateFlow<Map<String, Set<SensorProfile>>> = _profiles.asStateFlow()
+
     private val jobs = mutableListOf<Job>()
 
     fun paired(): List<PairedSensor> = store.read()
@@ -149,8 +156,6 @@ class SensorHub(
     fun start(scope: CoroutineScope) {
         stop()
         store.read().forEach { sensor ->
-            val profiles = sensor.profiles
-            if (profiles.isEmpty()) return@forEach
             jobs +=
                 scope.launch {
                     // A refused Bluetooth permission, a sensor whose profile this
@@ -160,7 +165,7 @@ class SensorHub(
                     // uncaught SecurityException here would break that promise at
                     // the worst possible moment.
                     runCatching {
-                        SensorConnection(context, sensor.address, profiles).events().collect { event ->
+                        SensorConnection(context, sensor.address).events().collect { event ->
                             apply(event)
                         }
                     }
@@ -176,7 +181,30 @@ class SensorHub(
         _connectedAddresses.value = emptySet()
     }
 
+    /** Corrects what was stored at pairing time, once the sensor has said so itself. */
+    private fun remember(
+        address: String,
+        profiles: Set<SensorProfile>,
+    ) {
+        if (profiles.isEmpty()) return
+        val known = store.read().firstOrNull { it.address == address } ?: return
+        val ids = profiles.map { it.id }
+        if (known.profileIds.toSet() == ids.toSet()) return
+        store.remember(known.copy(profileIds = ids))
+        _profiles.update { it + (address to profiles) }
+    }
+
     private fun apply(event: SensorEvent) {
+        if (event.discovery) {
+            // What the sensor turned out to be, written down so the pairing
+            // screen stops calling a heart-rate strap a running sensor - and
+            // stops calling it that again after a restart. Deliberately not
+            // counted as connected: a sensor that *can* report heart rate has
+            // not reported any yet, and it is a reading, not a capability, that
+            // takes a field away from the watch.
+            remember(event.address, event.profiles)
+            return
+        }
         if (!event.connected) {
             _connected.update { it - event.profiles }
             _connectedAddresses.update { it - event.address }

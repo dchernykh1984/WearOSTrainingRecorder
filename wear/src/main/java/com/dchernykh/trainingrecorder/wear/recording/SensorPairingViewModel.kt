@@ -61,6 +61,11 @@ class SensorPairingViewModel(
         if (scanJob != null) return
         // Connecting while looking, so the rows can say more than "paired".
         hub.start(viewModelScope)
+        // A sensor may turn out to be something other than it advertised, and it
+        // says so as soon as its services are read. Re-read then, so the row
+        // stops describing a heart-rate strap as a running sensor while the
+        // rider is looking straight at it.
+        viewModelScope.launch { hub.profiles.collect { _paired.value = store.read() } }
         _scanning.value = true
         scanJob =
             viewModelScope.launch {

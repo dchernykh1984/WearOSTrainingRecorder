@@ -67,4 +67,21 @@ class PairedSensorStoreTest {
         store.forget("AA:BB")
         assertEquals(listOf("CC:DD"), store.read().map { it.address })
     }
+
+    @Test
+    fun whatASensorTurnsOutToBeReplacesWhatItAdvertised() {
+        // A Garmin HRM-Pro+ advertises running cadence and need not mention
+        // heart rate at all. Once its services are read it says what it really
+        // is, and that answer has to survive a restart or the row goes back to
+        // calling a heart-rate strap a running sensor.
+        val store = store()
+        store.remember(PairedSensor("AA:BB", "HRMPro+", listOf("rsc")))
+        val known = store.read().single()
+        store.remember(known.copy(profileIds = listOf("heart_rate", "rsc")))
+        assertEquals(
+            setOf(SensorProfile.HEART_RATE, SensorProfile.RUNNING_SPEED_CADENCE),
+            store.read().single().profiles,
+        )
+        assertEquals("correcting a sensor must not double it", 1, store.read().size)
+    }
 }
