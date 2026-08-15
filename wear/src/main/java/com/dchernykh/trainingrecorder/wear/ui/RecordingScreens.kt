@@ -41,6 +41,7 @@ import com.dchernykh.trainingrecorder.core.layout.Band
 import com.dchernykh.trainingrecorder.core.layout.LayoutPlanner
 import com.dchernykh.trainingrecorder.core.layout.ScreenShape
 import com.dchernykh.trainingrecorder.core.recording.RecordingAction
+import com.dchernykh.trainingrecorder.core.sensor.FixStatus
 import com.dchernykh.trainingrecorder.localization.Labels
 import com.dchernykh.trainingrecorder.localization.R
 
@@ -61,6 +62,8 @@ fun RecordingPager(
     modifier: Modifier = Modifier,
     /** Named on the controls page, so the rider can see what they are stopping. */
     @StringRes sportLabelRes: Int = 0,
+    /** Null for a ride with nothing to track, which shows no indicator at all. */
+    fix: FixStatus? = null,
 ) {
     // The controls sit to the RIGHT of the data screens. Wear OS reserves the
     // left-to-right swipe for dismissing an app, so putting them on the left
@@ -75,7 +78,15 @@ fun RecordingPager(
         if (page == CONTROLS_PAGE) {
             ControlsPage(sportLabelRes = sportLabelRes, actions = actions, onAction = onAction)
         } else {
-            DataPages(screens = screens, shape = shape, values = values, state = vertical)
+            Box(modifier = Modifier.fillMaxSize()) {
+                DataPages(screens = screens, shape = shape, values = values, state = vertical)
+                if (fix != null) {
+                    FixIndicator(
+                        fix = fix,
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                    )
+                }
+            }
         }
     }
 }
