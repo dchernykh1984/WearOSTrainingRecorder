@@ -96,6 +96,20 @@ data class SensorSnapshot(
                 "lap_count",
                 "stroke_count",
                 "lengths",
+                // Averages and maxima are facts about the ride so far, not
+                // measurements of this instant. Left out, they aged like a live
+                // reading: Health Services can batch minutes apart, and the
+                // average speed of a ride in progress would blank between
+                // batches - which is the same lie the staleness rule exists to
+                // prevent, told about a number that cannot go stale.
+                "speed_avg",
+                "speed_max",
+                "hr_avg",
+                "hr_max",
+                "cadence_avg",
+                "cadence_max",
+                "power_avg",
+                "power_max",
             )
 
         /**

@@ -287,4 +287,27 @@ class SensorSnapshotTest {
             "a batching source and a notifying one cannot share a window",
         )
     }
+
+    @Test
+    fun anAverageDoesNotGoStaleTheWayALiveReadingDoes() {
+        // What the ride has averaged so far does not stop being true because no
+        // batch arrived recently. Health Services can be minutes apart, and an
+        // average that blanked in between would be the same lie the staleness
+        // rule exists to prevent.
+        val longAgo = now - SensorSnapshot.BUILT_IN_STALE_AFTER_MS * 10
+        val merged =
+            SensorSnapshot.merge(
+                external = emptyMap(),
+                builtIn =
+                    mapOf(
+                        "speed_avg" to SensorReading(7.5, SensorOrigin.BUILT_IN, longAgo),
+                        "hr_max" to SensorReading(178.0, SensorOrigin.BUILT_IN, longAgo),
+                        "speed_current" to SensorReading(7.5, SensorOrigin.BUILT_IN, longAgo),
+                    ),
+                nowEpochMs = now,
+            )
+        assertEquals(7.5, merged.value("speed_avg"))
+        assertEquals(178.0, merged.value("hr_max"))
+        assertNull(merged.value("speed_current"), "the live one still ages")
+    }
 }
