@@ -134,6 +134,8 @@
     <string name="config_level_default">Par defaut</string>
     <string name="config_level_discipline">De la discipline</string>
     <string name="config_level_sport_type">Reglages propres</string>
+    <string name="config_target_default">Par defaut (tous)</string>
+    <string name="config_target_section">Par defaut pour cette section</string>
     <string name="screen_count">%d ecrans</string>
 
     <string name="recording_notification_title">Enregistrement en cours</string>

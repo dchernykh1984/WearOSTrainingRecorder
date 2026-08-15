@@ -134,6 +134,8 @@
     <string name="config_level_default">Әдепкі</string>
     <string name="config_level_discipline">Бағыттан</string>
     <string name="config_level_sport_type">Жеке баптау</string>
+    <string name="config_target_default">Әдепкі (барлық түрлері)</string>
+    <string name="config_target_section">Бөлім бойынша әдепкі</string>
     <string name="screen_count">экран: %d</string>
 
     <string name="recording_notification_title">Жаттығу жазылуда</string>

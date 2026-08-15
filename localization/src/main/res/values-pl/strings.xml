@@ -134,6 +134,8 @@
     <string name="config_level_default">Domyslne</string>
     <string name="config_level_discipline">Z dyscypliny</string>
     <string name="config_level_sport_type">Wlasne ustawienia</string>
+    <string name="config_target_default">Domyslny (wszystkie)</string>
+    <string name="config_target_section">Domyslny dla sekcji</string>
     <string name="screen_count">%d ekranow</string>
 
     <string name="recording_notification_title">Nagrywanie treningu</string>

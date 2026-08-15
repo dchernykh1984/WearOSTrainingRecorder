@@ -134,6 +134,8 @@
     <string name="config_level_default">Predefinido</string>
     <string name="config_level_discipline">Da disciplina</string>
     <string name="config_level_sport_type">Definicoes proprias</string>
+    <string name="config_target_default">Padrao (todos)</string>
+    <string name="config_target_section">Padrao desta secao</string>
     <string name="screen_count">%d ecras</string>
 
     <string name="recording_notification_title">A gravar treino</string>

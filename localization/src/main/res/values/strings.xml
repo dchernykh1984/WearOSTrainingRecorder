@@ -144,6 +144,8 @@
     <string name="config_level_default">Default</string>
     <string name="config_level_discipline">From discipline</string>
     <string name="config_level_sport_type">Own settings</string>
+    <string name="config_target_default">Default (all sports)</string>
+    <string name="config_target_section">Default for this section</string>
     <string name="screen_count">%d screens</string>
 
     <!-- Recording service -->

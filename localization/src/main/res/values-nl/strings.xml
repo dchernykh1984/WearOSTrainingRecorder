@@ -134,6 +134,8 @@
     <string name="config_level_default">Standaard</string>
     <string name="config_level_discipline">Van discipline</string>
     <string name="config_level_sport_type">Eigen instellingen</string>
+    <string name="config_target_default">Standaard (alle sporten)</string>
+    <string name="config_target_section">Standaard voor dit onderdeel</string>
     <string name="screen_count">%d schermen</string>
 
     <string name="recording_notification_title">Training wordt opgenomen</string>

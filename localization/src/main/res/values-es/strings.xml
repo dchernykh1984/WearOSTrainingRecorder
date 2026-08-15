@@ -134,6 +134,8 @@
     <string name="config_level_default">Predeterminado</string>
     <string name="config_level_discipline">De la disciplina</string>
     <string name="config_level_sport_type">Ajustes propios</string>
+    <string name="config_target_default">Predeterminado (todos)</string>
+    <string name="config_target_section">Predeterminado de la seccion</string>
     <string name="screen_count">%d pantallas</string>
 
     <string name="recording_notification_title">Grabando entrenamiento</string>
