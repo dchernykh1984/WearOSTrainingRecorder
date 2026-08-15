@@ -28,7 +28,7 @@ data class SolarEvents(
  *
  * This is the standard sunrise equation: mean solar anomaly, the equation of the
  * centre, ecliptic longitude, declination, and the hour angle at which the sun's
- * centre reaches 0.833° below the horizon - half a degree for the disc and a
+ * centre reaches 0.833 degrees below the horizon - half a degree for the disc and a
  * third for refraction, which is why sunrise is a moment before geometry says
  * it should be. Good to about a minute, which is a great deal better than the
  * light changes.
