@@ -70,6 +70,8 @@
     <string name="field_timer_moving">Em movimento</string>
     <string name="field_timer_paused">Em pausa</string>
     <string name="field_time_of_day">Hora</string>
+    <string name="field_sunrise">Nascer do sol</string>
+    <string name="field_sunset">Por do sol</string>
     <string name="field_lap_time">Tempo da volta</string>
     <string name="field_lap_time_last">Volta anterior</string>
     <string name="field_distance_total">Distancia</string>

@@ -73,6 +73,8 @@ object Labels {
             "timer_moving" to R.string.field_timer_moving,
             "timer_paused" to R.string.field_timer_paused,
             "time_of_day" to R.string.field_time_of_day,
+            "sunrise" to R.string.field_sunrise,
+            "sunset" to R.string.field_sunset,
             "lap_time" to R.string.field_lap_time,
             "lap_time_last" to R.string.field_lap_time_last,
             "distance_total" to R.string.field_distance_total,

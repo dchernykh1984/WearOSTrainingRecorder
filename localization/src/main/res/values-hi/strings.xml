@@ -53,6 +53,8 @@
     <string name="field_timer_moving">गति में</string>
     <string name="field_timer_paused">रुका हुआ</string>
     <string name="field_time_of_day">घड़ी</string>
+    <string name="field_sunrise">सूर्योदय</string>
+    <string name="field_sunset">सूर्यास्त</string>
     <string name="field_lap_time">लैप समय</string>
     <string name="field_lap_time_last">पिछला लैप</string>
     <string name="field_distance_total">दूरी</string>

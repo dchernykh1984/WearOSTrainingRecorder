@@ -70,6 +70,8 @@
     <string name="field_timer_moving">In beweging</string>
     <string name="field_timer_paused">Gepauzeerd</string>
     <string name="field_time_of_day">Klok</string>
+    <string name="field_sunrise">Zonsopkomst</string>
+    <string name="field_sunset">Zonsondergang</string>
     <string name="field_lap_time">Rondetijd</string>
     <string name="field_lap_time_last">Vorige ronde</string>
     <string name="field_distance_total">Afstand</string>

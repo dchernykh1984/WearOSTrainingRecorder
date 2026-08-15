@@ -70,6 +70,8 @@
     <string name="field_timer_moving">Bewegungszeit</string>
     <string name="field_timer_paused">Pausiert</string>
     <string name="field_time_of_day">Uhrzeit</string>
+    <string name="field_sunrise">Sonnenaufgang</string>
+    <string name="field_sunset">Sonnenuntergang</string>
     <string name="field_lap_time">Rundenzeit</string>
     <string name="field_lap_time_last">Letzte Runde</string>
     <string name="field_distance_total">Distanz</string>

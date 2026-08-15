@@ -70,6 +70,8 @@
     <string name="field_timer_moving">En movimiento</string>
     <string name="field_timer_paused">En pausa</string>
     <string name="field_time_of_day">Hora</string>
+    <string name="field_sunrise">Amanecer</string>
+    <string name="field_sunset">Atardecer</string>
     <string name="field_lap_time">Tiempo vuelta</string>
     <string name="field_lap_time_last">Vuelta anterior</string>
     <string name="field_distance_total">Distancia</string>

@@ -6,6 +6,7 @@ import com.dchernykh.trainingrecorder.core.recording.RecordingState
 import com.dchernykh.trainingrecorder.core.sensor.SensorOrigin
 import com.dchernykh.trainingrecorder.core.sensor.SensorReading
 import com.dchernykh.trainingrecorder.core.sensor.SensorSnapshot
+import com.dchernykh.trainingrecorder.core.solar.SolarEvents
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -59,8 +60,18 @@ class FieldValuesTest {
 
     @Test
     fun theClockFieldFollowsTheOffsetItIsGiven() {
-        val utc = FieldValues.snapshot(recording(), now, clockOffsetMinutes = 0)["time_of_day"]
-        val moscow = FieldValues.snapshot(recording(), now, clockOffsetMinutes = 180)["time_of_day"]
+        val utc =
+            FieldValues.snapshot(
+                recording(),
+                now,
+                surroundings = Surroundings(clockOffsetMinutes = 0),
+            )["time_of_day"]
+        val moscow =
+            FieldValues.snapshot(
+                recording(),
+                now,
+                surroundings = Surroundings(clockOffsetMinutes = 180),
+            )["time_of_day"]
         // Three hours apart, which is the whole point of passing an offset in.
         assertEquals("2:50", utc)
         assertEquals("5:50", moscow)
@@ -154,5 +165,31 @@ class FieldValuesTest {
         val values = FieldValues.snapshot(RecordingState(), now)
         assertEquals("0:00", values["timer_elapsed"])
         assertEquals(FieldCatalogue.all.size, values.size)
+    }
+
+    @Test
+    fun theSunsTimetableIsShownAsAClockTimeInTheWatchsZone() {
+        val values =
+            FieldValues.snapshot(
+                state = RecordingState(),
+                nowEpochMs = 1_782_043_200_000L,
+                surroundings =
+                    Surroundings(
+                        clockOffsetMinutes = 180,
+                        solar = SolarEvents(1_782_002_640_000L, 1_782_065_880_000L),
+                    ),
+            )
+        assertEquals("3:44", values["sunrise"])
+        assertEquals("21:18", values["sunset"])
+    }
+
+    @Test
+    fun theSunsFieldsReadEmptyBeforeTheWatchKnowsWhereItIs() {
+        // The first minute of every outdoor ride, and every indoor one. A blank
+        // is the honest answer - and the same one polar day gives, where there
+        // genuinely is no sunset to print.
+        val values = FieldValues.snapshot(state = RecordingState(), nowEpochMs = 1_782_043_200_000L)
+        assertEquals(FieldCatalogue.EMPTY_VALUE, values["sunrise"])
+        assertEquals(FieldCatalogue.EMPTY_VALUE, values["sunset"])
     }
 }

@@ -70,6 +70,8 @@
     <string name="field_timer_moving">Қозғалыста</string>
     <string name="field_timer_paused">Кідірісте</string>
     <string name="field_time_of_day">Сағат</string>
+    <string name="field_sunrise">Күн шығуы</string>
+    <string name="field_sunset">Күн батуы</string>
     <string name="field_lap_time">Шеңбер уақыты</string>
     <string name="field_lap_time_last">Алдыңғы шеңбер</string>
     <string name="field_distance_total">Қашықтық</string>

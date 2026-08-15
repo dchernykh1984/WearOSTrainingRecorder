@@ -53,6 +53,8 @@
     <string name="field_timer_moving">Hareket suresi</string>
     <string name="field_timer_paused">Duraklatilan</string>
     <string name="field_time_of_day">Saat</string>
+    <string name="field_sunrise">Gun dogumu</string>
+    <string name="field_sunset">Gun batimi</string>
     <string name="field_lap_time">Tur suresi</string>
     <string name="field_lap_time_last">Onceki tur</string>
     <string name="field_distance_total">Mesafe</string>
