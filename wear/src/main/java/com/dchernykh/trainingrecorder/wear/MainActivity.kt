@@ -55,8 +55,22 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 SettingsStore.revision.collect {
-                    val tag = withContext(Dispatchers.IO) { SettingsStore(this@MainActivity).read()?.languageTag }
-                    if (tag != appliedLanguageTag) recreate()
+                    // Guarded: this reads a file, and an unreadable one would
+                    // otherwise take the exception up through the lifecycle
+                    // scope and end the app - a spectacular way to fail at
+                    // noticing a language change.
+                    //
+                    // The failure is kept inside the Result rather than
+                    // flattened to null, because null is also a real answer
+                    // here: it is what "follow the system" looks like, and
+                    // collapsing the two would leave a rider who switched back
+                    // to the system language on the one they chose before.
+                    val read =
+                        withContext(Dispatchers.IO) {
+                            runCatching { SettingsStore(this@MainActivity).read()?.languageTag }
+                        }
+                    val tag = read.getOrNull()
+                    if (read.isSuccess && tag != appliedLanguageTag) recreate()
                 }
             }
         }
