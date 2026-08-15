@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.9.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.8.0...v0.9.0) (2026-08-15)
+
+
+### Features
+
+* **core:** work out distance, speed and climb from the ride's own positions ([001c434](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/001c4349f435b31cf4b517639bb8d6d5d52d79c8))
+* **wear:** record the ride from its own positions rather than trusting the platform ([562123a](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/562123a558fbccc9a0d507f75fc15823bb107359))
+
+
+### Bug Fixes
+
+* **core:** never drop a ride that has not arrived anywhere ([7a76ab0](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/7a76ab000ec072f78f7c42d170c5598766379a8e))
+* **core:** stop averages and maxima ageing like live readings ([1dc2f77](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/1dc2f77f253c6dcfc577ceee0458247f90a116e1))
+* **wear:** calibrate the barometer against the sky, not against itself ([cccca3d](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/cccca3d936537b546038c987d560101f94e6e0c0))
+* **wear:** tell a silent sensor apart from one that is not connected ([e4e25f1](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/e4e25f1c4cd4bf368e14bc2fa54eda72d9737f7b))
+
 ## [0.8.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.7.0...v0.8.0) (2026-08-15)
 
 
