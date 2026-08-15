@@ -66,6 +66,13 @@ class ExerciseRecorder(
         gpsEnabled: Boolean = true,
         poolLengthMeters: Float = DEFAULT_POOL_LENGTH_METERS,
     ) {
+        // Cleared with the ride it belonged to. Carried over, the last ride's
+        // answer stands until the platform gets round to sending a new one -
+        // so a rider setting off indoors, or before the receiver has found
+        // anything, would be shown the green from yesterday's ride. The same
+        // mistake as a heart rate left on screen after its sensor stopped, in a
+        // different field.
+        availability.value = emptyMap()
         val capabilities = client.getCapabilitiesAsync().await()
         val exerciseType = ExerciseTypes.forSport(sportTypeId)
         // getExerciseTypeCapabilities throws for a type the device does not
