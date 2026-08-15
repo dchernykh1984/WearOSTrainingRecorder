@@ -145,7 +145,18 @@ class RecordingViewModel(
         history.value = SportOrdering.forget(history.value, sport.id).also(settings::writeHistory)
     }
 
-    private var screens: ScreenConfiguration = ScreenConfiguration.initial()
+    private val _configuration = MutableStateFlow(ScreenConfiguration.initial())
+
+    /**
+     * The screen layouts, observed rather than read once.
+     *
+     * A plain field meant the pager drew whatever the configuration was when the
+     * ride started, so a rider rearranging their fields on the phone had to
+     * finish and start again to see it. Nothing about the recording depends on
+     * this - the samples come from Health Services and the sensors whatever is
+     * on screen - so it is only ever a question of what is drawn.
+     */
+    val configuration: StateFlow<ScreenConfiguration> = _configuration.asStateFlow()
     private var units: UnitSystem = UnitSystem.METRIC
     private var race: RaceStatsConfig = RaceStatsConfig()
 
@@ -166,6 +177,10 @@ class RecordingViewModel(
 
     init {
         applySettings()
+        // Re-read whenever the phone pushes, including mid-ride. The listener
+        // that receives the push runs in this process, so this is the whole
+        // mechanism.
+        viewModelScope.launch { SettingsStore.revision.collect { applySettings() } }
         // On the first construction after a launch, which is exactly when a ride
         // the last process never got to finish is sitting on disk waiting to be
         // noticed.
@@ -228,13 +243,13 @@ class RecordingViewModel(
     /** Re-read whenever the screen comes back, so a phone push lands promptly. */
     fun applySettings() {
         settings.read()?.let {
-            screens = it.screens
+            _configuration.value = it.screens
             units = it.units
             race = it.race
         }
     }
 
-    fun screensFor(sport: SportType) = screens.resolve(sport)
+    fun screensFor(sport: SportType) = _configuration.value.resolve(sport)
 
     fun start(sport: SportType) {
         // PREPARING counts as started even though the state machine does not call
