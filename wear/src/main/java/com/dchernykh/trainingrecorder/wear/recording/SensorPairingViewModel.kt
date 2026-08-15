@@ -72,7 +72,7 @@ class SensorPairingViewModel(
     }
 
     fun pair(sensor: DiscoveredSensor) {
-        store.remember(PairedSensor(sensor.address, sensor.name, sensor.profile.id))
+        store.remember(PairedSensor(sensor.address, sensor.name, sensor.profiles.map { it.id }))
         _paired.value = store.read()
     }
 

@@ -19,13 +19,20 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import java.io.File
 
-/** A sensor the rider has paired, as it is remembered between rides. */
+/**
+ * A sensor the rider has paired, as it is remembered between rides.
+ *
+ * Several profiles, because one sensor is routinely several: a chest strap that
+ * advertises heart rate and running cadence is one device with two things to
+ * say, and remembering only one of them is how a strap ends up paired, connected
+ * and silent on the field the rider actually wanted.
+ */
 data class PairedSensor(
     val address: String,
     val name: String?,
-    val profileId: String,
+    val profileIds: List<String>,
 ) {
-    val profile: SensorProfile? get() = SensorProfile.byId(profileId)
+    val profiles: Set<SensorProfile> get() = profileIds.mapNotNull(SensorProfile::byId).toSet()
 }
 
 /**
@@ -36,9 +43,16 @@ data class PairedSensor(
  * the watch is what has to be next to it.
  */
 class PairedSensorStore(
-    context: Context,
-    private val file: File = File(context.filesDir, "sensors.json"),
+    private val file: File,
 ) {
+    /**
+     * The app's own directory. A second constructor rather than a defaulted
+     * parameter so the file-only form needs no Context at all, which is what
+     * lets the format - including the shape an older build wrote - be tested on
+     * a plain JVM.
+     */
+    constructor(context: Context) : this(File(context.filesDir, "sensors.json"))
+
     private val json = Json { ignoreUnknownKeys = true }
 
     fun read(): List<PairedSensor> {
@@ -47,8 +61,15 @@ class PairedSensorStore(
             (json.parseToJsonElement(file.readText()) as? JsonArray).orEmpty().mapNotNull { node ->
                 val entry = node as? JsonObject ?: return@mapNotNull null
                 val address = string(entry, "address") ?: return@mapNotNull null
-                val profileId = string(entry, "profile") ?: return@mapNotNull null
-                PairedSensor(address, string(entry, "name"), profileId)
+                // "profile" is what a single-profile build wrote. Read as well as
+                // "profiles" so a rider who upgrades keeps the sensors they had
+                // rather than finding the pairing screen empty.
+                val profileIds =
+                    (entry["profiles"] as? JsonArray)
+                        ?.mapNotNull { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content }
+                        ?: listOfNotNull(string(entry, "profile"))
+                if (profileIds.isEmpty()) return@mapNotNull null
+                PairedSensor(address, string(entry, "name"), profileIds)
             }
         }.getOrDefault(emptyList())
     }
@@ -61,7 +82,10 @@ class PairedSensorStore(
                         buildJsonObject {
                             put("address", sensor.address)
                             sensor.name?.let { put("name", it) }
-                            put("profile", sensor.profileId)
+                            put(
+                                "profiles",
+                                buildJsonArray { sensor.profileIds.forEach { add(JsonPrimitive(it)) } },
+                            )
                         },
                     )
                 }
@@ -106,6 +130,17 @@ class SensorHub(
     private val _connected = MutableStateFlow<Set<SensorProfile>>(emptySet())
     val connected: StateFlow<Set<SensorProfile>> = _connected.asStateFlow()
 
+    /**
+     * Which sensors are linked right now, by address.
+     *
+     * By address rather than by profile because that is the question the pairing
+     * screen asks: a rider looking at a row wants to know whether *that strap* is
+     * talking, and a screen that cannot say is one they have to test by starting
+     * a ride.
+     */
+    private val _connectedAddresses = MutableStateFlow<Set<String>>(emptySet())
+    val connectedAddresses: StateFlow<Set<String>> = _connectedAddresses.asStateFlow()
+
     private val jobs = mutableListOf<Job>()
 
     fun paired(): List<PairedSensor> = store.read()
@@ -114,7 +149,8 @@ class SensorHub(
     fun start(scope: CoroutineScope) {
         stop()
         store.read().forEach { sensor ->
-            val profile = sensor.profile ?: return@forEach
+            val profiles = sensor.profiles
+            if (profiles.isEmpty()) return@forEach
             jobs +=
                 scope.launch {
                     // A refused Bluetooth permission, a sensor whose profile this
@@ -124,7 +160,7 @@ class SensorHub(
                     // uncaught SecurityException here would break that promise at
                     // the worst possible moment.
                     runCatching {
-                        SensorConnection(context, sensor.address, profile).events().collect { event ->
+                        SensorConnection(context, sensor.address, profiles).events().collect { event ->
                             apply(event)
                         }
                     }
@@ -137,17 +173,20 @@ class SensorHub(
         jobs.clear()
         _readings.value = emptyMap()
         _connected.value = emptySet()
+        _connectedAddresses.value = emptySet()
     }
 
     private fun apply(event: SensorEvent) {
         if (!event.connected) {
-            _connected.update { it - event.profile }
+            _connected.update { it - event.profiles }
+            _connectedAddresses.update { it - event.address }
             // The readings are left in place rather than cleared: the snapshot
             // ages them out on its own timer, and wiping them here would blank a
             // field on a momentary dropout that reconnects a second later.
             return
         }
-        _connected.update { it + event.profile }
+        _connected.update { it + event.profiles }
+        _connectedAddresses.update { it + event.address }
         _readings.update { it + event.readings }
     }
 }
