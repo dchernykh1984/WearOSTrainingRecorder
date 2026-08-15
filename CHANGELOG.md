@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.2](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.1...v0.9.2) (2026-08-15)
+
+
+### Bug Fixes
+
+* **core:** count the ground a walker actually covers ([27eaf0c](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/27eaf0ccb1c00e6d87067f71690ce193a16bc47f))
+* **core:** start counting again promptly after a long stop ([7e90f9f](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/7e90f9f0eb94e1ed8b839b58f4a2e536d820c6af))
+
 ## [0.9.1](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.0...v0.9.1) (2026-08-15)
 
 
