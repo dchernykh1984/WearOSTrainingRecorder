@@ -50,38 +50,25 @@ object Haversine {
  * itself, and a distance computed from them is by construction the same distance
  * the saved track draws.
  *
- * Two filters, both of which matter more than they look:
- *
- * A fix that implies an impossible speed is dropped. GNSS occasionally emits a
- * position a kilometre away and comes straight back, and unfiltered that is two
- * kilometres added to a ride that never moved.
- *
- * Movement below a few metres is ignored - but measured from an *anchor* that is
- * held until the threshold is crossed, not from the previous fix. Measured
- * pairwise it was worse than useless: fixes arrive about once a second, a walker
- * covers a metre and a half in that time, so every single step fell under the
- * threshold and was thrown away. A two hundred metre walk recorded three metres,
- * which is the one number worse than none - it looks like the feature works.
- *
- * Holding the anchor keeps both properties. A rider moving steadily gets further
- * from it every second and crosses the threshold within a few, and every metre
- * they covered is counted from where they last were. A watch on a table wanders
- * around its anchor without ever getting far from it, because the noise is
- * bounded and the anchor does not follow it.
+ * Every fix counts. There is deliberately no noise filtering, no minimum step,
+ * no minimum speed and no auto-pause: this records what the receiver reported,
+ * and where the receiver wanders the ride shows that wander rather than a
+ * tidier number the app made up. Filtering was tried and did real harm - a
+ * three metre step threshold, reasonable for cycling, silently discarded every
+ * step of a walk, because fixes arrive about once a second and a walker covers
+ * a metre and a half in that time. Two hundred metres recorded as three, which
+ * is worse than recording nothing because it looks like it worked. Anything
+ * that decides a measurement is not real is a guess, and a guess in this
+ * position is invisible until it is wrong.
  */
-class RideTrack(
-    private val jitterMeters: Double = JITTER_METERS,
-    private val speedCeilingMps: Double = MAX_PLAUSIBLE_SPEED_MPS,
-    private val stationaryAfterSeconds: Double = STATIONARY_AFTER_SECONDS,
-    private val crawlingSpeedMps: Double = CRAWLING_SPEED_MPS,
-) {
-    /** Where the last counted metre ended, and what the next fix is measured from. */
-    private var anchor: Fix? = null
+class RideTrack {
+    /** The last fix, and what the next one is measured from. */
+    private var previous: Fix? = null
 
     var distanceMeters: Double = 0.0
         private set
 
-    /** Metres per second over the last accepted pair, or null before there is one. */
+    /** Metres per second over the last pair, or null before there is one. */
     var speedMps: Double? = null
         private set
 
@@ -91,65 +78,30 @@ class RideTrack(
     /**
      * True when the fix moved the ride on.
      *
-     * Four ways it does not. The first fix has nothing to measure from. A fix
-     * out of order has no interval. An impossible one is refused *and* replaces
-     * the anchor, because keeping the old one would measure everything after it
-     * from a position the rider left long ago, turning a single bad fix into a
-     * wrong distance for the rest of the ride. And a fix still inside the noise
-     * leaves the anchor exactly where it is, so the next one is measured from
-     * the same place and the rider's slow progress accumulates instead of being
-     * discarded a metre at a time.
+     * The only fixes that do not are the first, which has nothing to measure
+     * from, and one that arrives out of order or in the same millisecond, which
+     * gives no interval to divide by. Neither is a judgement about the data.
      */
-    @Suppress("ReturnCount")
     fun record(fix: Fix): Boolean {
-        val from = anchor
+        val from = previous
         if (from == null) {
-            anchor = fix
+            previous = fix
             return false
         }
         val seconds = (fix.atEpochMs - from.atEpochMs) / MILLIS_PER_SECOND
         if (seconds <= 0) return false
         val metres = Haversine.metresBetween(from, fix)
-        if (metres / seconds > speedCeilingMps) {
-            anchor = fix
-            return false
-        }
-        // Over the whole held interval, which is the average across the stretch
-        // actually measured rather than of one arbitrary pair - and the reason
-        // the two tests below can tell a walker from a drifting receiver at all.
         val speed = metres / seconds
-        if (metres < jitterMeters || speed < crawlingSpeedMps) {
-            // The anchor is held, not advanced, so the rider's slow progress
-            // accumulates towards the threshold instead of being discarded a
-            // metre at a time. That is what makes the speed floor safe: a
-            // stationary receiver drifts a few metres and stops, so as the
-            // anchor is held its apparent speed falls towards zero, while a
-            // walker's stays at walking pace however long the anchor is held.
-            //
-            // Someone who has not got clear of the anchor in several seconds is
-            // standing still, and should be shown that rather than the speed of
-            // whatever they last did. The anchor moves to them at the same
-            // moment, which matters more than it looks: held across a five
-            // minute stop at a cafe, the speed floor is measured over those five
-            // minutes, and the rider would have to cover a hundred metres before
-            // a single one of them counted. Once they are known to be standing,
-            // the next stretch is measured from where they stood.
-            if (seconds >= stationaryAfterSeconds) {
-                speedMps = 0.0
-                anchor = fix
-            }
-            return false
-        }
-        anchor = fix
+        previous = fix
         distanceMeters += metres
         speedMps = speed
         maxSpeedMps = max(maxSpeedMps, speed)
         return true
     }
 
-    /** Forgets the ride, keeping the settings it was built with. */
+    /** Forgets the ride. */
     fun clear() {
-        anchor = null
+        previous = null
         distanceMeters = 0.0
         speedMps = null
         maxSpeedMps = 0.0
@@ -157,35 +109,6 @@ class RideTrack(
 
     private companion object {
         const val MILLIS_PER_SECOND = 1000.0
-
-        /**
-         * Displacement from the anchor under this is receiver noise rather than
-         * travel. A walker crosses it in about two seconds and a rider in less
-         * than one; a watch on a table never does, because its wander is bounded
-         * and the anchor does not follow it.
-         */
-        const val JITTER_METERS = 3.0
-
-        /**
-         * Failing to get clear of the anchor for this long is standing still.
-         * Under half a metre a second, which is slower than a walk.
-         */
-        const val STATIONARY_AFTER_SECONDS = 6.0
-
-        /**
-         * Slower than this, averaged over the whole held interval, is drift
-         * rather than travel. A receiver left alone wanders a few metres and
-         * stays there, so the longer the anchor is held the slower it appears;
-         * a walker is four times this and stays there.
-         */
-        const val CRAWLING_SPEED_MPS = 0.35
-
-        /**
-         * Faster than this between two fixes did not happen on a bicycle: 250
-         * km/h leaves room for a descent, a train, and a bad fix that is merely
-         * bad rather than absurd.
-         */
-        const val MAX_PLAUSIBLE_SPEED_MPS = 70.0
     }
 }
 
