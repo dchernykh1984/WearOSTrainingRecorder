@@ -217,6 +217,7 @@
     <string name="connect_in_progress">Қосылуда...</string>
     <string name="connect_done">Қосылды</string>
     <string name="connect_failed">Қосылу мүмкін болмады. Деректерді тексеріп, қайталаңыз.</string>
+    <string name="connect_no_callback">Браузер қолданбаға оралмады. Телефон қолданбаны фондық режимде шектесе, шектеуді алып тастап, қайталаңыз.</string>
     <string name="connect_needs_application">Алдымен қолданбаңыздың Client ID және Secret мәнін енгізіңіз.</string>
     <string name="settings_units">Өлшем бірліктері</string>
     <string name="units_metric">Метрлік</string>

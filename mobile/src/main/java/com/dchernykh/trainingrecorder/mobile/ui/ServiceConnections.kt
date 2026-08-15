@@ -141,7 +141,7 @@ class ServiceConnections(
                     R.string.connect_done
                 }
 
-                is AuthorizationResult.Failed -> R.string.connect_failed
+                is AuthorizationResult.Failed -> result.statusRes
             }
     }
 

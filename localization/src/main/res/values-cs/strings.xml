@@ -217,6 +217,7 @@
     <string name="connect_in_progress">Pripojovani...</string>
     <string name="connect_done">Pripojeno</string>
     <string name="connect_failed">Pripojeni se nezdarilo. Zkontrolujte udaje a zkuste to znovu.</string>
+    <string name="connect_no_callback">Prohlizec se nevratil. Pokud telefon tuto aplikaci omezuje na pozadi, povolte ji a zkuste to znovu.</string>
     <string name="connect_needs_application">Nejprve zadejte Client ID a Secret sve aplikace.</string>
     <string name="settings_units">Jednotky</string>
     <string name="units_metric">Metrické</string>
