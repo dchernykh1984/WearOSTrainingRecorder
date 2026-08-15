@@ -130,6 +130,8 @@
     <string name="config_level_default">डिफ़ॉल्ट</string>
     <string name="config_level_discipline">अनुशासन से</string>
     <string name="config_level_sport_type">अपनी सेटिंग</string>
+    <string name="config_target_default">डिफ़ॉल्ट (सभी खेल)</string>
+    <string name="config_target_section">इस अनुभाग का डिफ़ॉल्ट</string>
     <string name="screen_count">%d स्क्रीन</string>
     <string name="recording_notification_title">ट्रेनिंग रिकॉर्ड हो रही है</string>
     <string name="recording_channel_name">रिकॉर्डिंग</string>

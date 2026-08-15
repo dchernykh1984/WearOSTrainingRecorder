@@ -130,6 +130,8 @@
     <string name="config_level_default">既定</string>
     <string name="config_level_discipline">種目から</string>
     <string name="config_level_sport_type">個別設定</string>
+    <string name="config_target_default">既定（すべての種目）</string>
+    <string name="config_target_section">このセクションの既定</string>
     <string name="screen_count">%d 画面</string>
     <string name="recording_notification_title">トレーニングを記録中</string>
     <string name="recording_channel_name">記録</string>

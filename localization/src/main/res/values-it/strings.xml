@@ -134,6 +134,8 @@
     <string name="config_level_default">Predefinito</string>
     <string name="config_level_discipline">Dalla disciplina</string>
     <string name="config_level_sport_type">Impostazioni proprie</string>
+    <string name="config_target_default">Predefinito (tutti)</string>
+    <string name="config_target_section">Predefinito per la sezione</string>
     <string name="screen_count">%d schermate</string>
 
     <string name="recording_notification_title">Registrazione allenamento</string>

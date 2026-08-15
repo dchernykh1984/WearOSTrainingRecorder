@@ -130,6 +130,8 @@
     <string name="config_level_default">Varsayilan</string>
     <string name="config_level_discipline">Disiplinden</string>
     <string name="config_level_sport_type">Kendi ayari</string>
+    <string name="config_target_default">Varsayilan (tum sporlar)</string>
+    <string name="config_target_section">Bu bolum icin varsayilan</string>
     <string name="screen_count">%d ekran</string>
     <string name="recording_notification_title">Antrenman kaydediliyor</string>
     <string name="recording_channel_name">Kayit</string>

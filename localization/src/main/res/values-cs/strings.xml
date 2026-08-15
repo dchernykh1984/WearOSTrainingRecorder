@@ -134,6 +134,8 @@
     <string name="config_level_default">Vychozi</string>
     <string name="config_level_discipline">Z discipliny</string>
     <string name="config_level_sport_type">Vlastni nastaveni</string>
+    <string name="config_target_default">Vychozi (vsechny)</string>
+    <string name="config_target_section">Vychozi pro tuto sekci</string>
     <string name="screen_count">%d obrazovek</string>
 
     <string name="recording_notification_title">Nahravani treninku</string>

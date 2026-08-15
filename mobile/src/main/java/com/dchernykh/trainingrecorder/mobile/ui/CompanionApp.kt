@@ -2,7 +2,9 @@ package com.dchernykh.trainingrecorder.mobile.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -29,10 +32,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dchernykh.trainingrecorder.core.config.ConfigLevel
+import com.dchernykh.trainingrecorder.core.config.ConfigTarget
 import com.dchernykh.trainingrecorder.core.config.ScreenConfiguration
+import com.dchernykh.trainingrecorder.core.config.levelOf
+import com.dchernykh.trainingrecorder.core.config.resolve
 import com.dchernykh.trainingrecorder.core.connector.GarminProtocol
+import com.dchernykh.trainingrecorder.core.sport.Discipline
 import com.dchernykh.trainingrecorder.core.sport.SportCatalogue
-import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.localization.Labels
 import com.dchernykh.trainingrecorder.localization.R
 import kotlinx.coroutines.delay
@@ -59,7 +65,7 @@ fun CompanionApp(
             var section by rememberSaveable { mutableStateOf(Section.SPORTS) }
             var editingId by rememberSaveable { mutableStateOf<String?>(null) }
             var picking by rememberSaveable { mutableStateOf<Pair<Int, Int>?>(null) }
-            val editing = editingId?.let { id -> SportCatalogue.byId(id) }
+            val editing = editingId?.let(ConfigTarget::byKey)
 
             // Leaving the editor with the system back gesture, so the phone
             // behaves like every other phone rather than trapping the rider on
@@ -113,7 +119,7 @@ fun CompanionApp(
                     section = section,
                     editing = editing,
                     picking = picking,
-                    onEdit = { editingId = it?.id },
+                    onEdit = { editingId = it?.key },
                     onPick = { picking = it },
                     onLanguageChanged = onLanguageChanged,
                     modifier = Modifier.padding(padding),
@@ -127,9 +133,9 @@ fun CompanionApp(
 private fun SectionContent(
     model: CompanionViewModel,
     section: Section,
-    editing: SportType?,
+    editing: ConfigTarget?,
     picking: Pair<Int, Int>?,
-    onEdit: (SportType?) -> Unit,
+    onEdit: (ConfigTarget?) -> Unit,
     onPick: (Pair<Int, Int>?) -> Unit,
     onLanguageChanged: () -> Unit,
     modifier: Modifier = Modifier,
@@ -138,7 +144,7 @@ private fun SectionContent(
     when {
         editing != null && picking != null ->
             FieldPicker(
-                sport = editing,
+                discipline = editing.fieldsOf,
                 onFieldChosen = { fieldId ->
                     model.assignField(editing, picking.first, picking.second, fieldId)
                     onPick(null)
@@ -147,16 +153,16 @@ private fun SectionContent(
             )
         editing != null ->
             ScreenEditor(
-                sport = editing,
+                target = editing,
                 screens = configuration.resolve(editing),
                 level = configuration.levelOf(editing),
                 onScreensChanged = { model.updateScreens(editing, it) },
-                onResetToInherited = { model.resetSport(editing) },
+                onResetToInherited = { model.resetTarget(editing) },
                 onPickField = { screenIndex, slotIndex -> onPick(screenIndex to slotIndex) },
                 modifier = modifier,
             )
         section == Section.SPORTS ->
-            SportConfigurationList(configuration = configuration, onSportSelected = onEdit, modifier = modifier)
+            SportConfigurationList(configuration = configuration, onTargetSelected = onEdit, modifier = modifier)
         section == Section.RACE ->
             RaceSettings(config = model.race.value, onChanged = model::updateRace, modifier = modifier)
         section == Section.CONNECTIONS ->
@@ -210,20 +216,90 @@ private fun ConnectionList(
 @Composable
 fun SportConfigurationList(
     configuration: ScreenConfiguration,
-    onSportSelected: (SportType) -> Unit,
+    onTargetSelected: (ConfigTarget) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // One section open at a time, as in the field picker. Thirty-five sports
+    // flat is a screen to scroll; four disciplines is a screen to read.
+    var openDiscipline by rememberSaveable { mutableStateOf<String?>(null) }
     LazyColumn(modifier = modifier.fillMaxSize()) {
-        items(SportCatalogue.all, key = { it.id }) { sport ->
-            SportRow(
-                sport = sport,
-                level = configuration.levelOf(sport),
-                screenCount = configuration.resolve(sport).screens.size,
-                onClick = { onSportSelected(sport) },
+        item(key = "default") {
+            // First, and above the disciplines, because it is what they all
+            // inherit. A rider who wants the same three fields everywhere sets
+            // them here once instead of thirty-five times.
+            TargetRow(
+                title = stringResource(R.string.config_target_default),
+                level = ConfigLevel.DEFAULT,
+                screenCount = configuration.resolve(ConfigTarget.Default).screens.size,
+                onClick = { onTargetSelected(ConfigTarget.Default) },
             )
             HorizontalDivider()
         }
+        Discipline.entries.forEach { discipline ->
+            val open = openDiscipline == discipline.id
+            item(key = "discipline-${discipline.id}") {
+                DisciplineHeader(
+                    discipline = discipline,
+                    sportCount = SportCatalogue.forDiscipline(discipline).size,
+                    open = open,
+                    onClick = { openDiscipline = if (open) null else discipline.id },
+                )
+            }
+            if (!open) return@forEach
+            item(key = "discipline-default-${discipline.id}") {
+                // The section's own default, inside the section it applies to,
+                // where "Default" needs no further explanation.
+                TargetRow(
+                    title = stringResource(R.string.config_target_section),
+                    level = configuration.levelOf(ConfigTarget.OfDiscipline(discipline)),
+                    screenCount = configuration.resolve(ConfigTarget.OfDiscipline(discipline)).screens.size,
+                    onClick = { onTargetSelected(ConfigTarget.OfDiscipline(discipline)) },
+                    indent = true,
+                )
+                HorizontalDivider()
+            }
+            items(SportCatalogue.forDiscipline(discipline), key = { it.id }) { sport ->
+                TargetRow(
+                    title = stringResource(Labels.sport(sport.id)),
+                    level = configuration.levelOf(sport),
+                    screenCount = configuration.resolve(sport).screens.size,
+                    onClick = { onTargetSelected(ConfigTarget.OfSport(sport)) },
+                    indent = true,
+                )
+                HorizontalDivider()
+            }
+        }
     }
+}
+
+/** One discipline, opened by tapping it. Sized above the rows it introduces. */
+@Composable
+private fun DisciplineHeader(
+    discipline: Discipline,
+    sportCount: Int,
+    open: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(Labels.discipline(discipline.id)),
+            style = MaterialTheme.typography.titleLarge,
+        )
+        Text(
+            text = if (open) "-" else "+ $sportCount",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    HorizontalDivider()
 }
 
 /**
@@ -233,21 +309,22 @@ fun SportConfigurationList(
  * them moves.
  */
 @Composable
-private fun SportRow(
-    sport: SportType,
+private fun TargetRow(
+    title: String,
     level: ConfigLevel,
     screenCount: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    indent: Boolean = false,
 ) {
     Column(
         modifier =
             modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(start = if (indent) 32.dp else 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
     ) {
-        Text(text = stringResource(Labels.sport(sport.id)), style = MaterialTheme.typography.bodyLarge)
+        Text(text = title, style = MaterialTheme.typography.bodyLarge)
         Text(
             text = stringResource(level.labelRes()) + " - " + stringResource(R.string.screen_count, screenCount),
             style = MaterialTheme.typography.bodySmall,

@@ -29,26 +29,28 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dchernykh.trainingrecorder.core.config.ConfigLevel
+import com.dchernykh.trainingrecorder.core.config.ConfigTarget
 import com.dchernykh.trainingrecorder.core.config.Screen
 import com.dchernykh.trainingrecorder.core.config.ScreenSet
 import com.dchernykh.trainingrecorder.core.field.FieldCatalogue
 import com.dchernykh.trainingrecorder.core.field.FieldCategory
-import com.dchernykh.trainingrecorder.core.sport.SportType
+import com.dchernykh.trainingrecorder.core.sport.Discipline
 import com.dchernykh.trainingrecorder.localization.Labels
 import com.dchernykh.trainingrecorder.localization.R
 
 /**
- * Edits the screens for one sport.
+ * Edits the screens for one tier: the default, a discipline, or one sport.
  *
  * The banner at the top is the important part. Until the rider changes something
- * this sport is reading its discipline's layout, or the default, and editing here
- * forks it - after which changing the parent no longer reaches it. That is easy
- * to do by accident and impossible to see afterwards, so it is stated before the
- * first edit rather than explained after.
+ * this tier is reading the one above it, and editing here forks it - after which
+ * changing the parent no longer reaches it. That is easy to do by accident and
+ * impossible to see afterwards, so it is stated before the first edit rather
+ * than explained after. The default has no parent, which is the one case where
+ * the banner has nothing to warn about.
  */
 @Composable
 fun ScreenEditor(
-    sport: SportType,
+    target: ConfigTarget,
     screens: ScreenSet,
     level: ConfigLevel,
     onScreensChanged: (ScreenSet) -> Unit,
@@ -58,11 +60,15 @@ fun ScreenEditor(
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         Text(
-            text = stringResource(Labels.sport(sport.id)),
+            text = stringResource(titleOf(target)),
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         )
-        InheritanceBanner(level = level, onResetToInherited = onResetToInherited)
+        // The default inherits from nothing, so there is no sentence to show
+        // and nothing a Reset could put back.
+        if (target !is ConfigTarget.Default) {
+            InheritanceBanner(level = level, onResetToInherited = onResetToInherited)
+        }
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(screens.screens.withIndex().toList(), key = { it.index }) { (index, screen) ->
                 ScreenCard(
@@ -84,6 +90,14 @@ fun ScreenEditor(
         }
     }
 }
+
+/** What the editor is called: the tier's own name. */
+private fun titleOf(target: ConfigTarget): Int =
+    when (target) {
+        is ConfigTarget.Default -> R.string.config_target_default
+        is ConfigTarget.OfDiscipline -> Labels.discipline(target.discipline.id)
+        is ConfigTarget.OfSport -> Labels.sport(target.sport.id)
+    }
 
 @Composable
 private fun InheritanceBanner(
@@ -127,7 +141,7 @@ private fun InheritanceBanner(
         // true - this sport has nothing of its own yet.
         TextButton(
             onClick = onResetToInherited,
-            enabled = level == ConfigLevel.SPORT_TYPE,
+            enabled = level != ConfigLevel.DEFAULT,
         ) { Text(stringResource(R.string.editor_reset)) }
     }
 }
@@ -234,11 +248,18 @@ private const val DEFAULT_NEW_SCREEN_SLOTS = 3
 /** Offered when a slot is tapped, grouped so sixty fields stay navigable. */
 @Composable
 fun FieldPicker(
-    sport: SportType,
+    discipline: Discipline?,
     onFieldChosen: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val available = FieldCatalogue.forDisciplineByCategory(sport.discipline)
+    // Null is the default layout, which belongs to no discipline and therefore
+    // offers every field there is - it is inherited by all of them.
+    val available =
+        if (discipline == null) {
+            FieldCatalogue.all.groupBy { it.category }
+        } else {
+            FieldCatalogue.forDisciplineByCategory(discipline)
+        }
     // One category open at a time, and none to begin with. Sixty fields laid out
     // flat is a screen the rider scrolls through hunting for a heading; twelve
     // headings is a screen they read. An accordion rather than free toggling

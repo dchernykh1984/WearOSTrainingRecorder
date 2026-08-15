@@ -130,6 +130,8 @@
     <string name="config_level_default">默认</string>
     <string name="config_level_discipline">来自项目</string>
     <string name="config_level_sport_type">自定义</string>
+    <string name="config_target_default">默认（全部运动）</string>
+    <string name="config_target_section">该分区的默认</string>
     <string name="screen_count">%d 个页面</string>
     <string name="recording_notification_title">正在记录训练</string>
     <string name="recording_channel_name">记录</string>

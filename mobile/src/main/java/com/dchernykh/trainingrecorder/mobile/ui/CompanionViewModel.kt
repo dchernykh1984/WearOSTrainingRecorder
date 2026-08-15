@@ -5,12 +5,15 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.dchernykh.trainingrecorder.core.config.ConfigTarget
 import com.dchernykh.trainingrecorder.core.config.ScreenConfiguration
 import com.dchernykh.trainingrecorder.core.config.ScreenSet
+import com.dchernykh.trainingrecorder.core.config.reset
+import com.dchernykh.trainingrecorder.core.config.resolve
+import com.dchernykh.trainingrecorder.core.config.withScreensFor
 import com.dchernykh.trainingrecorder.core.datalayer.WatchSettings
 import com.dchernykh.trainingrecorder.core.format.UnitSystem
 import com.dchernykh.trainingrecorder.core.race.RaceStatsConfig
-import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.core.workout.WorkoutSummary
 import com.dchernykh.trainingrecorder.localization.AppLanguage
 import com.dchernykh.trainingrecorder.localization.R
@@ -117,28 +120,28 @@ class CompanionViewModel(
     }
 
     fun updateScreens(
-        sport: SportType,
+        target: ConfigTarget,
         screens: ScreenSet,
     ) {
-        // Forked on the first edit: changing a sport must not quietly rewrite
-        // every other sport that shares its discipline's screens.
-        _configuration.value = _configuration.value.withScreensFor(sport, screens)
+        // Forked on the first edit: changing one tier must not quietly rewrite
+        // every other tier that was reading the same inherited screens.
+        _configuration.value = _configuration.value.withScreensFor(target, screens)
         persist()
     }
 
     fun assignField(
-        sport: SportType,
+        target: ConfigTarget,
         screenIndex: Int,
         slotIndex: Int,
         fieldId: String?,
     ) {
-        val current = _configuration.value.resolve(sport)
+        val current = _configuration.value.resolve(target)
         val screen = current.screens.getOrNull(screenIndex) ?: return
-        updateScreens(sport, current.withScreen(screenIndex, screen.withSlot(slotIndex, fieldId)))
+        updateScreens(target, current.withScreen(screenIndex, screen.withSlot(slotIndex, fieldId)))
     }
 
-    fun resetSport(sport: SportType) {
-        _configuration.value = _configuration.value.resetSportType(sport)
+    fun resetTarget(target: ConfigTarget) {
+        _configuration.value = _configuration.value.reset(target)
         persist()
     }
 

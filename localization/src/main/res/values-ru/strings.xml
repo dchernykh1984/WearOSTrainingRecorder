@@ -134,6 +134,8 @@
     <string name="config_level_default">По умолчанию</string>
     <string name="config_level_discipline">От направления</string>
     <string name="config_level_sport_type">Свои настройки</string>
+    <string name="config_target_default">По умолчанию (все виды)</string>
+    <string name="config_target_section">По умолчанию для раздела</string>
     <string name="screen_count">экранов: %d</string>
 
     <string name="recording_notification_title">Идёт запись тренировки</string>
