@@ -430,7 +430,11 @@ private fun DiscardControl(
                     // indistinguishable from a broken one only when it has not
                     // said so.
                     onClick = {},
-                ).padding(horizontal = 12.dp, vertical = 6.dp),
+                    // Small, but not smaller than a thumb. Six points of
+                    // padding around eleven-point text is a target under half
+                    // the size a watch control needs, and this one is reached at
+                    // the end of a ride, in gloves, while moving.
+                ).padding(horizontal = 16.dp, vertical = 12.dp),
     )
 }
 
