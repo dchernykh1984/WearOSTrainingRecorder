@@ -184,4 +184,29 @@ class RideTrackTest {
     private companion object {
         const val METERS_PER_DEGREE_LATITUDE = 111_195.0
     }
+
+    @Test
+    fun settingOffAgainAfterALongStopCountsStraightAway() {
+        // The anchor is held while the rider is moving slowly, which is the
+        // point of it - but held across a five minute stop, the speed floor is
+        // then measured over those five minutes, and the rider would have to
+        // cover a hundred metres before a single one counted.
+        val track = RideTrack()
+        var fix = Fix(55.0, 37.0, start)
+        track.record(fix)
+        repeat(300) {
+            fix = fix.copy(atEpochMs = fix.atEpochMs + 1000)
+            track.record(fix)
+        }
+        assertEquals(0.0, track.distanceMeters, "standing still covers no ground")
+
+        repeat(20) {
+            fix = northOf(fix, metres = 5.0)
+            track.record(fix)
+        }
+        assertTrue(
+            abs(track.distanceMeters - 100) < 8,
+            "the ride should resume promptly, got ${track.distanceMeters}",
+        )
+    }
 }

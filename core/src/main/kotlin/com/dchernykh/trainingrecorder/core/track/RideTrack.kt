@@ -128,8 +128,16 @@ class RideTrack(
             //
             // Someone who has not got clear of the anchor in several seconds is
             // standing still, and should be shown that rather than the speed of
-            // whatever they last did.
-            if (seconds >= stationaryAfterSeconds) speedMps = 0.0
+            // whatever they last did. The anchor moves to them at the same
+            // moment, which matters more than it looks: held across a five
+            // minute stop at a cafe, the speed floor is measured over those five
+            // minutes, and the rider would have to cover a hundred metres before
+            // a single one of them counted. Once they are known to be standing,
+            // the next stretch is measured from where they stood.
+            if (seconds >= stationaryAfterSeconds) {
+                speedMps = 0.0
+                anchor = fix
+            }
             return false
         }
         anchor = fix
