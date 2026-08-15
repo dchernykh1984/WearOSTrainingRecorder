@@ -624,7 +624,13 @@ class RecordingViewModel(
         // One point per second, whoever asked. The values are recomputed both on
         // the tick and whenever a batch lands, and two points sharing a second
         // is a duplicate sample in the file for no gain.
-        if (nowEpochMs - lastPointAtEpochMs < TICK_MS) return
+        //
+        // Only a gap that is short *and forwards* skips. A clock that steps
+        // backwards - which any watch does when it syncs - would otherwise leave
+        // this test true for as long as the step was, and the ride would simply
+        // stop being recorded until the clock caught up.
+        val sinceLast = nowEpochMs - lastPointAtEpochMs
+        if (sinceLast in 0 until TICK_MS) return
         lastPointAtEpochMs = nowEpochMs
         val point =
             TrackPoint(
