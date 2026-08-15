@@ -14,6 +14,7 @@ import com.dchernykh.trainingrecorder.core.race.RaceStatsSnapshot
 import com.dchernykh.trainingrecorder.core.recording.RecordingAction
 import com.dchernykh.trainingrecorder.core.recording.RecordingPhase
 import com.dchernykh.trainingrecorder.core.recording.RecordingState
+import com.dchernykh.trainingrecorder.core.sensor.FixStatus
 import com.dchernykh.trainingrecorder.core.sensor.SensorReading
 import com.dchernykh.trainingrecorder.core.sensor.SensorSnapshot
 import com.dchernykh.trainingrecorder.core.sport.SportType
@@ -139,6 +140,17 @@ class RecordingViewModel(
         history
             .map { SportOrdering.favourites(it) }
             .stateIn(viewModelScope, SharingStarted.Eagerly, SportOrdering.favourites(history.value))
+
+    /**
+     * Where the position has got to, for the indicator on the ride screen.
+     *
+     * Straight from the recorder: the fix is the platform's answer, and there is
+     * nothing for this class to add to it.
+     */
+    val fix: StateFlow<FixStatus> get() = recorder.fix
+
+    /** Whether this sport has a position to track, and so an indicator to show. */
+    fun tracksPosition(sport: SportType): Boolean = recorder.needsGps(sport.id)
 
     /** Drops a sport from the shortcut list. It stays in the catalogue. */
     fun forgetFavourite(sport: SportType) {

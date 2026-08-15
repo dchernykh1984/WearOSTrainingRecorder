@@ -61,6 +61,10 @@ fun TrainingRecorderApp(
                 // not the one after it.
                 val configuration by model.configuration.collectAsStateWithLifecycle()
                 val sport = sportOf(model, state.sportTypeId)
+                // Only where there is a position to have: an indoor ride is not
+                // failing to find satellites, it never asked for any, and a red
+                // GPS on a turbo trainer is a bug report waiting to be filed.
+                val fix by model.fix.collectAsStateWithLifecycle()
                 RecordingPager(
                     screens = configuration.resolve(requireNotNull(sport)),
                     shape = currentShape(),
@@ -68,6 +72,7 @@ fun TrainingRecorderApp(
                     actions = state.availableActions,
                     onAction = model::onAction,
                     sportLabelRes = Labels.sport(sport.id),
+                    fix = fix.takeIf { model.tracksPosition(requireNotNull(sport)) },
                 )
             }
         }

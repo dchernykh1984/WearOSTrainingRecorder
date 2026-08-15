@@ -11,16 +11,25 @@ import androidx.health.services.client.data.ExerciseConfig
 import androidx.health.services.client.data.ExerciseLapSummary
 import androidx.health.services.client.data.ExerciseType
 import androidx.health.services.client.data.ExerciseUpdate
+import androidx.health.services.client.data.LocationAvailability
 import androidx.health.services.client.data.LocationData
 import androidx.health.services.client.data.SampleDataPoint
+import com.dchernykh.trainingrecorder.core.sensor.FixStatus
 import com.dchernykh.trainingrecorder.core.sensor.SensorOrigin
 import com.dchernykh.trainingrecorder.core.sensor.SensorReading
 import com.dchernykh.trainingrecorder.core.sport.SportCatalogue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.guava.await
 
@@ -43,11 +52,25 @@ data class BuiltInSample(
 class ExerciseRecorder(
     context: Context,
     private val client: ExerciseClient = HealthServices.getClient(context).exerciseClient,
+    /** Where [fix] is kept alive; the caller's scope, so it ends with the caller. */
+    scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) {
     private val availability = MutableStateFlow<Map<String, Availability>>(emptyMap())
 
     /** Per data type, whether the watch can currently produce it. */
     val dataAvailability = availability.asStateFlow()
+
+    /**
+     * Where the position has got to, for the indicator on the ride screen.
+     *
+     * Read from what Health Services reports rather than inferred from whether
+     * coordinates have arrived: a watch that is still acquiring has not sent any
+     * either, and the two are worth telling apart.
+     */
+    val fix: StateFlow<FixStatus> =
+        availability
+            .map { fixStatusOf(it[DataType.LOCATION.name]) }
+            .stateIn(scope, SharingStarted.Eagerly, FixStatus.NONE)
 
     suspend fun start(
         sportTypeId: String,
@@ -134,7 +157,14 @@ class ExerciseRecorder(
             awaitClose { client.clearUpdateCallbackAsync(callback) }
         }
 
-    private fun needsGps(sportTypeId: String): Boolean {
+    /**
+     * Whether this sport has a position to track at all.
+     *
+     * Public because the ride screen asks the same question: an indoor ride is
+     * not failing to find satellites, it never asked for any, and a red GPS on a
+     * turbo trainer is a bug report waiting to be filed.
+     */
+    fun needsGps(sportTypeId: String): Boolean {
         val sport = SportCatalogue.byId(sportTypeId) ?: return true
         // Indoor sports have nothing to track, and a GNSS radio hunting for
         // satellites through a roof is pure battery drain.
@@ -148,6 +178,19 @@ class ExerciseRecorder(
         const val DEFAULT_POOL_LENGTH_METERS = 25f
     }
 }
+
+/**
+ * What Health Services says about the position, in the three states a rider
+ * needs. Anything that is not a real fix and is not actively looking is "no" -
+ * including the unknown, since a state this build does not recognise is not one
+ * to reassure anybody with.
+ */
+internal fun fixStatusOf(availability: Availability?): FixStatus =
+    when (availability) {
+        LocationAvailability.ACQUIRED_TETHERED, LocationAvailability.ACQUIRED_UNTETHERED -> FixStatus.ACQUIRED
+        LocationAvailability.ACQUIRING -> FixStatus.ACQUIRING
+        else -> FixStatus.NONE
+    }
 
 /**
  * Folds an update into the shape the shared sensor merge expects.
