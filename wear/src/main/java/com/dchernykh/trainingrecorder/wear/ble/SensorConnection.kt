@@ -23,7 +23,8 @@ import java.util.UUID
 
 /** What one connected sensor is currently reporting. */
 data class SensorEvent(
-    val profile: SensorProfile,
+    val address: String,
+    val profiles: Set<SensorProfile>,
     val readings: Map<String, SensorReading>,
     val connected: Boolean = true,
 )
@@ -36,11 +37,16 @@ data class SensorEvent(
  * byte layouts from the specification; this class is only the transport. Keeping
  * that seam is what makes the fiddly part - flags, endianness, counter rollover -
  * testable without a strap in the room.
+ *
+ * A sensor is a set of profiles, not one. Chest straps routinely advertise heart
+ * rate *and* running speed and cadence; a bike computer sensor may speak power
+ * and cadence. Reading only one of them is how a heart-rate strap ends up
+ * connected, described as a running sensor, and reporting no heart rate at all.
  */
 class SensorConnection(
     private val context: Context,
     private val address: String,
-    private val profile: SensorProfile,
+    private val profiles: Set<SensorProfile>,
 ) {
     /**
      * Cadence needs the previous sample to compute a rate, so the state is
@@ -78,8 +84,9 @@ class SensorConnection(
     @SuppressLint("MissingPermission")
     fun events(): Flow<SensorEvent> =
         callbackFlow {
-            if (profile !in supportedProfiles) {
-                close(IllegalArgumentException("no measurement characteristic for ${profile.id}"))
+            val readable = profiles.filter { it in supportedProfiles }.toSet()
+            if (readable.isEmpty()) {
+                close(IllegalArgumentException("no measurement characteristic for any of $profiles"))
                 return@callbackFlow
             }
             val device =
@@ -89,6 +96,11 @@ class SensorConnection(
                         return@callbackFlow
                     }
             val baseline = CrankBaseline()
+            // What is left to arm. Android's GATT queue holds one operation at a
+            // time, so a second descriptor written before the first is
+            // acknowledged is simply dropped - which would leave a two-profile
+            // strap reporting only whichever characteristic happened to win.
+            val pending = ArrayDeque<SensorProfile>()
             val callback =
                 object : BluetoothGattCallback() {
                     override fun onConnectionStateChange(
@@ -104,7 +116,8 @@ class SensorConnection(
                             // that wraps every 64 seconds is exactly the bogus
                             // spike this class exists to avoid.
                             baseline.clear()
-                            trySend(SensorEvent(profile, emptyMap(), connected = false))
+                            pending.clear()
+                            trySend(SensorEvent(address, readable, emptyMap(), connected = false))
                         }
                     }
 
@@ -112,21 +125,37 @@ class SensorConnection(
                         gatt: BluetoothGatt,
                         status: Int,
                     ) {
-                        val measurement = measurementUuid(profile) ?: return
-                        val characteristic =
-                            gatt
-                                .getService(serviceUuid(profile))
-                                ?.getCharacteristic(measurement) ?: return
+                        pending.clear()
+                        // Only the profiles this device actually carries: a strap
+                        // that advertises a service it does not implement would
+                        // otherwise stall the queue on a characteristic that is
+                        // never found.
+                        readable.filter { characteristicFor(gatt, it) != null }.forEach { pending.addLast(it) }
+                        armNext(gatt)
+                    }
+
+                    override fun onDescriptorWrite(
+                        gatt: BluetoothGatt,
+                        descriptor: BluetoothGattDescriptor,
+                        status: Int,
+                    ) {
+                        // The acknowledgement is the only safe moment to start
+                        // the next one, whether or not this one succeeded - a
+                        // refused descriptor must not strand the rest.
+                        armNext(gatt)
+                    }
+
+                    /** Arms the next characteristic in the queue, if any. */
+                    private fun armNext(gatt: BluetoothGatt) {
+                        val next = pending.removeFirstOrNull() ?: return
+                        val characteristic = characteristicFor(gatt, next) ?: return armNext(gatt)
                         gatt.setCharacteristicNotification(characteristic, true)
                         // Notifications only start once the client configuration
                         // descriptor is written; setCharacteristicNotification
                         // alone is a local flag and silently produces nothing.
-                        characteristic
-                            .getDescriptor(CLIENT_CONFIG)
-                            ?.let {
-                                it.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-                                gatt.writeDescriptor(it)
-                            }
+                        val descriptor = characteristic.getDescriptor(CLIENT_CONFIG) ?: return armNext(gatt)
+                        descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                        if (!gatt.writeDescriptor(descriptor)) armNext(gatt)
                     }
 
                     @Deprecated("Kept for API levels below 33, where the typed overload does not exist")
@@ -135,15 +164,22 @@ class SensorConnection(
                         characteristic: BluetoothGattCharacteristic,
                     ) {
                         @Suppress("DEPRECATION")
-                        characteristic.value?.let { trySend(SensorEvent(profile, readingsFrom(it, baseline))) }
+                        characteristic.value?.let { deliver(characteristic, it) }
                     }
 
                     override fun onCharacteristicChanged(
                         gatt: BluetoothGatt,
                         characteristic: BluetoothGattCharacteristic,
                         value: ByteArray,
+                    ) = deliver(characteristic, value)
+
+                    /** Which profile a notification belongs to decides how it parses. */
+                    private fun deliver(
+                        characteristic: BluetoothGattCharacteristic,
+                        value: ByteArray,
                     ) {
-                        trySend(SensorEvent(profile, readingsFrom(value, baseline)))
+                        val source = readable.firstOrNull { measurementUuid(it) == characteristic.uuid } ?: return
+                        trySend(SensorEvent(address, setOf(source), readingsFrom(source, value, baseline)))
                     }
                 }
             val connection = device.connectGatt(context, true, callback)
@@ -154,6 +190,7 @@ class SensorConnection(
         }
 
     private fun readingsFrom(
+        profile: SensorProfile,
         data: ByteArray,
         baseline: CrankBaseline,
     ): Map<String, SensorReading> {
@@ -302,6 +339,12 @@ class SensorConnection(
                 SensorProfile.RUNNING_SPEED_CADENCE -> uuid("2A53")
                 else -> null
             }
+
+        fun characteristicFor(
+            gatt: BluetoothGatt,
+            profile: SensorProfile,
+        ): BluetoothGattCharacteristic? =
+            measurementUuid(profile)?.let { gatt.getService(serviceUuid(profile))?.getCharacteristic(it) }
 
         val supportedProfiles =
             setOf(

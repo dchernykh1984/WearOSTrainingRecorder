@@ -74,11 +74,24 @@ fun SensorPairing(
                 onClick = { onPair(sensor) },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(sensor.name ?: sensor.address) },
-                secondaryLabel = { Text(stringResource(labelFor(sensor.profile))) },
+                secondaryLabel = { Text(describe(sensor.profiles)) },
             )
         }
     }
 }
+
+/**
+ * Everything the sensor can report, not just the first thing it mentioned.
+ *
+ * A strap that speaks heart rate and running cadence used to be listed as
+ * whichever profile came first, which read as a flat statement that it could not
+ * do the other one.
+ */
+@Composable
+private fun describe(profiles: Set<SensorProfile>): String =
+    profiles.map { stringResource(labelFor(it)) }.joinToString(SEPARATOR)
+
+private const val SEPARATOR = ", "
 
 /**
  * What the sensor is, rather than the raw profile id. A rider knows they own a

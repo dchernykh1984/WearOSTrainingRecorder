@@ -17,7 +17,7 @@ import java.util.UUID
 data class DiscoveredSensor(
     val address: String,
     val name: String?,
-    val profile: SensorProfile,
+    val profiles: Set<SensorProfile>,
     val rssi: Int,
 )
 
@@ -55,16 +55,16 @@ class SensorScanner(
                         callbackType: Int,
                         result: ScanResult,
                     ) {
-                        profileOf(result)?.let {
-                            trySend(
-                                DiscoveredSensor(
-                                    address = result.device.address,
-                                    name = result.scanRecord?.deviceName ?: result.device.name,
-                                    profile = it,
-                                    rssi = result.rssi,
-                                ),
-                            )
-                        }
+                        val profiles = profilesOf(result)
+                        if (profiles.isEmpty()) return
+                        trySend(
+                            DiscoveredSensor(
+                                address = result.device.address,
+                                name = result.scanRecord?.deviceName ?: result.device.name,
+                                profiles = profiles,
+                                rssi = result.rssi,
+                            ),
+                        )
                     }
 
                     override fun onScanFailed(errorCode: Int) {
@@ -80,25 +80,27 @@ class SensorScanner(
         }
 
     /**
-     * Which profile the advertisement claims. A sensor advertising several - a
-     * power meter that also speaks cadence - resolves to the richest one, so
-     * pairing it once gets everything it can report.
+     * Every profile the advertisement claims, not the richest one.
+     *
+     * Picking one was a bug with a very quiet failure: chest straps commonly
+     * advertise heart rate *and* running speed and cadence, and resolving them to
+     * whichever came first in the list meant a heart-rate strap could pair, sit
+     * there labelled a running sensor, and never report a beat.
      */
-    private fun profileOf(result: ScanResult): SensorProfile? {
+    private fun profilesOf(result: ScanResult): Set<SensorProfile> {
         val advertised =
             result.scanRecord
                 ?.serviceUuids
                 .orEmpty()
                 .map { it.uuid }
                 .toSet()
-        return scannableProfiles.firstOrNull { serviceUuidOf(it) in advertised }
+        return scannableProfiles.filter { serviceUuidOf(it) in advertised }.toSet()
     }
 
     private companion object {
         /**
-         * Ordered richest first, which is what makes a combined sensor resolve to
-         * the profile that carries the most: a power meter read as plain cadence
-         * would silently throw away the watts.
+         * Richest first, which is only about how a sensor describes itself in a
+         * list now that every advertised profile is kept.
          */
         val scannableProfiles =
             listOf(
