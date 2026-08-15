@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.6.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.5.0...v0.6.0) (2026-08-15)
+
+
+### Features
+
+* **wear:** set a field's caption apart from its value ([e27528b](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/e27528b2faee15a3ffeb4e6a11f00260e5060f4f))
+
+
+### Bug Fixes
+
+* **wear:** ask a sensor what it is instead of believing its advertisement ([fe76f5d](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/fe76f5d0fd11cce6772d2deb8dcecd7125f4176e))
+* **wear:** guard the connection's state against its own callback threads ([ff1fa4f](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/ff1fa4faadc5816e312530953acd712e4974bce2))
+* **wear:** keep sensor bookkeeping off the thread drawing the ride ([37bc29a](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/37bc29aafb6c19cb93f29eca0e87a782e88093c8))
+* **wear:** let go of a sensor that carries nothing this build can read ([e3adf74](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/e3adf7499acd92f44938e3021606c6d1741b30cf))
+* **wear:** stop writing a fake altitude into the track ([2bea2d1](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/2bea2d121415535f8fce36b2b2e9d932d7776cd2))
+
 ## [0.5.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.4.0...v0.5.0) (2026-08-15)
 
 
