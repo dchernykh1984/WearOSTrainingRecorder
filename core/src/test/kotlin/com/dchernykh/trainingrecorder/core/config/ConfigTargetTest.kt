@@ -4,8 +4,10 @@ import com.dchernykh.trainingrecorder.core.sport.Discipline
 import com.dchernykh.trainingrecorder.core.sport.SportCatalogue
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ConfigTargetTest {
     private val road = requireNotNull(SportCatalogue.byId("cycling_road"))
@@ -102,5 +104,17 @@ class ConfigTargetTest {
         assertEquals(Discipline.CYCLING, ConfigTarget.OfDiscipline(Discipline.CYCLING).fieldsOf)
         assertEquals(Discipline.CYCLING, ConfigTarget.OfSport(road).fieldsOf)
         assertNotNull(ConfigTarget.OfSport(running).fieldsOf)
+    }
+
+    @Test
+    fun onlyATierWithALayoutOfItsOwnHasSomethingToReset() {
+        // A sport reading its discipline's layout reports DISCIPLINE, so
+        // deciding this from the level alone offers a Reset that looks active
+        // and does nothing.
+        val edited = ScreenConfiguration.initial().withScreensFor(ConfigTarget.OfDiscipline(Discipline.CYCLING), two)
+        assertEquals(ConfigLevel.DISCIPLINE, edited.levelOf(ConfigTarget.OfSport(road)))
+        assertFalse(edited.isForked(ConfigTarget.OfSport(road)), "it has nothing of its own")
+        assertTrue(edited.isForked(ConfigTarget.OfDiscipline(Discipline.CYCLING)))
+        assertFalse(edited.isForked(ConfigTarget.Default), "the default has nowhere to go back to")
     }
 }

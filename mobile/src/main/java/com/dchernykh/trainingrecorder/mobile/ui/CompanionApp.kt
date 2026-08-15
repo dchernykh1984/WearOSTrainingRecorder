@@ -34,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dchernykh.trainingrecorder.core.config.ConfigLevel
 import com.dchernykh.trainingrecorder.core.config.ConfigTarget
 import com.dchernykh.trainingrecorder.core.config.ScreenConfiguration
+import com.dchernykh.trainingrecorder.core.config.isForked
 import com.dchernykh.trainingrecorder.core.config.levelOf
 import com.dchernykh.trainingrecorder.core.config.resolve
 import com.dchernykh.trainingrecorder.core.connector.GarminProtocol
@@ -156,6 +157,7 @@ private fun SectionContent(
                 target = editing,
                 screens = configuration.resolve(editing),
                 level = configuration.levelOf(editing),
+                canReset = configuration.isForked(editing),
                 onScreensChanged = { model.updateScreens(editing, it) },
                 onResetToInherited = { model.resetTarget(editing) },
                 onPickField = { screenIndex, slotIndex -> onPick(screenIndex to slotIndex) },

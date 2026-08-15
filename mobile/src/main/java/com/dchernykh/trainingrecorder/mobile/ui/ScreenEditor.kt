@@ -53,6 +53,7 @@ fun ScreenEditor(
     target: ConfigTarget,
     screens: ScreenSet,
     level: ConfigLevel,
+    canReset: Boolean,
     onScreensChanged: (ScreenSet) -> Unit,
     onResetToInherited: () -> Unit,
     onPickField: (screenIndex: Int, slotIndex: Int) -> Unit,
@@ -67,7 +68,7 @@ fun ScreenEditor(
         // The default inherits from nothing, so there is no sentence to show
         // and nothing a Reset could put back.
         if (target !is ConfigTarget.Default) {
-            InheritanceBanner(level = level, onResetToInherited = onResetToInherited)
+            InheritanceBanner(level = level, canReset = canReset, onResetToInherited = onResetToInherited)
         }
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(screens.screens.withIndex().toList(), key = { it.index }) { (index, screen) ->
@@ -102,6 +103,7 @@ private fun titleOf(target: ConfigTarget): Int =
 @Composable
 private fun InheritanceBanner(
     level: ConfigLevel,
+    canReset: Boolean,
     onResetToInherited: () -> Unit,
 ) {
     Row(
@@ -141,7 +143,7 @@ private fun InheritanceBanner(
         // true - this sport has nothing of its own yet.
         TextButton(
             onClick = onResetToInherited,
-            enabled = level != ConfigLevel.DEFAULT,
+            enabled = canReset,
         ) { Text(stringResource(R.string.editor_reset)) }
     }
 }
