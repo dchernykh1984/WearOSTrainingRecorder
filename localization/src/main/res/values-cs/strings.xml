@@ -200,6 +200,14 @@
     <string name="sensors_none">Nenalezeny žádné senzory</string>
     <string name="sensors_paired">Spárováno</string>
     <string name="sensors_forget">Zapomenout</string>
+    <string name="sports_favourites">Oblibene</string>
+    <string name="sports_all">Vsechny sporty</string>
+    <string name="favourite_remove_question">Odebrat z oblibenych?</string>
+    <string name="sensors_forget_question">Zapomenout tento senzor?</string>
+    <string name="action_remove">Odebrat</string>
+    <string name="action_cancel">Zrusit</string>
+    <string name="sensors_connected">Pripojeno</string>
+    <string name="sensors_connecting">Pripojuji...</string>
     <string name="profile_heart_rate">Tepová frekvence</string>
     <string name="profile_csc">Kadence a rychlost</string>
     <string name="profile_cps">Výkon</string>

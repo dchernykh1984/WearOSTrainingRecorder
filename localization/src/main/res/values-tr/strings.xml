@@ -193,6 +193,14 @@
     <string name="sensors_none">Sensör bulunamadı</string>
     <string name="sensors_paired">Eşleştirildi</string>
     <string name="sensors_forget">Unut</string>
+    <string name="sports_favourites">Favoriler</string>
+    <string name="sports_all">Tum sporlar</string>
+    <string name="favourite_remove_question">Favorilerden cikarilsin mi?</string>
+    <string name="sensors_forget_question">Bu sensor unutulsun mu?</string>
+    <string name="action_remove">Cikar</string>
+    <string name="action_cancel">Iptal</string>
+    <string name="sensors_connected">Bagli</string>
+    <string name="sensors_connecting">Baglaniyor...</string>
     <string name="profile_heart_rate">Kalp atış hızı</string>
     <string name="profile_csc">Kadans ve hız</string>
     <string name="profile_cps">Güç</string>

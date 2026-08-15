@@ -193,6 +193,14 @@
     <string name="sensors_none">未找到传感器</string>
     <string name="sensors_paired">已配对</string>
     <string name="sensors_forget">忘记</string>
+    <string name="sports_favourites">收藏</string>
+    <string name="sports_all">全部运动</string>
+    <string name="favourite_remove_question">从收藏中移除？</string>
+    <string name="sensors_forget_question">忘记此传感器？</string>
+    <string name="action_remove">移除</string>
+    <string name="action_cancel">取消</string>
+    <string name="sensors_connected">已连接</string>
+    <string name="sensors_connecting">连接中…</string>
     <string name="profile_heart_rate">心率</string>
     <string name="profile_csc">踏频和速度</string>
     <string name="profile_cps">功率</string>

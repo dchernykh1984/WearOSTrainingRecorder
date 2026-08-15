@@ -1,13 +1,6 @@
 package com.dchernykh.trainingrecorder.wear.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -15,24 +8,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.wear.compose.material3.Button
-import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.MaterialTheme
-import androidx.wear.compose.material3.Text
 import com.dchernykh.trainingrecorder.core.field.FieldCatalogue
 import com.dchernykh.trainingrecorder.core.layout.ScreenShape
 import com.dchernykh.trainingrecorder.core.recording.RecordingPhase
 import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.localization.Labels
-import com.dchernykh.trainingrecorder.localization.R
 import com.dchernykh.trainingrecorder.wear.recording.RecordingViewModel
 import com.dchernykh.trainingrecorder.wear.recording.SensorPairingViewModel
 
@@ -59,10 +43,11 @@ fun TrainingRecorderApp(
                 if (pairing) {
                     SensorPairingScreen(model = sensorModel, onLeave = { pairing = false })
                 } else {
-                    val sports by model.sports.collectAsStateWithLifecycle()
+                    val favourites by model.favourites.collectAsStateWithLifecycle()
                     SportPicker(
-                        sports = sports,
+                        favourites = favourites,
                         onSportChosen = model::start,
+                        onForgetFavourite = model::forgetFavourite,
                         onPairSensors = { pairing = true },
                     )
                 }
@@ -83,23 +68,6 @@ fun TrainingRecorderApp(
             }
         }
     }
-}
-
-/**
- * Centred rather than left-aligned, which is what a round screen asks for.
- *
- * The list scrolls, so every row passes through the top and bottom of the face
- * on its way past - and that is exactly where the circle takes the corners away.
- * A line that starts at the left edge loses its first letters there; a centred
- * one loses the same amount from both ends and stays readable the whole way.
- */
-@Composable
-private fun CentredLabel(text: String) {
-    Text(
-        text = text,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth(),
-    )
 }
 
 /**
@@ -139,42 +107,3 @@ private fun sportOf(
 @Composable
 private fun currentShape(): ScreenShape =
     if (LocalConfiguration.current.isScreenRound) ScreenShape.ROUND else ScreenShape.SQUARE
-
-/**
- * The first thing the rider sees. The order is recency by kind, so the sport of
- * the last workout is at the top and the one before that - of a different kind -
- * is right below it.
- */
-@Composable
-fun SportPicker(
-    sports: List<SportType>,
-    onSportChosen: (SportType) -> Unit,
-    onPairSensors: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 8.dp, vertical = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        ListHeader { Text(stringResource(R.string.screen_title_start)) }
-        sports.forEach { sport ->
-            Button(
-                onClick = { onSportChosen(sport) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { CentredLabel(stringResource(Labels.sport(sport.id))) },
-            )
-        }
-        // Last, below every sport: pairing is something a rider does once and
-        // then never again, while starting a workout is what they came for.
-        Button(
-            onClick = onPairSensors,
-            modifier = Modifier.fillMaxWidth(),
-            label = { CentredLabel(stringResource(R.string.sensors_title)) },
-        )
-    }
-}

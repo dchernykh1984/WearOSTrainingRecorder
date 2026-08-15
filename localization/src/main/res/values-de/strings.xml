@@ -200,6 +200,14 @@
     <string name="sensors_none">Keine Sensoren gefunden</string>
     <string name="sensors_paired">Gekoppelt</string>
     <string name="sensors_forget">Entfernen</string>
+    <string name="sports_favourites">Favoriten</string>
+    <string name="sports_all">Alle Sportarten</string>
+    <string name="favourite_remove_question">Aus Favoriten entfernen?</string>
+    <string name="sensors_forget_question">Diesen Sensor vergessen?</string>
+    <string name="action_remove">Entfernen</string>
+    <string name="action_cancel">Abbrechen</string>
+    <string name="sensors_connected">Verbunden</string>
+    <string name="sensors_connecting">Verbinde...</string>
     <string name="profile_heart_rate">Herzfrequenz</string>
     <string name="profile_csc">Trittfrequenz und Tempo</string>
     <string name="profile_cps">Leistung</string>
