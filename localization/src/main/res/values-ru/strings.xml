@@ -70,6 +70,8 @@
     <string name="field_timer_moving">В движении</string>
     <string name="field_timer_paused">На паузе</string>
     <string name="field_time_of_day">Часы</string>
+    <string name="field_sunrise">Восход</string>
+    <string name="field_sunset">Закат</string>
     <string name="field_lap_time">Время круга</string>
     <string name="field_lap_time_last">Пред. круг</string>
     <string name="field_distance_total">Дистанция</string>

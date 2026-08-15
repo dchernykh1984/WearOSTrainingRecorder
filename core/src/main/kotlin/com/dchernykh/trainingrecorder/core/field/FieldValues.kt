@@ -6,6 +6,22 @@ import com.dchernykh.trainingrecorder.core.race.RaceStatsFormatter
 import com.dchernykh.trainingrecorder.core.race.RaceStatsSnapshot
 import com.dchernykh.trainingrecorder.core.recording.RecordingState
 import com.dchernykh.trainingrecorder.core.sensor.SensorSnapshot
+import com.dchernykh.trainingrecorder.core.solar.SolarEvents
+
+/**
+ * Where and when the watch is, which two fields need and the rest ignore.
+ *
+ * Grouped rather than passed alongside the rest because they are the same fact
+ * seen twice: the zone offset says what a clock time means here, and the sun's
+ * timetable is that same "here" applied to the sky. Both are supplied by the
+ * caller rather than read from the platform, so the whole of [FieldValues] stays
+ * a pure function of what it is given.
+ */
+data class Surroundings(
+    val clockOffsetMinutes: Int = 0,
+    /** Null until the watch knows where it is; the sun's fields then read empty. */
+    val solar: SolarEvents? = null,
+)
 
 /**
  * Turns everything the watch currently knows into the strings the slots show.
@@ -56,8 +72,9 @@ object FieldValues {
      * Every field at once. The screens read a map rather than calling per field
      * because a Compose slot can observe a value but not a function call.
      *
-     * [clockOffsetMinutes] is passed in rather than read from the default zone,
-     * so this stays deterministic; the caller knows the watch's zone.
+     * [surroundings] is passed in rather than read from the default zone and a
+     * location service, so this stays deterministic; the caller is what knows
+     * where the watch is.
      */
     fun snapshot(
         state: RecordingState,
@@ -65,10 +82,10 @@ object FieldValues {
         sensors: SensorSnapshot = SensorSnapshot(),
         race: RaceStatsSnapshot = RaceStatsSnapshot.EMPTY,
         units: UnitSystem = UnitSystem.METRIC,
-        clockOffsetMinutes: Int = 0,
+        surroundings: Surroundings = Surroundings(),
     ): Map<String, String> =
         FieldCatalogue.all.associate { definition ->
-            definition.id to value(definition, state, sensors, race, units, nowEpochMs, clockOffsetMinutes)
+            definition.id to value(definition, state, sensors, race, units, nowEpochMs, surroundings)
         }
 
     @Suppress("LongParameterList", "ReturnCount")
@@ -79,13 +96,13 @@ object FieldValues {
         race: RaceStatsSnapshot,
         units: UnitSystem,
         now: Long,
-        offsetMinutes: Int,
+        surroundings: Surroundings,
     ): String {
         val id = definition.id
         // Race stats arrive pre-formatted from the server; reformatting them
         // would only be a chance to disagree with the timing screen.
         if (definition.category == FieldCategory.RACE_STATS) return RaceStatsFormatter.displayValue(id, race)
-        timerValue(id, state, now, offsetMinutes)?.let { return it }
+        timerValue(id, state, now, surroundings)?.let { return it }
         val reading = sensors.value(id)
         return when {
             id in DURATION_FIELDS -> FieldFormatter.duration(reading?.times(MILLIS_PER_SECOND)?.toLong())
@@ -106,7 +123,7 @@ object FieldValues {
         id: String,
         state: RecordingState,
         now: Long,
-        offsetMinutes: Int,
+        surroundings: Surroundings,
     ): String? =
         when (id) {
             "timer_elapsed" -> FieldFormatter.duration(state.elapsedMillisAt(now))
@@ -114,7 +131,15 @@ object FieldValues {
             // Derived rather than tracked: paused time is whatever the clock ran
             // that the workout did not.
             "timer_paused" -> FieldFormatter.duration(state.elapsedMillisAt(now) - state.movingMillisAt(now))
-            "time_of_day" -> FieldFormatter.clockTime(now, offsetMinutes)
+            "time_of_day" -> FieldFormatter.clockTime(now, surroundings.clockOffsetMinutes)
+            // Empty rather than absent when there is no position or the sun does
+            // not rise at all that day: a blank field is the honest answer to
+            // "when is sunset" north of the Arctic circle in June.
+            "sunrise" ->
+                FieldFormatter.clockTime(surroundings.solar?.sunriseEpochMs, surroundings.clockOffsetMinutes)
+
+            "sunset" ->
+                FieldFormatter.clockTime(surroundings.solar?.sunsetEpochMs, surroundings.clockOffsetMinutes)
             else -> null
         }
 

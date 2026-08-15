@@ -70,6 +70,8 @@
     <string name="field_timer_moving">En mouvement</string>
     <string name="field_timer_paused">En pause</string>
     <string name="field_time_of_day">Heure</string>
+    <string name="field_sunrise">Lever du soleil</string>
+    <string name="field_sunset">Coucher du soleil</string>
     <string name="field_lap_time">Temps du tour</string>
     <string name="field_lap_time_last">Tour precedent</string>
     <string name="field_distance_total">Distance</string>

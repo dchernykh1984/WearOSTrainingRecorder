@@ -70,6 +70,8 @@
     <string name="field_timer_moving">W ruchu</string>
     <string name="field_timer_paused">Pauza</string>
     <string name="field_time_of_day">Zegar</string>
+    <string name="field_sunrise">Wschod slonca</string>
+    <string name="field_sunset">Zachod slonca</string>
     <string name="field_lap_time">Czas okrazenia</string>
     <string name="field_lap_time_last">Poprzednie okrazenie</string>
     <string name="field_distance_total">Dystans</string>

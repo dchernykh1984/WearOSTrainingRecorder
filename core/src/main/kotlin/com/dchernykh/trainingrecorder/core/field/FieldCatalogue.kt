@@ -32,6 +32,11 @@ object FieldCatalogue {
             DataFieldDef("timer_moving", TIME),
             DataFieldDef("timer_paused", TIME),
             DataFieldDef("time_of_day", TIME),
+            // Computed from the position and the date rather than read from
+            // anywhere, so they are answerable on a mountain with no signal -
+            // which is where the question gets asked.
+            DataFieldDef("sunrise", TIME),
+            DataFieldDef("sunset", TIME),
             DataFieldDef("lap_time", TIME),
             DataFieldDef("lap_time_last", TIME),
         )

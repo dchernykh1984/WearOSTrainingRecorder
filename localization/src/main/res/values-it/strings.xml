@@ -70,6 +70,8 @@
     <string name="field_timer_moving">In movimento</string>
     <string name="field_timer_paused">In pausa</string>
     <string name="field_time_of_day">Ora</string>
+    <string name="field_sunrise">Alba</string>
+    <string name="field_sunset">Tramonto</string>
     <string name="field_lap_time">Tempo giro</string>
     <string name="field_lap_time_last">Giro prec</string>
     <string name="field_distance_total">Distanza</string>

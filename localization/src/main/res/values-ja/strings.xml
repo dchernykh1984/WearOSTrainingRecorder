@@ -53,6 +53,8 @@
     <string name="field_timer_moving">移動時間</string>
     <string name="field_timer_paused">停止時間</string>
     <string name="field_time_of_day">時刻</string>
+    <string name="field_sunrise">日の出</string>
+    <string name="field_sunset">日の入り</string>
     <string name="field_lap_time">ラップタイム</string>
     <string name="field_lap_time_last">前ラップ</string>
     <string name="field_distance_total">距離</string>

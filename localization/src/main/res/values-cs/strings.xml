@@ -70,6 +70,8 @@
     <string name="field_timer_moving">V pohybu</string>
     <string name="field_timer_paused">Pozastaveno</string>
     <string name="field_time_of_day">Hodiny</string>
+    <string name="field_sunrise">Vychod slunce</string>
+    <string name="field_sunset">Zapad slunce</string>
     <string name="field_lap_time">Cas kola</string>
     <string name="field_lap_time_last">Predchozi kolo</string>
     <string name="field_distance_total">Vzdalenost</string>
