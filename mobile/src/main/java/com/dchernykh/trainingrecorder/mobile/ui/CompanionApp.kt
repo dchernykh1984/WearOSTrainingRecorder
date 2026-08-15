@@ -179,12 +179,11 @@ private fun SectionContent(
                 // rather than pushing the unit choice off the top of the screen.
                 LanguageSettings(
                     current = model.language.value,
-                    onLanguageChosen = {
-                        model.updateLanguage(it)
-                        // Recreated rather than recomposed: the strings come from
-                        // the Activity's resources, fixed at attach time.
-                        onLanguageChanged()
-                    },
+                    // Recreated rather than recomposed: the strings come from the
+                    // Activity's resources, fixed at attach time - and only once
+                    // the choice has reached the file the Activity reads them
+                    // from.
+                    onLanguageChosen = { model.updateLanguage(it, onLanguageChanged) },
                     modifier = Modifier.weight(1f),
                 )
             }

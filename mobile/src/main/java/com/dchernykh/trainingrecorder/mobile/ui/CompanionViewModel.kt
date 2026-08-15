@@ -162,10 +162,25 @@ class CompanionViewModel(
         persist()
     }
 
-    /** Persisted here; the Activity applies it by recreating itself. */
-    fun updateLanguage(language: AppLanguage) {
+    /**
+     * Persisted here; the Activity applies it by recreating itself.
+     *
+     * [onApplied] is called only once the choice is on disk. The Activity reads
+     * the language from that file as it is being built, so recreating it while
+     * the write was still in flight - which is what fire-and-forget persistence
+     * meant - reloaded the language the rider had just changed away from. It
+     * worked whenever the write happened to win the race, which is why it looked
+     * like the setting applied sometimes and not others.
+     */
+    fun updateLanguage(
+        language: AppLanguage,
+        onApplied: () -> Unit,
+    ) {
         _language.value = language
-        persist()
+        viewModelScope.launch {
+            persistNow()
+            onApplied()
+        }
     }
 
     /** Runs a sign-in on the model's scope; the work itself is [connections]'. */
@@ -186,6 +201,19 @@ class CompanionViewModel(
     }
 
     private fun persist() {
+        viewModelScope.launch { persistNow() }
+    }
+
+    /**
+     * Writes and publishes, and does not return until it has.
+     *
+     * Off the main thread, because every keystroke in a text field lands here
+     * and a file write plus a Data Layer put per character is jank at best and
+     * an ANR on a slow phone. Suspending rather than fire-and-forget so a caller
+     * that has to act *after* the settings are on disk can wait for it - which
+     * is exactly what choosing a language needs.
+     */
+    private suspend fun persistNow() {
         val settings =
             WatchSettings(
                 screens = _configuration.value,
@@ -193,18 +221,11 @@ class CompanionViewModel(
                 units = _units.value,
                 languageTag = AppLanguage.tagOf(_language.value),
             )
-        save {
-            store.writeSettings(settings)
-            publisher.publish(settings)
+        withContext(Dispatchers.IO) {
+            runCatching {
+                store.writeSettings(settings)
+                publisher.publish(settings)
+            }
         }
-    }
-
-    /**
-     * Off the main thread. Every keystroke in a text field lands here, and a
-     * file write plus a Data Layer put per character is jank at best and an ANR
-     * on a slow phone.
-     */
-    private fun save(block: () -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) { runCatching(block) }
     }
 }
