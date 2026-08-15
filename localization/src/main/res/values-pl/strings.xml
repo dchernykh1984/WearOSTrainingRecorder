@@ -211,6 +211,7 @@
     <string name="action_remove">Usun</string>
     <string name="action_cancel">Anuluj</string>
     <string name="sensors_connected">Polaczony</string>
+    <string name="sensors_no_data">Polaczony, brak danych</string>
     <string name="sensors_connecting">Laczenie...</string>
     <string name="profile_heart_rate">Tętno</string>
     <string name="profile_csc">Kadencja i predkosc (rower)</string>

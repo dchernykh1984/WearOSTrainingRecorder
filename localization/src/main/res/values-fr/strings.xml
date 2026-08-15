@@ -211,6 +211,7 @@
     <string name="action_remove">Retirer</string>
     <string name="action_cancel">Annuler</string>
     <string name="sensors_connected">Connecte</string>
+    <string name="sensors_no_data">Connecte, pas encore de donnees</string>
     <string name="sensors_connecting">Connexion...</string>
     <string name="profile_heart_rate">Fréquence cardiaque</string>
     <string name="profile_csc">Cadence et vitesse (velo)</string>

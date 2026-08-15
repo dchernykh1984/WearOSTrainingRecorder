@@ -211,6 +211,7 @@
     <string name="action_remove">Odebrat</string>
     <string name="action_cancel">Zrusit</string>
     <string name="sensors_connected">Pripojeno</string>
+    <string name="sensors_no_data">Pripojeno, zatim bez dat</string>
     <string name="sensors_connecting">Pripojuji...</string>
     <string name="profile_heart_rate">Tepová frekvence</string>
     <string name="profile_csc">Kadence a rychlost (kolo)</string>

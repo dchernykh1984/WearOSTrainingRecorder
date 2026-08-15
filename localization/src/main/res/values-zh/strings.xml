@@ -204,6 +204,7 @@
     <string name="action_remove">移除</string>
     <string name="action_cancel">取消</string>
     <string name="sensors_connected">已连接</string>
+    <string name="sensors_no_data">已连接，暂无数据</string>
     <string name="sensors_connecting">连接中…</string>
     <string name="profile_heart_rate">心率</string>
     <string name="profile_csc">踏频与速度（骑行）</string>

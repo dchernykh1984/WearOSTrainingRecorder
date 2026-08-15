@@ -211,6 +211,7 @@
     <string name="action_remove">Verwijderen</string>
     <string name="action_cancel">Annuleren</string>
     <string name="sensors_connected">Verbonden</string>
+    <string name="sensors_no_data">Verbonden, nog geen data</string>
     <string name="sensors_connecting">Verbinden...</string>
     <string name="profile_heart_rate">Hartslag</string>
     <string name="profile_csc">Cadans en snelheid (fiets)</string>

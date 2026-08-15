@@ -227,6 +227,7 @@
     <string name="action_remove">Remove</string>
     <string name="action_cancel">Cancel</string>
     <string name="sensors_connected">Connected</string>
+    <string name="sensors_no_data">Connected, no data yet</string>
     <string name="sensors_connecting">Connecting...</string>
     <string name="profile_heart_rate">Heart rate</string>
     <string name="profile_csc">Cadence and speed (bike)</string>

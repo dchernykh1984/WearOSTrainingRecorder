@@ -204,6 +204,7 @@
     <string name="action_remove">削除</string>
     <string name="action_cancel">キャンセル</string>
     <string name="sensors_connected">接続済み</string>
+    <string name="sensors_no_data">接続済み、データはまだ</string>
     <string name="sensors_connecting">接続中...</string>
     <string name="profile_heart_rate">心拍数</string>
     <string name="profile_csc">ケイデンスと速度（自転車）</string>

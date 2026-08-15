@@ -211,6 +211,7 @@
     <string name="action_remove">Алып тастау</string>
     <string name="action_cancel">Бас тарту</string>
     <string name="sensors_connected">Қосылған</string>
+    <string name="sensors_no_data">Қосылған, деректер әлі жоқ</string>
     <string name="sensors_connecting">Қосылуда...</string>
     <string name="profile_heart_rate">Жүрек соғысы</string>
     <string name="profile_csc">Каденс және жылдамдық (велосипед)</string>
