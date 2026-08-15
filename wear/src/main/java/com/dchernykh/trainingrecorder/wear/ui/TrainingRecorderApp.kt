@@ -56,9 +56,13 @@ fun TrainingRecorderApp(
                 // asked the model for each value would be invoked once and never
                 // again, freezing every field for the whole ride.
                 val values by model.values.collectAsStateWithLifecycle()
+                // Observed for the same reason the values are: a layout the
+                // rider changes on the phone should reach the ride they are on,
+                // not the one after it.
+                val configuration by model.configuration.collectAsStateWithLifecycle()
                 val sport = sportOf(model, state.sportTypeId)
                 RecordingPager(
-                    screens = model.screensFor(requireNotNull(sport)),
+                    screens = configuration.resolve(requireNotNull(sport)),
                     shape = currentShape(),
                     values = { values[it] ?: FieldCatalogue.EMPTY_VALUE },
                     actions = state.availableActions,

@@ -10,6 +10,10 @@ import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.tasks.await
 import java.io.File
 
@@ -65,6 +69,11 @@ class SettingsStore(
         val temporary = File(file.parentFile, file.name + ".part")
         temporary.writeText(payload)
         temporary.renameTo(file)
+        // Announced after the file is in place, so anyone who reacts by reading
+        // it gets the new one. The listener service and the recording model live
+        // in the same process, which is what makes an in-memory counter enough:
+        // no broadcast, no permission, and nothing that leaves the app.
+        revisions.update { it + 1 }
     }
 
     fun read(): WatchSettings? = if (file.exists()) SyncContract.decode(file.readText()) else null
@@ -91,6 +100,18 @@ class SettingsStore(
 
     companion object {
         const val KEY_PAYLOAD = "payload"
+
+        private val revisions = MutableStateFlow(0)
+
+        /**
+         * Bumped whenever settings from the phone land.
+         *
+         * What lets a layout change reach a ride already in progress. Without it
+         * the watch reads this file when a workout starts and never again, so a
+         * rider rearranging their screens on the phone sees nothing until they
+         * start another ride.
+         */
+        val revision: StateFlow<Int> = revisions.asStateFlow()
 
         /**
          * Pulls whatever the phone last published.
