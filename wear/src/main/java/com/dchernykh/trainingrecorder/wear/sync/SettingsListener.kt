@@ -60,10 +60,20 @@ class SettingsListener : WearableListenerService() {
  * older watch survive a newer phone.
  */
 class SettingsStore(
-    context: Context,
-    private val file: File = File(context.filesDir, "settings.json"),
-    private val historyFile: File = File(context.filesDir, "sport-history.txt"),
+    private val file: File,
+    private val historyFile: File,
 ) {
+    /**
+     * The app's own directory. A second constructor rather than defaulted
+     * parameters so the file-only form needs no Context, which is what lets the
+     * revision signal - the thing that carries a language change to a screen
+     * already on the wrist - be tested on a plain JVM.
+     */
+    constructor(context: Context) : this(
+        File(context.filesDir, "settings.json"),
+        File(context.filesDir, "sport-history.txt"),
+    )
+
     fun write(payload: String) {
         if (SyncContract.decode(payload) == null) return
         val temporary = File(file.parentFile, file.name + ".part")
