@@ -1,5 +1,6 @@
 package com.dchernykh.trainingrecorder.wear.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -42,6 +43,9 @@ fun SensorPairing(
     var pendingForget by rememberSaveable { mutableStateOf<String?>(null) }
     val forgetting = pendingForget?.let { address -> paired.firstOrNull { it.address == address } }
     if (forgetting != null) {
+        // Answers "no", rather than falling through to the screen's own back
+        // handler and leaving the sensors list altogether.
+        BackHandler { pendingForget = null }
         Confirmation(
             question = stringResource(R.string.sensors_forget_question),
             subject = forgetting.name ?: forgetting.address,

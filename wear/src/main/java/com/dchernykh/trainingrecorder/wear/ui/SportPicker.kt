@@ -46,6 +46,10 @@ fun SportPicker(
 
     val removing = pendingRemoval?.let { id -> SportCatalogue.all.firstOrNull { it.id == id } }
     if (removing != null) {
+        // Back answers "no". Without this the question is the one screen whose
+        // back gesture leaves the app - and a rider who held a sport by accident
+        // reaches for back first.
+        BackHandler { pendingRemoval = null }
         Confirmation(
             question = stringResource(R.string.favourite_remove_question),
             subject = stringResource(Labels.sport(removing.id)),
