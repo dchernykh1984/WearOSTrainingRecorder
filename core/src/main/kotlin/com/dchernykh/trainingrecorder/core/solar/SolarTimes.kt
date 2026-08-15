@@ -54,14 +54,19 @@ object SolarTimes {
         require(abs(longitudeDeg) <= MAX_LONGITUDE) { "longitude must be within +/-180, got $longitudeDeg" }
 
         val julian = atEpochMs / MILLIS_PER_DAY + UNIX_EPOCH_AS_JULIAN
-        // Which solar day to answer for. Rounded rather than truncated: the day
-        // whose noon is nearest is the day the rider is standing in, and
-        // truncating would hand them tomorrow's sunrise from midday onwards.
-        val day = (julian - J2000 + LEAP_SECOND_FUDGE).roundToLong()
-        // Solar time runs ahead of UTC to the east, so the longitude comes off
-        // rather than on. This sign is the one thing here that a test near
-        // Greenwich cannot catch.
-        val meanSolarDay = day - longitudeDeg / DEGREES_PER_DAY
+        val longitudeAsDays = longitudeDeg / DEGREES_PER_DAY
+        // Which solar day to answer for: the one whose noon is nearest to now
+        // *where the rider is standing*, which is why the longitude is in the
+        // rounding as well as after it. Rounded against UTC noon instead, the
+        // day changed at midnight in Greenwich and therefore at eleven in the
+        // morning in Sydney and three in the afternoon in Anchorage - so for a
+        // good part of every day the watch reported yesterday's sunrise.
+        // Rounded rather than truncated for the same reason: it is the nearest
+        // noon that matters, not the last one.
+        val day = (julian - J2000 + LEAP_SECOND_FUDGE + longitudeAsDays).roundToLong()
+        // And off again here, because solar time runs ahead of UTC to the east.
+        // This sign is the one thing that a test near Greenwich cannot catch.
+        val meanSolarDay = day - longitudeAsDays
 
         val anomaly = degrees(MEAN_ANOMALY_AT_EPOCH + MEAN_ANOMALY_PER_DAY * meanSolarDay)
         val centre =

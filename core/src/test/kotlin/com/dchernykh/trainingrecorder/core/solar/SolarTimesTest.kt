@@ -97,6 +97,24 @@ class SolarTimesTest {
     }
 
     @Test
+    fun theDayTurnsOverAtMidnightWhereTheRiderIsAndNotAtGreenwich() {
+        // Sydney is ten hours of longitude east. Deciding the day against UTC
+        // noon changed the answer at eleven in the morning there - so from
+        // breakfast until then the watch reported yesterday's sunrise, and
+        // reported it correctly enough to be believed.
+        val sydney = -33.8688 to 151.2093
+        val breakfast = SYDNEY_LOCAL_MIDNIGHT_2026_01_15 + 8 * MILLIS_PER_HOUR
+        val afternoon = SYDNEY_LOCAL_MIDNIGHT_2026_01_15 + 15 * MILLIS_PER_HOUR
+        val morningAnswer = assertNotNull(SolarTimes.at(sydney.first, sydney.second, breakfast))
+        val afternoonAnswer = assertNotNull(SolarTimes.at(sydney.first, sydney.second, afternoon))
+        assertEquals(
+            morningAnswer,
+            afternoonAnswer,
+            "the same local day gave two different sunrises",
+        )
+    }
+
+    @Test
     fun theAnswerIsTheSameDayWheneverDuringItYouAsk() {
         // A ride is not the moment it started, and the field must not change its
         // answer at noon. Every hour of one day, one answer.
@@ -139,6 +157,9 @@ class SolarTimesTest {
 
         /** 2026-03-20 12:00 UTC. */
         const val MARCH_EQUINOX_2026 = 1_774_008_000_000L
+
+        /** 2026-01-15 00:00 in Sydney, which is UTC+11 in January. */
+        const val SYDNEY_LOCAL_MIDNIGHT_2026_01_15 = 1_768_395_600_000L
     }
 
     @Test
