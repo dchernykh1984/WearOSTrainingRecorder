@@ -646,7 +646,16 @@ class RecordingViewModel(
         }
         // The barometer arrives as an ordinary reading; the fix carries its own.
         // Which is used, and how the two are reconciled, is AltitudeFusion's.
-        val fused = altitude.altitude(sample.readings["altitude"]?.value, sample.altitudeMeters, nowEpochMs)
+        val fused =
+            altitude.altitude(
+                barometricMeters = sample.readings["altitude"]?.value,
+                // The fix's own altitude, not the sample's - that one has already
+                // fallen back to the barometer, and calibrating a barometer
+                // against itself records a perfect agreement that means nothing
+                // and then holds it for an hour.
+                gnssMeters = sample.gnssAltitudeMeters,
+                nowEpochMs = nowEpochMs,
+            )
         fused?.let(climb::record)
         aggregates.record(sensors.value.readings.mapValues { it.value.value })
 
