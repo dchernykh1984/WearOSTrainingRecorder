@@ -202,9 +202,9 @@
     <string name="sensors_connected">Bagli</string>
     <string name="sensors_connecting">Baglaniyor...</string>
     <string name="profile_heart_rate">Kalp atış hızı</string>
-    <string name="profile_csc">Kadans ve hız</string>
+    <string name="profile_csc">Kadans ve hiz (bisiklet)</string>
     <string name="profile_cps">Güç</string>
-    <string name="profile_rsc">Koşu sensörü</string>
+    <string name="profile_rsc">Adim ve hiz (kosu)</string>
     <string name="connect_in_progress">Baglaniyor...</string>
     <string name="connect_done">Baglandi</string>
     <string name="connect_failed">Baglanilamadi. Bilgileri kontrol edip tekrar deneyin.</string>

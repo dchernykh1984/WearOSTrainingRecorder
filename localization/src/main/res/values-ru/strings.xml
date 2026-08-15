@@ -209,9 +209,9 @@
     <string name="sensors_connected">Подключён</string>
     <string name="sensors_connecting">Подключение...</string>
     <string name="profile_heart_rate">Пульс</string>
-    <string name="profile_csc">Каденс и скорость</string>
+    <string name="profile_csc">Каденс и скорость (вело)</string>
     <string name="profile_cps">Мощность</string>
-    <string name="profile_rsc">Беговой датчик</string>
+    <string name="profile_rsc">Каденс и скорость (бег)</string>
     <string name="connect_in_progress">Подключение...</string>
     <string name="connect_done">Подключено</string>
     <string name="connect_failed">Не удалось подключиться. Проверьте данные и повторите.</string>

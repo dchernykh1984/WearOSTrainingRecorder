@@ -209,9 +209,9 @@
     <string name="sensors_connected">Қосылған</string>
     <string name="sensors_connecting">Қосылуда...</string>
     <string name="profile_heart_rate">Жүрек соғысы</string>
-    <string name="profile_csc">Каденс және жылдамдық</string>
+    <string name="profile_csc">Каденс және жылдамдық (велосипед)</string>
     <string name="profile_cps">Қуат</string>
-    <string name="profile_rsc">Жүгіру сенсоры</string>
+    <string name="profile_rsc">Каденс және жылдамдық (жүгіру)</string>
     <string name="connect_in_progress">Қосылуда...</string>
     <string name="connect_done">Қосылды</string>
     <string name="connect_failed">Қосылу мүмкін болмады. Деректерді тексеріп, қайталаңыз.</string>
