@@ -233,6 +233,7 @@
     <string name="connect_in_progress">Connecting...</string>
     <string name="connect_done">Connected</string>
     <string name="connect_failed">Could not connect. Check the details and try again.</string>
+    <string name="connect_no_callback">The browser never came back. If the phone restricts this app in the background, allow it and try again.</string>
     <string name="connect_needs_application">Enter your application\'s Client ID and Secret first.</string>
     <string name="settings_units">Units</string>
     <string name="units_metric">Metric</string>

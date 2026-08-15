@@ -217,6 +217,7 @@
     <string name="connect_in_progress">Connessione...</string>
     <string name="connect_done">Connesso</string>
     <string name="connect_failed">Impossibile connettersi. Controlla i dati e riprova.</string>
+    <string name="connect_no_callback">Il browser non e tornato. Se il telefono limita questa app in background, consentila e riprova.</string>
     <string name="connect_needs_application">Inserisci prima Client ID e Secret della tua applicazione.</string>
     <string name="settings_units">Unità</string>
     <string name="units_metric">Metrico</string>

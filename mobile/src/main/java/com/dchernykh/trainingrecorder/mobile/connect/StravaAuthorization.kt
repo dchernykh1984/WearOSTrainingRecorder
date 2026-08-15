@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import com.dchernykh.trainingrecorder.core.connector.StravaProtocol
+import com.dchernykh.trainingrecorder.localization.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
@@ -22,6 +23,13 @@ sealed interface AuthorizationResult {
 
     data class Failed(
         val reason: String,
+        /**
+         * What to put on screen. Most failures are indistinguishable to a rider
+         * and share one line; the browser never coming back is not one of them -
+         * it has a cause the rider can actually do something about, and saying
+         * only "failed" leaves them retrying the same thing forever.
+         */
+        val statusRes: Int = R.string.connect_failed,
     ) : AuthorizationResult
 }
 
@@ -52,6 +60,17 @@ class StravaAuthorization(
         clientId: String,
         clientSecret: String,
     ): AuthorizationResult =
+        // Held in the foreground for the whole exchange. The moment the browser
+        // opens, this app is a background process - and a background process the
+        // system has frozen cannot answer the redirect that carries the code.
+        SignInService.holdOpen(context) {
+            withContext(Dispatchers.IO) { authorizeOnLoopback(clientId, clientSecret) }
+        }
+
+    private suspend fun authorizeOnLoopback(
+        clientId: String,
+        clientSecret: String,
+    ): AuthorizationResult =
         withContext(Dispatchers.IO) {
             // Bound before the browser opens: the authorize URL has to carry the
             // port, and asking the OS for a free one avoids colliding with
@@ -67,7 +86,10 @@ class StravaAuthorization(
                 if (!opened) return@withContext AuthorizationResult.Failed("no browser to open")
                 val callback =
                     it.awaitTarget(TIMEOUT_MS)
-                        ?: return@withContext AuthorizationResult.Failed("the browser did not return")
+                        ?: return@withContext AuthorizationResult.Failed(
+                            reason = "the browser did not return",
+                            statusRes = R.string.connect_no_callback,
+                        )
                 val code =
                     StravaProtocol.codeFrom(callback, state)
                         ?: return@withContext AuthorizationResult.Failed("authorization was declined")

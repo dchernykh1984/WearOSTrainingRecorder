@@ -210,6 +210,7 @@
     <string name="connect_in_progress">Baglaniyor...</string>
     <string name="connect_done">Baglandi</string>
     <string name="connect_failed">Baglanilamadi. Bilgileri kontrol edip tekrar deneyin.</string>
+    <string name="connect_no_callback">Tarayici uygulamaya donmedi. Telefon bu uygulamayi arka planda kisitliyorsa izin verip tekrar deneyin.</string>
     <string name="connect_needs_application">Once uygulamanizin Client ID ve Secret bilgisini girin.</string>
     <string name="settings_units">Birimler</string>
     <string name="units_metric">Metrik</string>

@@ -217,6 +217,7 @@
     <string name="connect_in_progress">Verbinden...</string>
     <string name="connect_done">Verbunden</string>
     <string name="connect_failed">Verbindung fehlgeschlagen. Daten prufen und erneut versuchen.</string>
+    <string name="connect_no_callback">Der Browser ist nicht zuruckgekehrt. Wenn das Telefon diese App im Hintergrund einschrankt, erlauben Sie es und versuchen Sie es erneut.</string>
     <string name="connect_needs_application">Gib zuerst Client ID und Secret deiner Anwendung ein.</string>
     <string name="settings_units">Einheiten</string>
     <string name="units_metric">Metrisch</string>

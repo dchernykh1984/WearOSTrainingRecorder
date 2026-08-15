@@ -210,6 +210,7 @@
     <string name="connect_in_progress">接続中...</string>
     <string name="connect_done">接続済み</string>
     <string name="connect_failed">接続できませんでした。入力内容を確認して再試行してください。</string>
+    <string name="connect_no_callback">ブラウザーがアプリに戻りませんでした。端末がこのアプリのバックグラウンド動作を制限している場合は許可して再試行してください。</string>
     <string name="connect_needs_application">先にアプリケーションの Client ID と Secret を入力してください。</string>
     <string name="settings_units">単位</string>
     <string name="units_metric">メートル法</string>

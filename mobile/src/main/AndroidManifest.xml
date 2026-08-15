@@ -14,6 +14,14 @@
          and connecting fails with an error that says nothing about a permission. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- The sign-in holds a loopback port open while the rider is away in a
+         browser, which means this process must not be frozen while they are. A
+         frozen process has its inbound traffic dropped rather than refused, so
+         the redirect carrying the authorization code times out against the
+         phone's own address - see SignInService. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
     <!-- See the comment in the wear manifest: no automatic Google Drive backup of
          third-party OAuth tokens or workout data. -->
     <application
@@ -31,6 +39,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Runs for the length of one sign-in and stops itself. -->
+        <service
+            android:name=".connect.SignInService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <!-- The one path that runs watch-to-phone. Without this declaration the
              watch publishes its workouts and nothing on the phone is ever woken

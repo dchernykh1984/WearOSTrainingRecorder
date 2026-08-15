@@ -210,6 +210,7 @@
     <string name="connect_in_progress">कनेक्ट हो रहा है...</string>
     <string name="connect_done">कनेक्ट हो गया</string>
     <string name="connect_failed">कनेक्ट नहीं हो सका। विवरण जाँचें और फिर से प्रयास करें।</string>
+    <string name="connect_no_callback">ब्राउज़र वापस नहीं आया। अगर फ़ोन इस ऐप को बैकग्राउंड में सीमित करता है, तो अनुमति दें और फिर कोशिश करें।</string>
     <string name="connect_needs_application">पहले अपने ऐप्लिकेशन का Client ID और Secret दर्ज करें।</string>
     <string name="settings_units">इकाइयाँ</string>
     <string name="units_metric">मीट्रिक</string>

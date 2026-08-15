@@ -217,6 +217,7 @@
     <string name="connect_in_progress">Laczenie...</string>
     <string name="connect_done">Polaczono</string>
     <string name="connect_failed">Nie udalo sie polaczyc. Sprawdz dane i sprobuj ponownie.</string>
+    <string name="connect_no_callback">Przegladarka nie wrocila. Jesli telefon ogranicza te aplikacje w tle, zezwol i sprobuj ponownie.</string>
     <string name="connect_needs_application">Najpierw podaj Client ID i Secret swojej aplikacji.</string>
     <string name="settings_units">Jednostki</string>
     <string name="units_metric">Metryczne</string>

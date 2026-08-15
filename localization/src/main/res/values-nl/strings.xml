@@ -217,6 +217,7 @@
     <string name="connect_in_progress">Verbinden...</string>
     <string name="connect_done">Verbonden</string>
     <string name="connect_failed">Verbinden mislukt. Controleer de gegevens en probeer opnieuw.</string>
+    <string name="connect_no_callback">De browser kwam niet terug. Als de telefoon deze app op de achtergrond beperkt, sta het toe en probeer opnieuw.</string>
     <string name="connect_needs_application">Voer eerst de Client ID en Secret van je applicatie in.</string>
     <string name="settings_units">Eenheden</string>
     <string name="units_metric">Metrisch</string>

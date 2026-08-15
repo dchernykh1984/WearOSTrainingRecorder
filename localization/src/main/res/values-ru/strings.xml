@@ -217,6 +217,7 @@
     <string name="connect_in_progress">Подключение...</string>
     <string name="connect_done">Подключено</string>
     <string name="connect_failed">Не удалось подключиться. Проверьте данные и повторите.</string>
+    <string name="connect_no_callback">Браузер не вернулся в приложение. Если телефон ограничивает работу приложения в фоне, снимите ограничение и повторите.</string>
     <string name="connect_needs_application">Сначала укажите Client ID и Secret вашего приложения.</string>
     <string name="settings_units">Единицы измерения</string>
     <string name="units_metric">Метрические</string>
