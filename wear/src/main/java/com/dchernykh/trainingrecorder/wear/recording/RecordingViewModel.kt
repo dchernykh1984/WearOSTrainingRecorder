@@ -613,7 +613,12 @@ class RecordingViewModel(
         nowEpochMs: Long,
     ) {
         if (latitudeDeg == null || longitudeDeg == null) return
-        val due = solar == null || nowEpochMs - solarAtEpochMs >= SOLAR_REFRESH_MS
+        // Asked of the clock, not of the answer: north of the Arctic circle in
+        // June there is no sunrise, and a null result is the right one. Treating
+        // it as "not worked out yet" would recompute it every second for the
+        // whole ride, which is the one place this arithmetic could cost
+        // anything.
+        val due = solarAtEpochMs == 0L || nowEpochMs - solarAtEpochMs >= SOLAR_REFRESH_MS
         if (!due) return
         solarAtEpochMs = nowEpochMs
         // Null where the sun does not rise or set that day, which is a real
