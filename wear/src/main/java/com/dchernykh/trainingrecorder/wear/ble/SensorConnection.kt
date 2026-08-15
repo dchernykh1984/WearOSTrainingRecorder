@@ -146,6 +146,17 @@ class SensorConnection(
                         // carries. Not what it advertised: that is a marketing
                         // slot, this is the device's own service table.
                         found = supportedProfiles.filter { characteristicFor(gatt, it) != null }.toSet()
+                        if (found.isEmpty()) {
+                            // Nothing here this build can read - but only say so
+                            // when the table was actually read. A failed
+                            // discovery looks identical from here, and giving up
+                            // on it would drop a sensor that is merely having a
+                            // bad moment; autoConnect will try again.
+                            if (status == BluetoothGatt.GATT_SUCCESS) {
+                                close(IllegalStateException("$address carries no measurement this build reads"))
+                            }
+                            return
+                        }
                         trySend(SensorEvent(address, found, emptyMap(), discovery = true))
                         found.forEach { pending.addLast(it) }
                         armNext(gatt)
