@@ -78,13 +78,21 @@ fun RecordingPager(
         if (page == CONTROLS_PAGE) {
             ControlsPage(sportLabelRes = sportLabelRes, actions = actions, onAction = onAction)
         } else {
-            Box(modifier = Modifier.fillMaxSize()) {
-                DataPages(screens = screens, shape = shape, values = values, state = vertical)
+            // A strip of its own rather than an overlay. Laid over the data
+            // the indicator sat against the last field's descenders, which on a
+            // round face is where the rim is already taking width away - two
+            // things competing for the worst part of the screen. Giving it a
+            // dozen points costs the bands little and cannot collide.
+            Column(modifier = Modifier.fillMaxSize()) {
+                DataPages(
+                    screens = screens,
+                    shape = shape,
+                    values = values,
+                    state = vertical,
+                    modifier = Modifier.weight(1f),
+                )
                 if (fix != null) {
-                    FixIndicator(
-                        fix = fix,
-                        modifier = Modifier.align(Alignment.BottomCenter),
-                    )
+                    FixIndicator(fix = fix, modifier = Modifier.align(Alignment.CenterHorizontally))
                 }
             }
         }
@@ -97,8 +105,9 @@ private fun DataPages(
     shape: ScreenShape,
     values: (String) -> String,
     state: PagerState,
+    modifier: Modifier = Modifier,
 ) {
-    VerticalPager(state = state, modifier = Modifier.fillMaxSize()) { index ->
+    VerticalPager(state = state, modifier = modifier.fillMaxSize()) { index ->
         DataScreen(screen = screens.screens[index], shape = shape, values = values)
     }
 }
