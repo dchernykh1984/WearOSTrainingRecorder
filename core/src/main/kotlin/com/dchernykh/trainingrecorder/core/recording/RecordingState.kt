@@ -65,8 +65,15 @@ data class RecordingState(
             when (phase) {
                 RecordingPhase.IDLE, RecordingPhase.FINISHED -> listOf(RecordingAction.START)
                 RecordingPhase.PREPARING -> listOf(RecordingAction.DISCARD)
-                RecordingPhase.RECORDING -> listOf(RecordingAction.PAUSE, RecordingAction.FINISH)
-                RecordingPhase.PAUSED -> listOf(RecordingAction.RESUME, RecordingAction.FINISH)
+                // Discard is offered throughout, not only while a ride is
+                // starting up: a rider who sets off by mistake, or turns back
+                // after a mile, otherwise has to finish and save a ride they
+                // never wanted in order to be rid of it. It is deliberately not
+                // one of the two large controls - see the controls screen.
+                RecordingPhase.RECORDING ->
+                    listOf(RecordingAction.PAUSE, RecordingAction.FINISH, RecordingAction.DISCARD)
+                RecordingPhase.PAUSED ->
+                    listOf(RecordingAction.RESUME, RecordingAction.FINISH, RecordingAction.DISCARD)
             }
 
     fun prepare(

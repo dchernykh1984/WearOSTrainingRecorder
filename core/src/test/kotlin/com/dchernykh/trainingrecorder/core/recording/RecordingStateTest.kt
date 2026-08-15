@@ -109,12 +109,33 @@ class RecordingStateTest {
 
     @Test
     fun theControlsOfferedMatchThePhase() {
-        assertEquals(listOf(RecordingAction.PAUSE, RecordingAction.FINISH), running().availableActions)
         assertEquals(
-            listOf(RecordingAction.RESUME, RecordingAction.FINISH),
+            listOf(RecordingAction.PAUSE, RecordingAction.FINISH, RecordingAction.DISCARD),
+            running().availableActions,
+        )
+        assertEquals(
+            listOf(RecordingAction.RESUME, RecordingAction.FINISH, RecordingAction.DISCARD),
             running().pause(t0 + 1).availableActions,
         )
         assertEquals(listOf(RecordingAction.START), running().finish(t0 + 1).availableActions)
+    }
+
+    @Test
+    fun aRideCanBeThrownAwayAtAnyPointWhileItRuns() {
+        // A rider who sets off by mistake, or turns back after a mile, should
+        // not have to save the ride in order to be rid of it.
+        listOf(running(), running().pause(t0 + 1)).forEach {
+            assertTrue(RecordingAction.DISCARD in it.availableActions, "no way out of ${it.phase}")
+        }
+    }
+
+    @Test
+    fun throwingARideAwayNeedsDeliberateIntent() {
+        // Both of the controls that lose a ride are held rather than tapped -
+        // a pocket brush must not be able to end one.
+        assertTrue(RecordingAction.DISCARD.requiresLongPress)
+        assertTrue(RecordingAction.FINISH.requiresLongPress)
+        assertFalse(RecordingAction.PAUSE.requiresLongPress)
     }
 
     @Test
