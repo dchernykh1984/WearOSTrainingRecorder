@@ -180,7 +180,9 @@ class RecordingViewModel(
         // Re-read whenever the phone pushes, including mid-ride. The listener
         // that receives the push runs in this process, so this is the whole
         // mechanism.
-        viewModelScope.launch { SettingsStore.revision.collect { applySettings() } }
+        // Off the main thread: applying settings reads a file, and this now runs
+        // on every push from the phone rather than once at startup.
+        viewModelScope.launch(Dispatchers.IO) { SettingsStore.revision.collect { applySettings() } }
         // On the first construction after a launch, which is exactly when a ride
         // the last process never got to finish is sitting on disk waiting to be
         // noticed.
