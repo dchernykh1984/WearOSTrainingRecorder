@@ -8,6 +8,7 @@ import com.dchernykh.trainingrecorder.wear.ble.PairedSensor
 import com.dchernykh.trainingrecorder.wear.ble.PairedSensorStore
 import com.dchernykh.trainingrecorder.wear.ble.SensorHub
 import com.dchernykh.trainingrecorder.wear.ble.SensorScanner
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,6 +57,7 @@ class SensorPairingViewModel(
     val scanning: StateFlow<Boolean> = _scanning.asStateFlow()
 
     private var scanJob: Job? = null
+    private var profileJob: Job? = null
 
     fun startScan() {
         if (scanJob != null) return
@@ -65,7 +67,10 @@ class SensorPairingViewModel(
         // says so as soon as its services are read. Re-read then, so the row
         // stops describing a heart-rate strap as a running sensor while the
         // rider is looking straight at it.
-        viewModelScope.launch { hub.profiles.collect { _paired.value = store.read() } }
+        profileJob =
+            viewModelScope.launch(Dispatchers.IO) {
+                hub.profiles.collect { _paired.value = store.read() }
+            }
         _scanning.value = true
         scanJob =
             viewModelScope.launch {
@@ -92,6 +97,11 @@ class SensorPairingViewModel(
     fun stopScan() {
         scanJob?.cancel()
         scanJob = null
+        // Cancelled with the scan it was started beside. Left running, each
+        // visit to this screen would add another collector reading the same
+        // file on every change.
+        profileJob?.cancel()
+        profileJob = null
         hub.stop()
         _scanning.value = false
     }

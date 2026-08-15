@@ -4,6 +4,7 @@ import android.content.Context
 import com.dchernykh.trainingrecorder.core.field.SensorProfile
 import com.dchernykh.trainingrecorder.core.sensor.SensorReading
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -157,7 +158,12 @@ class SensorHub(
         stop()
         store.read().forEach { sensor ->
             jobs +=
-                scope.launch {
+                // On the IO dispatcher: a connection that identifies itself
+                // writes the corrected profiles back to disk, and the collector
+                // would otherwise be doing that on whichever thread the caller's
+                // scope runs on - which for a view model is the one drawing the
+                // ride.
+                scope.launch(Dispatchers.IO) {
                     // A refused Bluetooth permission, a sensor whose profile this
                     // build cannot read, or a stack that throws mid-connect must
                     // cost the rider that one sensor - not the whole ride. The
