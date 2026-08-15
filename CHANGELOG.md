@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.8.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.7.0...v0.8.0) (2026-08-15)
+
+
+### Features
+
+* **core:** work out sunrise and sunset from where the ride is ([4dccaa1](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/4dccaa1a7dd5154560e3622ff0c86e0214b04788))
+* **wear:** show sunrise and sunset, recomputed sparingly ([d960d25](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/d960d25228b913d2651dcd7007bf41920282f66f))
+
+
+### Bug Fixes
+
+* **core:** return nothing at a pole rather than a pair of times in 1970 ([bc6a3ca](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/bc6a3cabaf1ea319d10b460c074c2c3ac2ce6da9))
+* **core:** turn the solar day over at local midnight, not Greenwich's ([bc3a53d](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/bc3a53df24b939d63db9dd0a6450c9b17bd01a81))
+* **wear:** stop recomputing the sun's timetable every second in the Arctic ([7beb532](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/7beb532293147fb42096aa0ea024c0fdefcfff44))
+
 ## [0.7.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.6.0...v0.7.0) (2026-08-15)
 
 
