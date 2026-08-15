@@ -1,5 +1,6 @@
 package com.dchernykh.trainingrecorder.core.sensor
 
+import com.dchernykh.trainingrecorder.core.field.FieldCatalogue
 import com.dchernykh.trainingrecorder.core.field.SensorProfile
 
 /** Where a live value came from, which decides what wins when both are present. */
@@ -93,9 +94,15 @@ data class SensorSnapshot(
             )
 
         /**
-         * Folds the two sources into what the screens read. External wins while
-         * it is fresh; otherwise the built-in reading is used while it is fresh
-         * in its own right; when neither is, the field shows nothing.
+         * Folds the two sources into what the screens read.
+         *
+         * A connected external sensor takes its fields over completely: the
+         * watch's own reading for those fields is not used at all, not even
+         * while the sensor is between notifications. That is what a rider means
+         * by pairing a strap - a chest strap and an optical sensor disagree, and
+         * a field that quietly alternates between them is worse than either.
+         * Where no sensor is connected the built-in reading stands on its own,
+         * and where neither is current the field shows nothing.
          */
         fun merge(
             external: Map<String, SensorReading>,
@@ -107,14 +114,32 @@ data class SensorSnapshot(
         ): SensorSnapshot {
             require(staleAfterMs > 0) { "the staleness window must be positive" }
             require(builtInStaleAfterMs > 0) { "the built-in staleness window must be positive" }
+            val superseded = fieldsCoveredBy(connectedProfiles)
             val merged = mutableMapOf<String, SensorReading>()
             builtIn.forEach { (fieldId, reading) ->
+                if (fieldId in superseded) return@forEach
                 if (isCurrent(fieldId, reading, nowEpochMs, builtInStaleAfterMs)) merged[fieldId] = reading
             }
             external.forEach { (fieldId, reading) ->
                 if (isCurrent(fieldId, reading, nowEpochMs, staleAfterMs)) merged[fieldId] = reading
             }
             return SensorSnapshot(merged.toMap(), connectedProfiles)
+        }
+
+        /**
+         * The fields a connected sensor owns, and which the watch therefore
+         * stops contributing to.
+         *
+         * Read from the catalogue rather than listed here: which sensor supplies
+         * a field is already recorded once, on the field, and a second copy of
+         * that mapping is a second thing to forget to update.
+         */
+        fun fieldsCoveredBy(connectedProfiles: Set<SensorProfile>): Set<String> {
+            if (connectedProfiles.isEmpty()) return emptySet()
+            return FieldCatalogue.all
+                .filter { it.preferredProfile in connectedProfiles }
+                .map { it.id }
+                .toSet()
         }
 
         private fun isCurrent(
