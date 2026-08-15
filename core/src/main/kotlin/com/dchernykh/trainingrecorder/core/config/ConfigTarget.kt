@@ -89,6 +89,21 @@ fun ScreenConfiguration.levelOf(target: ConfigTarget): ConfigLevel =
         is ConfigTarget.OfSport -> levelOf(target.sport)
     }
 
+/**
+ * Whether this tier holds a layout of its own, which is the only case where
+ * resetting it does anything.
+ *
+ * Not the same question as [levelOf]. A sport reading its discipline's layout
+ * reports DISCIPLINE, and offering it a Reset on that basis gives the rider a
+ * button that looks active and does nothing.
+ */
+fun ScreenConfiguration.isForked(target: ConfigTarget): Boolean =
+    when (target) {
+        is ConfigTarget.Default -> false
+        is ConfigTarget.OfDiscipline -> isForked(target.discipline)
+        is ConfigTarget.OfSport -> isForked(target.sport)
+    }
+
 /** Edits this tier, forking it from its parent on the first write. */
 fun ScreenConfiguration.withScreensFor(
     target: ConfigTarget,
