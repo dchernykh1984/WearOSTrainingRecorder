@@ -161,4 +161,22 @@ class TrackJournalTest {
         assertEquals(0.0, workout.totalDistanceMeters)
         assertTrue(workout.points.isEmpty())
     }
+
+    @Test
+    fun `an hour recorded every second survives the journal intact`() {
+        // The shape the recorder actually writes now. It used to write a few
+        // dozen points an hour, each stamped with the moment its batch was
+        // processed rather than the moment it described - so a ride reached
+        // Strava as under a minute of records. The count and the spacing are
+        // what matter here: the values were never the problem.
+        val written = (0 until 3600).map(::point)
+
+        val recovered = assertNotNull(TrackJournal.parse(journal(written)))
+
+        assertEquals(3600, recovered.points.size, "an hour at a point a second is three thousand six hundred")
+        assertEquals(start, recovered.points.first().timestampEpochMs)
+        assertEquals(start + 3599 * 1000L, recovered.points.last().timestampEpochMs)
+        val gaps = recovered.points.zipWithNext { a, b -> b.timestampEpochMs - a.timestampEpochMs }
+        assertTrue(gaps.all { it == 1000L }, "the points must stay a second apart rather than cluster")
+    }
 }
