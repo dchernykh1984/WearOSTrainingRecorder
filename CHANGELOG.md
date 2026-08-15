@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.1](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.0...v0.9.1) (2026-08-15)
+
+
+### Bug Fixes
+
+* **wear:** keep recording through a backwards clock step ([6f64a33](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/6f64a330cb900474339681d6058d9340da608c90))
+* **wear:** record the track on the clock, not when the platform delivers ([b89dd03](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/b89dd0348185a76b0720b5918b1fcf0d6581e449))
+
 ## [0.9.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.8.0...v0.9.0) (2026-08-15)
 
 
