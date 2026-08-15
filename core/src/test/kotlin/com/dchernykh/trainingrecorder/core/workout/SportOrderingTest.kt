@@ -74,4 +74,35 @@ class SportOrderingTest {
     fun aNonPositiveHistoryLimitIsRejected() {
         assertFailsWith<IllegalArgumentException> { SportOrdering.record(emptyList(), "a", limit = 0) }
     }
+
+    @Test
+    fun favouritesHoldOnlyWhatHasBeenUsed() {
+        val used = SportOrdering.favourites(listOf("cycling_road", "run_road"))
+        assertEquals(listOf("run_road", "cycling_road"), used.map { it.id })
+    }
+
+    @Test
+    fun favouritesAreEmptyBeforeTheFirstRide() {
+        assertTrue(SportOrdering.favourites(emptyList()).isEmpty())
+    }
+
+    @Test
+    fun forgettingASportRemovesEveryUseOfIt() {
+        // One tap has to be enough. Dropping only the most recent use would
+        // leave a sport that has been ridden ten times needing forgetting ten
+        // times, which reads as a button that does nothing.
+        val history = listOf("cycling_road", "run_road", "cycling_road", "cycling_road")
+        val left = SportOrdering.forget(history, "cycling_road")
+        assertEquals(listOf("run_road"), left)
+        assertTrue(SportOrdering.favourites(left).none { it.id == "cycling_road" })
+    }
+
+    @Test
+    fun aForgottenSportIsStillOfferedByTheCatalogue() {
+        // Forgetting is about the shortcut list, not about the sport. It must
+        // still be reachable, or the rider has deleted a sport they only meant
+        // to tidy away.
+        val left = SportOrdering.forget(listOf("cycling_road"), "cycling_road")
+        assertTrue(SportOrdering.order(left).any { it.id == "cycling_road" })
+    }
 }

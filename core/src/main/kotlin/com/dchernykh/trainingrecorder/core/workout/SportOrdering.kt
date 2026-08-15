@@ -28,6 +28,40 @@ object SportOrdering {
         return recent + catalogue.filterNot { it in recent }
     }
 
+    /**
+     * Only the sports the rider has actually used, most recent kind first.
+     *
+     * The picker's shortcut list. Separate from [order] because the two answer
+     * different questions: [order] is "every sport, best guess first", this is
+     * "the ones worth a single tap". A rider with three sports should not have
+     * to scroll past eleven to reach the fourth.
+     */
+    fun favourites(
+        history: List<String>,
+        catalogue: List<SportType> = SportCatalogue.all,
+    ): List<SportType> {
+        val known = catalogue.associateBy { it.id }
+        return history
+            .asReversed()
+            .asSequence()
+            .distinct()
+            .mapNotNull { known[it] }
+            .toList()
+    }
+
+    /**
+     * Drops a sport from the shortcut list.
+     *
+     * Every occurrence, not the most recent one: a sport used ten times would
+     * otherwise need forgetting ten times, which reads as a button that does
+     * nothing. The sport itself is untouched - it is still in the catalogue,
+     * still under its discipline, and starting it again puts it back here.
+     */
+    fun forget(
+        history: List<String>,
+        sportTypeId: String,
+    ): List<String> = history.filterNot { it == sportTypeId }
+
     /** The sport to preselect: the last one used, or the catalogue default. */
     fun preselected(
         history: List<String>,
