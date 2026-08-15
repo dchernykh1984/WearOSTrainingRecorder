@@ -1,6 +1,7 @@
 package com.dchernykh.trainingrecorder.wear.health
 
 import android.content.Context
+import android.os.SystemClock
 import androidx.health.services.client.ExerciseClient
 import androidx.health.services.client.ExerciseUpdateCallback
 import androidx.health.services.client.HealthServices
@@ -11,6 +12,7 @@ import androidx.health.services.client.data.ExerciseLapSummary
 import androidx.health.services.client.data.ExerciseType
 import androidx.health.services.client.data.ExerciseUpdate
 import androidx.health.services.client.data.LocationData
+import androidx.health.services.client.data.SampleDataPoint
 import com.dchernykh.trainingrecorder.core.sensor.SensorOrigin
 import com.dchernykh.trainingrecorder.core.sensor.SensorReading
 import com.dchernykh.trainingrecorder.core.sport.SportCatalogue
@@ -147,33 +149,45 @@ class ExerciseRecorder(
     }
 }
 
-/** Folds an update into the shape the shared sensor merge expects. */
+/**
+ * Folds an update into the shape the shared sensor merge expects.
+ *
+ * Each reading is stamped with when it was *measured*, not when this ran.
+ * Health Services batches, and the gap between the two is the whole batch - so
+ * stamping on arrival makes a two-minute-old heart rate look like it was taken
+ * this second, and the staleness rule downstream, which exists precisely to stop
+ * that, is handed a timestamp that can never be stale.
+ */
 internal fun ExerciseUpdate.toSample(): BuiltInSample {
     val metrics = latestMetrics
     val now = System.currentTimeMillis()
+    // Data points carry their age since boot; this is what turns that into a
+    // wall clock without asking the platform twice per field.
+    val bootAtEpochMs = now - SystemClock.elapsedRealtime()
     val readings = mutableMapOf<String, SensorReading>()
 
     fun record(
         fieldId: String,
         value: Double?,
+        atEpochMs: Long = now,
     ) {
-        value?.let { readings[fieldId] = SensorReading(it, SensorOrigin.BUILT_IN, now) }
+        value?.let { readings[fieldId] = SensorReading(it, SensorOrigin.BUILT_IN, atEpochMs) }
     }
 
-    record("hr", metrics.getData(DataType.HEART_RATE_BPM).lastOrNull()?.value)
-    record("speed_current", metrics.getData(DataType.SPEED).lastOrNull()?.value)
+    fun SampleDataPoint<*>.measuredAt(): Long = bootAtEpochMs + timeDurationFromBoot.toMillis()
+
+    metrics.getData(DataType.HEART_RATE_BPM).lastOrNull()?.let { record("hr", it.value, it.measuredAt()) }
+    metrics.getData(DataType.SPEED).lastOrNull()?.let { record("speed_current", it.value, it.measuredAt()) }
+    metrics.getData(DataType.ABSOLUTE_ELEVATION).lastOrNull()?.let {
+        record("altitude", it.value, it.measuredAt())
+    }
+    metrics.getData(DataType.STEPS_PER_MINUTE).lastOrNull()?.let {
+        record("cadence", it.value.toDouble(), it.measuredAt())
+    }
+    // Running totals, which never go stale and so need no measurement time.
     record("distance_total", metrics.getData(DataType.DISTANCE_TOTAL)?.total)
     record("calories", metrics.getData(DataType.CALORIES_TOTAL)?.total)
-    record("altitude", metrics.getData(DataType.ABSOLUTE_ELEVATION).lastOrNull()?.value)
     record("ascent_total", metrics.getData(DataType.ELEVATION_GAIN_TOTAL)?.total)
-    record(
-        "cadence",
-        metrics
-            .getData(DataType.STEPS_PER_MINUTE)
-            .lastOrNull()
-            ?.value
-            ?.toDouble(),
-    )
 
     val location: LocationData? = metrics.getData(DataType.LOCATION).lastOrNull()?.value
     return BuiltInSample(

@@ -59,18 +59,23 @@ data class SensorSnapshot(
          * How long the watch's own reading stays on screen after its last
          * update.
          *
-         * Longer than the external window on purpose: Health Services delivers
-         * in batches, and blanking a field because one batch was late would
-         * flicker for no reason. Fifteen seconds is far more than a late batch
-         * and far less than a rider staring at a number that stopped being true.
+         * Much longer than the external window, because the two sources behave
+         * nothing alike. A strap notifies about once a second, so three seconds
+         * of silence means something. Health Services *batches*, and how long it
+         * holds a batch is its decision, not ours - with the screen off it can
+         * be a minute or more, which is exactly the saving the app goes through
+         * it for. Fifteen seconds looked reasonable and was not: a rider who let
+         * the screen sleep and looked again found a blank heart rate, and the
+         * window that was meant to stop a lie was producing one of its own.
          *
-         * This window is why the constant exists at all. Built-in readings used
-         * to be copied into the snapshot without any check, so a source that
-         * went quiet left its last value on screen for the rest of the ride -
-         * a heart rate frozen at 66 while the rider moved about, looking every
-         * bit as live as a real one.
+         * The window still exists for the case it was written for. Built-in
+         * readings used to be copied in without any check at all, so a source
+         * that went quiet left its last value on screen for the rest of the
+         * ride - a heart rate frozen at 66 while the rider moved about, looking
+         * every bit as live as a real one. Two minutes is far beyond any batch
+         * and far short of that.
          */
-        const val BUILT_IN_STALE_AFTER_MS = 15_000L
+        const val BUILT_IN_STALE_AFTER_MS = 120_000L
 
         /**
          * Readings that are running totals rather than measurements of now.

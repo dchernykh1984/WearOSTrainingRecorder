@@ -244,4 +244,47 @@ class SensorSnapshotTest {
             assertEquals(SensorProfile.HEART_RATE, FieldCatalogue.byId(it)?.preferredProfile, it)
         }
     }
+
+    @Test
+    fun aBatchHeldWhileTheScreenSleepsStillCounts() {
+        // What broke it in the field: Health Services batches, and with the
+        // screen off it can hold one for a minute. A window tight enough to
+        // catch a dead sensor also blanked a live one every time the rider
+        // stopped looking at the watch.
+        val aMinuteAgo = now - 60_000
+        val merged =
+            SensorSnapshot.merge(
+                external = emptyMap(),
+                builtIn = mapOf("hr" to SensorReading(132.0, SensorOrigin.BUILT_IN, aMinuteAgo)),
+                nowEpochMs = now,
+            )
+        assertEquals(132.0, merged.value("hr"), "a batched reading is not a dead one")
+    }
+
+    @Test
+    fun aSourceThatHasGoneQuietForGoodStillBlanks() {
+        val merged =
+            SensorSnapshot.merge(
+                external = emptyMap(),
+                builtIn =
+                    mapOf(
+                        "hr" to
+                            SensorReading(
+                                66.0,
+                                SensorOrigin.BUILT_IN,
+                                now - SensorSnapshot.BUILT_IN_STALE_AFTER_MS - 1,
+                            ),
+                    ),
+                nowEpochMs = now,
+            )
+        assertNull(merged.value("hr"))
+    }
+
+    @Test
+    fun theWatchIsGivenFarMoreRopeThanAStrap() {
+        assertTrue(
+            SensorSnapshot.BUILT_IN_STALE_AFTER_MS > SensorSnapshot.EXTERNAL_STALE_AFTER_MS * 10,
+            "a batching source and a notifying one cannot share a window",
+        )
+    }
 }
