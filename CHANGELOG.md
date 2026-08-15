@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.6.0...v0.7.0) (2026-08-15)
+
+
+### Features
+
+* **wear:** show whether the ride is being tracked ([d0eeb88](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/d0eeb88a5c5ce3928897095087e6a68c40fe4751))
+
+
+### Bug Fixes
+
+* **mobile:** write the chosen language before rebuilding the screen ([31af0a9](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/31af0a90c8b17ab64d7d8199fdde155fe9743796))
+* **wear:** apply a language change without waiting for the next launch ([5f85b4d](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/5f85b4d47334cb619d599ab35e646fd729af09ed))
+* **wear:** clear the fix state with the ride it belonged to ([2b5235b](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/2b5235b2036b6c27289c708a99bd0a008b9b8ef2))
+* **wear:** give the fix indicator its own strip instead of overlaying it ([6f1df7a](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/6f1df7a80ea089936b52ad86594c5df4c9ddb24a))
+* **wear:** stop the fix indicator holding a scope that never ends ([93e2b78](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/93e2b7823bb6920e225e3227f630537b3da62f63))
+* **wear:** survive an unreadable settings file while watching for a language ([c8a28c5](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/c8a28c5be6b34fb097609ccca4a53e7f0ee985b5))
+
 ## [0.6.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.5.0...v0.6.0) (2026-08-15)
 
 
