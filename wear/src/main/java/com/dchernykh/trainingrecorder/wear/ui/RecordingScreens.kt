@@ -1,6 +1,7 @@
 package com.dchernykh.trainingrecorder.wear.ui
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -38,6 +39,7 @@ import com.dchernykh.trainingrecorder.core.layout.LayoutPlanner
 import com.dchernykh.trainingrecorder.core.layout.ScreenShape
 import com.dchernykh.trainingrecorder.core.recording.RecordingAction
 import com.dchernykh.trainingrecorder.localization.Labels
+import com.dchernykh.trainingrecorder.localization.R
 
 /**
  * The screens the rider swipes through while recording.
@@ -356,6 +358,13 @@ private fun ControlsPage(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp),
             )
         }
+        // Discard sits apart from the two large controls whenever there are
+        // any. It is not a peer of pause and stop: those end or suspend a ride
+        // that is kept, this one throws it away, and giving it the same disc
+        // beside them invites the mistake it can never undo. Alone - which is
+        // what a ride still starting up offers - it stays a proper button,
+        // because then it is the only thing on the screen.
+        val primary = actions.filterNot { it == RecordingAction.DISCARD && actions.size > 1 }
         Row(
             // Shared out rather than fixed. Two captions wide enough for German
             // at a fixed width overflow a 192 dp watch - the small round faces
@@ -372,11 +381,46 @@ private fun ControlsPage(
             // push its own button out of line with the one beside it.
             verticalAlignment = Alignment.Top,
         ) {
-            actions.sortedBy { it.controlOrder() }.forEach {
+            primary.sortedBy { it.controlOrder() }.forEach {
                 ControlButton(action = it, onAction = onAction, modifier = Modifier.weight(1f))
             }
         }
+        if (primary.size != actions.size) {
+            DiscardControl(onAction = onAction, modifier = Modifier.padding(top = 10.dp))
+        }
     }
+}
+
+/**
+ * Throwing the ride away: small, below the controls, and held rather than
+ * tapped.
+ *
+ * Small on purpose. Everything else on this screen is sized to be hit without
+ * looking, which is exactly the wrong treatment for the one control that loses
+ * a ride - and it is still a long press, so a jersey pocket cannot find it
+ * either.
+ */
+@Composable
+private fun DiscardControl(
+    onAction: (RecordingAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = stringResource(R.string.action_hold_to_discard),
+        style = MaterialTheme.typography.labelSmall,
+        textAlign = TextAlign.Center,
+        modifier =
+            modifier
+                .combinedClickable(
+                    onLongClickLabel = stringResource(R.string.action_hold_to_discard),
+                    onLongClick = { onAction(RecordingAction.DISCARD) },
+                    // A tap must do nothing at all: the caption already says the
+                    // gesture, and a control that quietly ignores a press is
+                    // indistinguishable from a broken one only when it has not
+                    // said so.
+                    onClick = {},
+                ).padding(horizontal = 12.dp, vertical = 6.dp),
+    )
 }
 
 private const val DATA_PAGE = 0
