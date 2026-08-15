@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.dchernykh.trainingrecorder.core.config.ScreenConfiguration
 import com.dchernykh.trainingrecorder.core.field.FieldValues
+import com.dchernykh.trainingrecorder.core.field.Surroundings
 import com.dchernykh.trainingrecorder.core.fit.RecordedWorkout
 import com.dchernykh.trainingrecorder.core.fit.TrackPoint
 import com.dchernykh.trainingrecorder.core.format.UnitSystem
@@ -17,6 +18,8 @@ import com.dchernykh.trainingrecorder.core.recording.RecordingState
 import com.dchernykh.trainingrecorder.core.sensor.FixStatus
 import com.dchernykh.trainingrecorder.core.sensor.SensorReading
 import com.dchernykh.trainingrecorder.core.sensor.SensorSnapshot
+import com.dchernykh.trainingrecorder.core.solar.SolarEvents
+import com.dchernykh.trainingrecorder.core.solar.SolarTimes
 import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.core.workout.SportOrdering
 import com.dchernykh.trainingrecorder.wear.ble.SensorHub
@@ -176,6 +179,20 @@ class RecordingViewModel(
     private val samples = mutableListOf<TrackPoint>()
 
     /**
+     * When the sun rises and sets where the ride is, and when that was worked
+     * out.
+     *
+     * Recomputed sparingly on purpose. The answer is a property of a place and a
+     * date, and neither moves fast: a rider crossing half a time zone changes
+     * their sunset by a couple of minutes, and a rider on an aeroplane is not
+     * reading this field. Once when a position first arrives, and every half
+     * hour after that, is far more often than the sky requires and rare enough
+     * to cost nothing.
+     */
+    private var solar: SolarEvents? = null
+    private var solarAtEpochMs = 0L
+
+    /**
      * The last reading seen for each built-in metric, rather than only what the
      * newest update carried. Health Services batches by data type, so any single
      * update is a partial picture.
@@ -277,6 +294,11 @@ class RecordingViewModel(
         // it if Health Services had not sent a fresh batch by the finish.
         builtIn.clear()
         samples.clear()
+        // Cleared with the ride: the sun's timetable belongs to where and when
+        // that ride was, and a ride started somewhere else tomorrow must not
+        // inherit it.
+        solar = null
+        solarAtEpochMs = 0
         sensors.value = SensorSnapshot()
         val startedAt = now()
         _state.update { it.prepare(sport.id, startedAt) }
@@ -351,6 +373,7 @@ class RecordingViewModel(
             // Only recorded while running: a paused ride must not lay down a
             // straight line between where the rider stopped and where they
             // started again.
+            refreshSolar(sample.latitudeDeg, sample.longitudeDeg, timestamp)
             if (_state.value.phase == RecordingPhase.RECORDING) {
                 val point =
                     TrackPoint(
@@ -567,9 +590,35 @@ class RecordingViewModel(
                 sensors = sensors.value,
                 race = raceStats.value,
                 units = units,
-                // The watch's own zone, so the clock field is not UTC.
-                clockOffsetMinutes = TimeZone.getDefault().getOffset(now) / MILLIS_PER_MINUTE,
+                surroundings =
+                    Surroundings(
+                        // The watch's own zone, so the clock field is not UTC.
+                        clockOffsetMinutes = TimeZone.getDefault().getOffset(now) / MILLIS_PER_MINUTE,
+                        solar = solar,
+                    ),
             )
+    }
+
+    /**
+     * Works out the sun's timetable when it is worth working out again.
+     *
+     * A position is needed and there may not be one for the first minute of a
+     * ride, so this is driven by samples arriving rather than by the start:
+     * "recompute at the start" would mean recomputing before the watch knows
+     * where it is, which is no answer at all.
+     */
+    private fun refreshSolar(
+        latitudeDeg: Double?,
+        longitudeDeg: Double?,
+        nowEpochMs: Long,
+    ) {
+        if (latitudeDeg == null || longitudeDeg == null) return
+        val due = solar == null || nowEpochMs - solarAtEpochMs >= SOLAR_REFRESH_MS
+        if (!due) return
+        solarAtEpochMs = nowEpochMs
+        // Null where the sun does not rise or set that day, which is a real
+        // answer this far north and the field shows as blank.
+        solar = runCatching { SolarTimes.at(latitudeDeg, longitudeDeg, nowEpochMs) }.getOrNull()
     }
 
     private fun now(): Long = System.currentTimeMillis()
@@ -577,6 +626,9 @@ class RecordingViewModel(
     private companion object {
         const val TAG = "RecordingViewModel"
         const val MILLIS_PER_SECOND = 1000.0
+
+        /** Half an hour, which is far more often than a sunset moves. */
+        const val SOLAR_REFRESH_MS = 30 * 60 * 1000L
         const val MILLIS_PER_MINUTE = 60_000
         const val TICK_MS = 1000L
 
