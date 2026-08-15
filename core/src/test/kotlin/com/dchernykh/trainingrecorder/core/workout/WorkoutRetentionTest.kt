@@ -53,11 +53,53 @@ class WorkoutRetentionTest {
     }
 
     @Test
-    fun aWorkoutNoServiceWillEverTakeStopsHoldingSpace() {
-        // Both halves matter: a refused ride is not retried, so keeping it
-        // forever would strand it and fill the watch at the same time.
+    fun aRideNoServiceEverTookIsKeptHoweverOftenItWasRefused() {
+        // The case that used to lose rides. The queue records FAILED both for a
+        // file a service refused and for one it simply gave up retrying - which
+        // is what an expired token looks like - so a ride that never left the
+        // watch became deletable, and the next ride needing space took it.
         val refused = workout("refused", 1, uploads = connectors.associateWith { UploadState.FAILED })
-        assertTrue(refused.isSafeToDelete(connectors))
+        assertFalse(refused.isSafeToDelete(connectors), "it has never arrived anywhere")
+    }
+
+    @Test
+    fun oneServiceAcceptingItIsEnoughToLetItGo() {
+        // The ride exists somewhere other than the watch, which is the whole
+        // question. Whether the other service also wanted it is its own business.
+        val delivered =
+            workout(
+                "delivered",
+                1,
+                uploads = mapOf("garmin" to UploadState.UPLOADED, "strava" to UploadState.FAILED),
+            )
+        assertTrue(delivered.isSafeToDelete(connectors))
+    }
+
+    @Test
+    fun aRiderWithNoServicesAtAllStillGetsToKeepRecording() {
+        // Nothing can ever deliver these, so holding every one forever would
+        // fill the watch and cost the rider the rides in front of them to keep
+        // the ones behind. Age and space decide there, and only there.
+        val kept = workout("kept", 1)
+        assertTrue(kept.isSafeToDelete(emptySet()))
+    }
+
+    @Test
+    fun weeksInTheMountainsWithNoSignalLoseNothing() {
+        // No network means no attempt, so every ride sits PENDING - and none of
+        // them may be evicted to make room for the next.
+        val hike =
+            (1..200).map {
+                workout(
+                    "day$it",
+                    it.toLong(),
+                    uploads = connectors.associateWith { UploadState.PENDING },
+                )
+            }
+        assertTrue(
+            RetentionPolicy.evictable(hike, connectors, maxKept = 50).isEmpty(),
+            "a ride that has not arrived anywhere cannot be dropped to make room",
+        )
     }
 
     @Test
@@ -76,11 +118,11 @@ class WorkoutRetentionTest {
     }
 
     @Test
-    fun aWorkoutIsSafeOnlyWhenEveryEnabledServiceHasIt() {
+    fun aWorkoutIsSafeOnceAnyEnabledServiceHasIt() {
         val partial = workout("p", 1, uploads = mapOf("garmin" to UploadState.UPLOADED))
-        assertFalse(partial.isSafeToDelete(connectors))
+        assertTrue(partial.isSafeToDelete(connectors), "it exists off the watch")
         assertTrue(partial.isSafeToDelete(setOf("garmin")))
-        assertTrue(partial.isSafeToDelete(emptySet()), "with no services enabled nothing is owed")
+        assertTrue(partial.isSafeToDelete(emptySet()), "nothing can ever take it")
     }
 
     @Test
