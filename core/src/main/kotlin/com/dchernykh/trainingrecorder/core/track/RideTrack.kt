@@ -56,17 +56,27 @@ object Haversine {
  * position a kilometre away and comes straight back, and unfiltered that is two
  * kilometres added to a ride that never moved.
  *
- * Movement below a few metres between fixes is ignored. A watch left on a table
- * still produces fixes, each a metre or two from the last, and over an hour that
- * wander adds up to a ride the rider never took. The threshold is what a
- * consumer receiver's noise looks like, not a real slow crawl - a rider pushing
- * a bike still covers more than this between fixes.
+ * Movement below a few metres is ignored - but measured from an *anchor* that is
+ * held until the threshold is crossed, not from the previous fix. Measured
+ * pairwise it was worse than useless: fixes arrive about once a second, a walker
+ * covers a metre and a half in that time, so every single step fell under the
+ * threshold and was thrown away. A two hundred metre walk recorded three metres,
+ * which is the one number worse than none - it looks like the feature works.
+ *
+ * Holding the anchor keeps both properties. A rider moving steadily gets further
+ * from it every second and crosses the threshold within a few, and every metre
+ * they covered is counted from where they last were. A watch on a table wanders
+ * around its anchor without ever getting far from it, because the noise is
+ * bounded and the anchor does not follow it.
  */
 class RideTrack(
     private val jitterMeters: Double = JITTER_METERS,
     private val speedCeilingMps: Double = MAX_PLAUSIBLE_SPEED_MPS,
+    private val stationaryAfterSeconds: Double = STATIONARY_AFTER_SECONDS,
+    private val crawlingSpeedMps: Double = CRAWLING_SPEED_MPS,
 ) {
-    private var previous: Fix? = null
+    /** Where the last counted metre ended, and what the next fix is measured from. */
+    private var anchor: Fix? = null
 
     var distanceMeters: Double = 0.0
         private set
@@ -81,32 +91,48 @@ class RideTrack(
     /**
      * True when the fix moved the ride on.
      *
-     * Four ways it does not, and each of them leaves the track in a different
-     * place, which is what the branching is about: the first fix has nothing to
-     * measure from, a fix out of order has no interval, an impossible one is
-     * refused but still becomes the baseline - keeping the old one would measure
-     * the next step from a position the rider left long ago, turning one bad fix
-     * into a wrong distance for the rest of the ride - and a step inside the
-     * noise means standing still, which is a real answer and the one a stopped
-     * rider should see rather than a speed that never quite reaches zero.
+     * Four ways it does not. The first fix has nothing to measure from. A fix
+     * out of order has no interval. An impossible one is refused *and* replaces
+     * the anchor, because keeping the old one would measure everything after it
+     * from a position the rider left long ago, turning a single bad fix into a
+     * wrong distance for the rest of the ride. And a fix still inside the noise
+     * leaves the anchor exactly where it is, so the next one is measured from
+     * the same place and the rider's slow progress accumulates instead of being
+     * discarded a metre at a time.
      */
     @Suppress("ReturnCount")
     fun record(fix: Fix): Boolean {
-        val last = previous
-        if (last == null) {
-            previous = fix
+        val from = anchor
+        if (from == null) {
+            anchor = fix
             return false
         }
-        val seconds = (fix.atEpochMs - last.atEpochMs) / MILLIS_PER_SECOND
+        val seconds = (fix.atEpochMs - from.atEpochMs) / MILLIS_PER_SECOND
         if (seconds <= 0) return false
-        val metres = Haversine.metresBetween(last, fix)
-        val speed = metres / seconds
-        previous = fix
-        if (speed > speedCeilingMps) return false
-        if (metres < jitterMeters) {
-            speedMps = 0.0
+        val metres = Haversine.metresBetween(from, fix)
+        if (metres / seconds > speedCeilingMps) {
+            anchor = fix
             return false
         }
+        // Over the whole held interval, which is the average across the stretch
+        // actually measured rather than of one arbitrary pair - and the reason
+        // the two tests below can tell a walker from a drifting receiver at all.
+        val speed = metres / seconds
+        if (metres < jitterMeters || speed < crawlingSpeedMps) {
+            // The anchor is held, not advanced, so the rider's slow progress
+            // accumulates towards the threshold instead of being discarded a
+            // metre at a time. That is what makes the speed floor safe: a
+            // stationary receiver drifts a few metres and stops, so as the
+            // anchor is held its apparent speed falls towards zero, while a
+            // walker's stays at walking pace however long the anchor is held.
+            //
+            // Someone who has not got clear of the anchor in several seconds is
+            // standing still, and should be shown that rather than the speed of
+            // whatever they last did.
+            if (seconds >= stationaryAfterSeconds) speedMps = 0.0
+            return false
+        }
+        anchor = fix
         distanceMeters += metres
         speedMps = speed
         maxSpeedMps = max(maxSpeedMps, speed)
@@ -115,7 +141,7 @@ class RideTrack(
 
     /** Forgets the ride, keeping the settings it was built with. */
     fun clear() {
-        previous = null
+        anchor = null
         distanceMeters = 0.0
         speedMps = null
         maxSpeedMps = 0.0
@@ -125,10 +151,26 @@ class RideTrack(
         const val MILLIS_PER_SECOND = 1000.0
 
         /**
-         * Under this between two fixes is receiver noise rather than travel. A
-         * rider pushing a bike covers more than this in a second.
+         * Displacement from the anchor under this is receiver noise rather than
+         * travel. A walker crosses it in about two seconds and a rider in less
+         * than one; a watch on a table never does, because its wander is bounded
+         * and the anchor does not follow it.
          */
         const val JITTER_METERS = 3.0
+
+        /**
+         * Failing to get clear of the anchor for this long is standing still.
+         * Under half a metre a second, which is slower than a walk.
+         */
+        const val STATIONARY_AFTER_SECONDS = 6.0
+
+        /**
+         * Slower than this, averaged over the whole held interval, is drift
+         * rather than travel. A receiver left alone wanders a few metres and
+         * stays there, so the longer the anchor is held the slower it appears;
+         * a walker is four times this and stays there.
+         */
+        const val CRAWLING_SPEED_MPS = 0.35
 
         /**
          * Faster than this between two fixes did not happen on a bicycle: 250
