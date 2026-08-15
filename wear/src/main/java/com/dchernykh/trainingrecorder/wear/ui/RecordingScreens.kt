@@ -25,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -262,6 +263,17 @@ private fun Slot(
                     // on two lines. Values stay on one - a number that wraps is
                     // not a number.
                     maxLines = 2,
+                    // Dimmed rather than tinted. The caption and the value were
+                    // the same white, so a screen of ten fields read as twenty
+                    // equal lines and the rider had to work out which was which.
+                    // A hue would have said something it does not mean - fields
+                    // are not colour-coded here - and would have to survive being
+                    // read in sunlight through a polarised lens. Less light is
+                    // the one distinction that stays legible and stays quiet:
+                    // the value keeps the full white it is read at a glance for,
+                    // and the caption steps back to where it is still perfectly
+                    // readable when looked at.
+                    color = CAPTION,
                     modifier = Modifier.fillMaxWidth().weight(LABEL_SHARE),
                 )
             }
@@ -311,13 +323,14 @@ private fun FittedText(
     maxFontSize: TextUnit,
     modifier: Modifier = Modifier,
     maxLines: Int = 1,
+    color: Color = MaterialTheme.colorScheme.onBackground,
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         BasicText(
             text = text,
             style =
                 style.copy(
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = color,
                     textAlign = TextAlign.Center,
                     lineHeight = TextUnit.Unspecified,
                 ),
@@ -441,6 +454,14 @@ private fun DiscardControl(
 private const val DATA_PAGE = 0
 private const val CONTROLS_PAGE = 1
 private const val PAGE_COUNT_WITH_CONTROLS = 2
+
+/**
+ * The caption's white, at the contrast a secondary label wants: comfortably past
+ * the 4.5:1 that body text needs against this black, and clearly behind the
+ * value beside it.
+ */
+private val CAPTION = Color(0xFFB0B4BA)
+
 private val ROUND_INSET = 16.dp
 private val ROUND_VERTICAL_INSET = 12.dp
 private val SQUARE_INSET = 8.dp
