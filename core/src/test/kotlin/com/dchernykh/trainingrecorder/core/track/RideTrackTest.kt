@@ -53,17 +53,66 @@ class RideTrackTest {
 
     @Test
     fun aWatchLeftOnATableDoesNotGoForARide() {
-        // The failure this filter exists for: a stationary receiver still emits
-        // fixes a metre or two apart, and an hour of that is a ride that never
-        // happened.
+        // Real jitter wanders a few metres and stays there; it does not march in
+        // one direction. An earlier version of this test had it drifting north
+        // at 1.5 m/s - a brisk walk, not noise - and so demanded the track throw
+        // away exactly the movement it exists to measure.
+        //
+        // The wander here is the awkward kind: it does eventually reach four
+        // metres from where it started, which the distance threshold alone would
+        // count. What catches it is that getting there took a minute.
+        val track = RideTrack()
+        val centre = Fix(55.0, 37.0, start)
+        (0..3600).forEach { second ->
+            val phase = (second % 120) / 120.0 * 2 * Math.PI
+            track.record(
+                Fix(
+                    latitudeDeg = centre.latitudeDeg + 2.0 * kotlin.math.sin(phase) / METERS_PER_DEGREE_LATITUDE,
+                    longitudeDeg = centre.longitudeDeg + 2.0 * kotlin.math.cos(phase) / METERS_PER_DEGREE_LATITUDE,
+                    atEpochMs = start + second * 1000L,
+                ),
+            )
+        }
+        assertEquals(0.0, track.distanceMeters, "an hour of wander is not a ride")
+        assertEquals(0.0, track.speedMps, "a stopped rider is stopped")
+    }
+
+    @Test
+    fun aWalkerCoversTheGroundTheyActuallyWalked() {
+        // The bug this replaced. Fixes arrive about once a second and a walker
+        // covers a metre and a half in that time, so measuring each pair against
+        // a three metre threshold threw away every step: two hundred metres of
+        // walking recorded three, which is the one answer worse than none
+        // because it looks like the feature works.
         val track = RideTrack()
         var fix = Fix(55.0, 37.0, start)
-        repeat(3600) {
-            fix = northOf(fix, metres = 1.5)
+        repeat(140) {
+            fix = northOf(fix, metres = 1.4)
             track.record(fix)
         }
-        assertEquals(0.0, track.distanceMeters, "an hour of jitter is not a ride")
-        assertEquals(0.0, track.speedMps, "a stopped rider is stopped")
+        assertTrue(
+            abs(track.distanceMeters - 196) < 8,
+            "expected about 196 m of walking, got ${track.distanceMeters}",
+        )
+        assertTrue(
+            abs(assertNotNull(track.speedMps) - 1.4) < 0.3,
+            "expected a walking pace, got ${track.speedMps}",
+        )
+    }
+
+    @Test
+    fun aRiderWhoStopsAtTheLightsIsShownAsStopped() {
+        val track = RideTrack()
+        var fix = Fix(55.0, 37.0, start)
+        repeat(10) { fix = northOf(fix, metres = 8.0).also(track::record) }
+        val moving = assertNotNull(track.speedMps)
+        assertTrue(moving > 7, "should be moving, was $moving")
+        // Now standing: fixes keep arriving from the same spot.
+        repeat(10) {
+            fix = fix.copy(atEpochMs = fix.atEpochMs + 1000)
+            track.record(fix)
+        }
+        assertEquals(0.0, track.speedMps)
     }
 
     @Test
