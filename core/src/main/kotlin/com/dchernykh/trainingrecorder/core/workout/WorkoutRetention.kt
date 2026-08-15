@@ -61,21 +61,31 @@ data class WorkoutSummary(
     }
 
     /**
-     * True when every enabled service has reached a terminal answer.
+     * True only once this ride exists somewhere other than the watch.
      *
-     * [UploadState.FAILED] counts as terminal on purpose. A service that has
-     * refused a file, or that has been tried until the queue gave up, is never
-     * going to take it - and keeping the workout forever in the hope that it
-     * might both strands the ride and fills the watch. Only [UploadState.PENDING]
-     * and a service that has not been offered the workout at all hold it back.
+     * [UploadState.FAILED] used to count, on the reasoning that a service which
+     * has refused a file is never going to take it and holding the ride forever
+     * only fills the watch. That reasoning has one fatal case: the queue also
+     * records FAILED when it simply gives up after ten retries, which is what an
+     * expired token or a service having a bad day looks like. A ride the rider
+     * did was then deletable without ever having left the watch, and the next
+     * ride that needed the space would take it.
+     *
+     * So the rule is now the plain one: a ride is safe to delete when a service
+     * has actually accepted it. Anything else is kept, however old, however
+     * often the upload has been refused. The watch filling up is a problem the
+     * rider can see and act on; a ride quietly deleted before it ever arrived
+     * anywhere is not.
+     *
+     * With no services set up at all the ride can never be delivered, and
+     * holding every ride forever would mean the watch fills and stops being able
+     * to record new ones - losing the rides in front of the rider to keep the
+     * ones behind them. There, and only there, age and space decide.
      */
-    fun isSafeToDelete(enabledConnectors: Set<String>): Boolean =
-        enabledConnectors.all {
-            when (uploads[it]) {
-                UploadState.UPLOADED, UploadState.FAILED -> true
-                UploadState.PENDING, null -> false
-            }
-        }
+    fun isSafeToDelete(enabledConnectors: Set<String>): Boolean {
+        if (enabledConnectors.isEmpty()) return true
+        return enabledConnectors.any { uploads[it] == UploadState.UPLOADED }
+    }
 }
 
 /**
