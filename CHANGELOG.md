@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.3](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.2...v0.9.3) (2026-08-15)
+
+
+### Bug Fixes
+
+* **core:** record every fix the receiver reports, without filtering ([de3ea64](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/de3ea64c8e8d5a4c7ccb9a072da8c1747453cc14))
+
 ## [0.9.2](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.1...v0.9.2) (2026-08-15)
 
 
