@@ -1,5 +1,6 @@
 package com.dchernykh.trainingrecorder.wear.service
 
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,10 +8,12 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 import androidx.wear.ongoing.OngoingActivity
 import androidx.wear.ongoing.Status
 import com.dchernykh.trainingrecorder.localization.R
@@ -46,17 +49,37 @@ class RecordingService : Service() {
             this,
             NOTIFICATION_ID,
             buildNotification(),
-            // Health *and* location. Health alone keeps the process alive and
-            // says nothing about what it needs, so the platform withdraws
-            // positions as soon as the app leaves the screen - the ride goes on
-            // recording, with the distance frozen and the satellite indicator
-            // still green, because availability keeps being reported while the
-            // fixes stop.
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION,
+            serviceType(),
         )
         // Restarted with its last intent if the system does kill it, so a
         // recording survives memory pressure rather than ending silently.
         return START_REDELIVER_INTENT
+    }
+
+    /**
+     * Health, and location as well when the app is allowed any.
+     *
+     * Health alone keeps the process alive and says nothing about what it needs,
+     * so the platform withdraws positions as soon as the app leaves the screen -
+     * the ride goes on recording with the distance frozen and the satellite
+     * indicator still green, because availability keeps being reported while the
+     * fixes stop.
+     *
+     * Declared conditionally because from API 34 a service that starts with the
+     * location type *without* holding a location permission is refused outright
+     * with a SecurityException. A rider who declined location would have had the
+     * recording die at the moment it started - which is the same shape of
+     * mistake this file already carries a comment about, where a branch written
+     * to avoid a crash was the crash.
+     */
+    private fun serviceType(): Int {
+        val health = ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH
+        val allowed =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED
+        return if (allowed) health or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION else health
     }
 
     private fun buildNotification(): Notification {
