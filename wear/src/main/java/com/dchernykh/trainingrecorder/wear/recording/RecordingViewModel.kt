@@ -412,12 +412,16 @@ class RecordingViewModel(
                     nowEpochMs = timestamp,
                     connectedProfiles = hub.connected.value,
                 )
-            refreshSolar(sample.latitudeDeg, sample.longitudeDeg, timestamp)
             // Where the ride is, kept for the recorder to stamp on the points it
             // writes between batches. A fix stays true until the next one
             // arrives - a rider does not stop existing because the platform is
             // saving power.
             sample.fixes.lastOrNull()?.let { lastFix = it }
+            // One notion of where the ride is, and it is this one. The sample
+            // used to carry a second position of its own, stamped on arrival,
+            // which is what read as nine hundred kilometres an hour - it is gone
+            // rather than left about to be picked up again.
+            lastFix?.let { refreshSolar(it.latitudeDeg, it.longitudeDeg, timestamp) }
             recomputeValues()
         }
     }
