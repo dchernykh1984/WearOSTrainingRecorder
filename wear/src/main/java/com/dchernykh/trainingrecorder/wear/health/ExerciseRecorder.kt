@@ -18,6 +18,7 @@ import com.dchernykh.trainingrecorder.core.sensor.FixStatus
 import com.dchernykh.trainingrecorder.core.sensor.SensorOrigin
 import com.dchernykh.trainingrecorder.core.sensor.SensorReading
 import com.dchernykh.trainingrecorder.core.sport.SportCatalogue
+import com.dchernykh.trainingrecorder.core.track.Fix
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +43,21 @@ data class BuiltInSample(
      * perfect agreement that means nothing.
      */
     val gnssAltitudeMeters: Double? = null,
+    /**
+     * Every position in this update, each carrying when it was *measured*.
+     *
+     * Not one position stamped on arrival. Health Services batches location -
+     * with the screen off it holds a minute of it and hands the lot over when
+     * the wrist turns - so a fix taken at delivery time lands milliseconds after
+     * the one before it while describing a place a hundred metres away. The
+     * speed that comes out of that is nine hundred kilometres an hour, briefly,
+     * before the next honest reading replaces it. It also reached the recorded
+     * ride as a maximum speed of 131 km/h.
+     *
+     * Keeping the whole batch rather than its last point matters as well: with
+     * the screen off, one point per delivery threw away most of the track.
+     */
+    val fixes: List<Fix> = emptyList(),
 )
 
 /**
@@ -237,7 +253,15 @@ internal fun ExerciseUpdate.toSample(): BuiltInSample {
     record("calories", metrics.getData(DataType.CALORIES_TOTAL)?.total)
     record("ascent_total", metrics.getData(DataType.ELEVATION_GAIN_TOTAL)?.total)
 
-    val location: LocationData? = metrics.getData(DataType.LOCATION).lastOrNull()?.value
+    val positions = metrics.getData(DataType.LOCATION)
+    val fixes =
+        positions.mapNotNull { point ->
+            val value = point.value
+            val latitude = value.latitude.real() ?: return@mapNotNull null
+            val longitude = value.longitude.real() ?: return@mapNotNull null
+            Fix(latitude, longitude, point.measuredAt())
+        }
+    val location: LocationData? = positions.lastOrNull()?.value
     val gnssAltitude = location?.altitude?.real()
     return BuiltInSample(
         readings = readings,
@@ -247,6 +271,7 @@ internal fun ExerciseUpdate.toSample(): BuiltInSample {
         // anyway: a fix's altitude is the weakest thing GNSS produces.
         altitudeMeters = gnssAltitude ?: readings["altitude"]?.value,
         gnssAltitudeMeters = gnssAltitude,
+        fixes = fixes,
     )
 }
 
