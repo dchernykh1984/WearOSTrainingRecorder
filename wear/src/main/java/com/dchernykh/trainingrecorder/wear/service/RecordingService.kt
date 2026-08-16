@@ -46,7 +46,13 @@ class RecordingService : Service() {
             this,
             NOTIFICATION_ID,
             buildNotification(),
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH,
+            // Health *and* location. Health alone keeps the process alive and
+            // says nothing about what it needs, so the platform withdraws
+            // positions as soon as the app leaves the screen - the ride goes on
+            // recording, with the distance frozen and the satellite indicator
+            // still green, because availability keeps being reported while the
+            // fixes stop.
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION,
         )
         // Restarted with its last intent if the system does kill it, so a
         // recording survives memory pressure rather than ending silently.
