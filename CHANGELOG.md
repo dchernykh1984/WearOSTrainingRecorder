@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.5](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.4...v0.9.5) (2026-08-16)
+
+
+### Bug Fixes
+
+* **wear:** stamp each position with when it was taken, not when it arrived ([3364fc7](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/3364fc777f7f83b69f46a78125dddaa099bc7af7))
+
 ## [0.9.4](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.3...v0.9.4) (2026-08-16)
 
 
