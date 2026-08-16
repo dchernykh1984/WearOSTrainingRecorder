@@ -149,4 +149,47 @@ class RideTrackTest {
     private companion object {
         const val METERS_PER_DEGREE_LATITUDE = 111_195.0
     }
+
+    @Test
+    fun aBatchHandedOverAtOnceStillReadsAtTheSpeedItWasRidden() {
+        // What the wrist turn does. With the screen off the platform holds a
+        // minute of positions and releases the lot in a few milliseconds. Each
+        // fix carries when it was *measured*, so handing them over together
+        // changes nothing - stamped on arrival instead, the same minute of
+        // travel would land inside those milliseconds and read as hundreds of
+        // kilometres an hour before the next honest value replaced it.
+        val track = RideTrack()
+        val measured =
+            (0 until 60).map { second ->
+                Fix(
+                    latitudeDeg = 55.0 + second * 8.0 / METERS_PER_DEGREE_LATITUDE,
+                    longitudeDeg = 37.0,
+                    atEpochMs = start + second * 1000L,
+                )
+            }
+        measured.forEach(track::record)
+        assertTrue(abs(track.distanceMeters - 472) < 5, "expected about 472 m, got ${track.distanceMeters}")
+        assertTrue(abs(track.maxSpeedMps - 8.0) < 0.1, "no fix may read faster than it was ridden")
+    }
+
+    @Test
+    fun stampingABatchOnArrivalIsWhatProducedTheAbsurdSpeeds() {
+        // The failure, written down so the contract above is not mistaken for
+        // decoration: the same minute of riding, with every fix carrying the
+        // moment it was handed over instead of the moment it was taken.
+        val track = RideTrack()
+        (0 until 60).forEach { second ->
+            track.record(
+                Fix(
+                    latitudeDeg = 55.0 + second * 8.0 / METERS_PER_DEGREE_LATITUDE,
+                    longitudeDeg = 37.0,
+                    atEpochMs = start + second * 2L,
+                ),
+            )
+        }
+        assertTrue(
+            track.maxSpeedMps > 1000,
+            "delivery timestamps should read as nonsense, which is why they are not used",
+        )
+    }
 }

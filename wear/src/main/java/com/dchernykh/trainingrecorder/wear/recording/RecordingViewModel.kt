@@ -417,11 +417,7 @@ class RecordingViewModel(
             // writes between batches. A fix stays true until the next one
             // arrives - a rider does not stop existing because the platform is
             // saving power.
-            sample.latitudeDeg?.let { latitude ->
-                sample.longitudeDeg?.let { longitude ->
-                    lastFix = Fix(latitude, longitude, timestamp)
-                }
-            }
+            sample.fixes.lastOrNull()?.let { lastFix = it }
             recomputeValues()
         }
     }
@@ -696,11 +692,11 @@ class RecordingViewModel(
         sample: BuiltInSample,
         nowEpochMs: Long,
     ): Map<String, SensorReading> {
-        val latitude = sample.latitudeDeg
-        val longitude = sample.longitudeDeg
-        if (latitude != null && longitude != null) {
-            track.record(Fix(latitude, longitude, nowEpochMs))
-        }
+        // Every position in the batch, each at the time it was measured. Stamped
+        // on arrival instead, a batch released when the wrist turns puts a
+        // minute of travel into a few milliseconds and reads as hundreds of
+        // kilometres an hour.
+        sample.fixes.forEach(track::record)
         // The barometer arrives as an ordinary reading; the fix carries its own.
         // Which is used, and how the two are reconciled, is AltitudeFusion's.
         val fused =
