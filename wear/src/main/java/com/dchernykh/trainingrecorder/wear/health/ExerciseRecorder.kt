@@ -31,8 +31,6 @@ import kotlinx.coroutines.guava.await
 /** What the watch itself is producing right now. */
 data class BuiltInSample(
     val readings: Map<String, SensorReading> = emptyMap(),
-    val latitudeDeg: Double? = null,
-    val longitudeDeg: Double? = null,
     val altitudeMeters: Double? = null,
     /**
      * The altitude the fix itself carried, kept apart from [altitudeMeters].
@@ -265,8 +263,6 @@ internal fun ExerciseUpdate.toSample(): BuiltInSample {
     val gnssAltitude = location?.altitude?.real()
     return BuiltInSample(
         readings = readings,
-        latitudeDeg = location?.latitude?.real(),
-        longitudeDeg = location?.longitude?.real(),
         // The barometer as a fallback, which is usually the better number
         // anyway: a fix's altitude is the weakest thing GNSS produces.
         altitudeMeters = gnssAltitude ?: readings["altitude"]?.value,
