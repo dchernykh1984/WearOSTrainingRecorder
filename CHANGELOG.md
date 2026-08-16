@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.4](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.3...v0.9.4) (2026-08-16)
+
+
+### Bug Fixes
+
+* **wear:** do not claim the location service type without location ([f8c6ad5](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/f8c6ad56ca5e719580a4eee9d086f757dc5f01ed))
+* **wear:** keep receiving positions once the ride leaves the screen ([c657b9c](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/c657b9ce919b6fb4ba3149e64b617c03873a2d75))
+
 ## [0.9.3](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.2...v0.9.3) (2026-08-15)
 
 
