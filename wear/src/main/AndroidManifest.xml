@@ -16,7 +16,19 @@
          the app with nothing at all. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Without this the watch stops handing over positions the moment the app
+         is not on screen - which on a ride is almost immediately, and is
+         precisely when it is needed. The symptom is not an error: fixes simply
+         stop arriving, so the distance freezes while the timer runs on and the
+         satellite indicator stays green, because availability is still reported.
+         See RecordingService for the other half of the requirement. -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <!-- The same rule for the heart rate: from API 33 the watch stops reading
+         its own sensor once the app is out of sight unless this is held. -->
+    <uses-permission
+        android:name="android.permission.BODY_SENSORS_BACKGROUND"
+        android:minSdkVersion="33" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
     <!-- Wear OS 6 supersedes BODY_SENSORS with the granular health permissions;
@@ -43,6 +55,10 @@
          The health type is the one Wear OS expects for an exercise. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+    <!-- A foreground service only keeps access to location if it says that is
+         what it is for. Declaring health alone kept the process alive and let
+         the positions stop anyway. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
@@ -102,7 +118,7 @@
         <service
             android:name=".service.RecordingService"
             android:exported="false"
-            android:foregroundServiceType="health" />
+            android:foregroundServiceType="health|location" />
     </application>
 
 </manifest>
