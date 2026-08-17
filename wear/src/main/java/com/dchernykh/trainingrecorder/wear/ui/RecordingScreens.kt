@@ -37,6 +37,7 @@ import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import com.dchernykh.trainingrecorder.core.config.Screen
 import com.dchernykh.trainingrecorder.core.config.ScreenSet
+import com.dchernykh.trainingrecorder.core.field.FieldCatalogue
 import com.dchernykh.trainingrecorder.core.layout.Band
 import com.dchernykh.trainingrecorder.core.layout.LayoutPlanner
 import com.dchernykh.trainingrecorder.core.layout.ScreenShape
@@ -255,7 +256,12 @@ private fun Slot(
     // caller's weight with it, and the field beside it then spreads across the
     // whole band, out of line with every other row on the screen.
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        if (fieldId == null) return@Box
+        // An id this build no longer knows is an empty slot, not a field. Riders
+        // keep layouts across updates, and a field that has been removed from
+        // the catalogue would otherwise draw as a dash with no caption above it -
+        // which reads as the screen having broken rather than as a slot waiting
+        // to be filled.
+        if (fieldId == null || FieldCatalogue.byId(fieldId) == null) return@Box
         Column(
             // Capped before it is filled, so a slot with the whole face to itself
             // keeps its caption next to its value instead of pushing the two to
