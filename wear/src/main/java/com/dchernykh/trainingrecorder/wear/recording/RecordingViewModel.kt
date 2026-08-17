@@ -23,6 +23,7 @@ import com.dchernykh.trainingrecorder.core.solar.SolarEvents
 import com.dchernykh.trainingrecorder.core.solar.SolarTimes
 import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.core.track.AltitudeTracker
+import com.dchernykh.trainingrecorder.core.track.CumulativeBaseline
 import com.dchernykh.trainingrecorder.core.track.Fix
 import com.dchernykh.trainingrecorder.core.track.Gradient
 import com.dchernykh.trainingrecorder.core.track.RideAggregates
@@ -212,6 +213,12 @@ class RecordingViewModel(
     private val altitude = AltitudeTracker()
     private val aggregates = RideAggregates()
     private val rollingPower = RollingPower()
+
+    /**
+     * The platform's running totals, counted from this ride rather than from
+     * whenever its own session began.
+     */
+    private val platformTotals = CumulativeBaseline()
     private val gradient = Gradient()
 
     /**
@@ -338,6 +345,7 @@ class RecordingViewModel(
 
         aggregates.clear()
         rollingPower.clear()
+        platformTotals.clear()
         gradient.clear()
         // Cleared with the ride: the sun's timetable belongs to where and when
         // that ride was, and a ride started somewhere else tomorrow must not
@@ -407,7 +415,7 @@ class RecordingViewModel(
             // Services sends whatever that batch happened to carry, so an update
             // without the distance aggregate would blank the field - and, at the
             // end of a ride, save a workout that says it covered nothing.
-            builtIn += sample.readings
+            builtIn += fromStartOfRide(sample.readings)
             builtIn += derived(sample, timestamp)
             sensors.value =
                 SensorSnapshot.merge(
@@ -693,6 +701,23 @@ class RecordingViewModel(
     }
 
     /**
+     * The platform's readings, with its running totals rebased on this ride.
+     *
+     * An exercise session that was already under way hands over its accumulated
+     * figures on the first update, and the ride would otherwise open having
+     * covered nine hundred metres and climbed to somebody else's altitude -
+     * which reaches the file as a first point no service can make sense of.
+     */
+    private fun fromStartOfRide(readings: Map<String, SensorReading>): Map<String, SensorReading> =
+        readings.mapValues { (field, reading) ->
+            if (field in PLATFORM_TOTALS) {
+                reading.copy(value = platformTotals.sinceStart(field, reading.value))
+            } else {
+                reading
+            }
+        }
+
+    /**
      * What the ride knows that Health Services does not: distance and speed from
      * the positions, altitude from the barometer against the sky, climb from
      * that altitude, and the averages and maxima nothing else ever computed.
@@ -816,6 +841,12 @@ class RecordingViewModel(
          * and so still lose to a sensor that measures the same thing.
          */
         val MEASURED = setOf("distance_total", "speed_current", "altitude")
+
+        /**
+         * The platform's readings that are totals rather than measurements of
+         * now, and so have to be counted from the start of this ride.
+         */
+        val PLATFORM_TOTALS = setOf("distance_total", "calories", "ascent_total")
 
         /**
          * The services a finished workout is owed to. Saving with an empty set
