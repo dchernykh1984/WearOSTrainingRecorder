@@ -133,4 +133,42 @@ class AltitudeTrackerTest {
         (0..100).forEach { tracker.record(null, 800.0 + it * 2.0, start + it * 1000L) }
         assertTrue(abs(tracker.ascentMeters - 200) < 15, "expected about 200 m, got ${tracker.ascentMeters}")
     }
+
+    @Test
+    fun aDescentThatCrossesTheHourlyRecalibrationIsStillJustTheDescent() {
+        // The case most likely to be wrong and hardest to notice: the rider is
+        // coming down a pass when the datum is refreshed. If the correction
+        // leaked into the totals it would land in the descent, where a rider
+        // already expects a large number and would not question it.
+        val tracker = AltitudeTracker()
+        tracker.record(barometricMeters = 1500.0, gnssMeters = 1500.0, nowEpochMs = start)
+        // Up 300 m over the first hour.
+        (1..300).forEach { tracker.record(1500.0 + it, 1500.0 + it, start + it * 1000L) }
+        // The hour turns over and the weather has moved the pressure by 15 m.
+        tracker.record(1800.0, 1815.0, start + anHour)
+        // Then 500 m of descent.
+        (1..500).forEach { tracker.record(1800.0 - it, null, start + anHour + it * 1000L) }
+
+        assertTrue(abs(tracker.ascentMeters - 300) < 5, "expected 300 m up, got ${tracker.ascentMeters}")
+        assertTrue(abs(tracker.descentMeters - 500) < 5, "expected 500 m down, got ${tracker.descentMeters}")
+    }
+
+    @Test
+    fun aDescentOnlyRideCountsTheWholeDescentAndNoClimb() {
+        val tracker = AltitudeTracker()
+        (0..400).forEach { tracker.record(2000.0 - it, 2000.0, start + it * 1000L) }
+        assertEquals(0.0, tracker.ascentMeters)
+        assertTrue(abs(tracker.descentMeters - 400) < 5, "expected 400 m down, got ${tracker.descentMeters}")
+    }
+
+    @Test
+    fun bothTotalsAreReadableFromTheFirstMomentThereIsAnAltitude() {
+        // A dash where a zero belongs reads as "not working", and the rider has
+        // no way to tell the two apart until they have climbed something.
+        val tracker = AltitudeTracker()
+        tracker.record(800.0, 800.0, start)
+        assertTrue(tracker.measuring)
+        assertEquals(0.0, tracker.ascentMeters)
+        assertEquals(0.0, tracker.descentMeters)
+    }
 }
