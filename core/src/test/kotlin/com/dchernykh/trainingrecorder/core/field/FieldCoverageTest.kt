@@ -68,37 +68,15 @@ class FieldCoverageTest {
      * Fields the app cannot fill yet, each with what it is waiting for.
      *
      * This is a list of work, not an excuse: every line is a field a rider can
-     * put on a screen today and watch stay empty.
+     * put on a screen today and watch stay empty. Twenty-five entries were
+     * removed from the catalogue outright rather than left here - a field nobody
+     * intends to implement is not outstanding work, it is a promise on a screen
+     * that will never be kept.
      */
     private val notYet =
         mapOf(
-            "lap_number" to "laps are not implemented",
-            "lap_count" to "laps are not implemented",
-            "lap_time" to "laps are not implemented",
-            "lap_time_last" to "laps are not implemented",
-            "distance_lap" to "laps are not implemented",
-            "distance_lap_last" to "laps are not implemented",
-            "hr_lap" to "laps are not implemented",
-            "cadence_lap" to "laps are not implemented",
-            "power_lap" to "laps are not implemented",
-            "speed_lap" to "laps are not implemented",
-            "pace_lap" to "laps are not implemented",
-            "hr_pct_max" to "needs the rider's maximum heart rate, which nothing asks for",
-            "hr_pct_hrr" to "needs maximum and resting heart rate, which nothing asks for",
-            "hr_zone" to "needs heart rate zones, which nothing asks for",
-            "power_per_kg" to "needs the rider's weight, which nothing asks for",
-            "intensity_factor" to "needs an FTP, which nothing asks for",
-            "training_stress_score" to "needs an FTP, which nothing asks for",
             "pedal_smoothness" to "an optional field of the power characteristic that is not parsed",
             "torque_effectiveness" to "an optional field of the power characteristic that is not parsed",
-            "sensor_hr_battery" to "needs the Bluetooth battery service, which is not read",
-            "sensor_cadence_battery" to "needs the Bluetooth battery service, which is not read",
-            "sensor_power_battery" to "needs the Bluetooth battery service, which is not read",
-            "temperature" to "needs the environmental sensing service, which is not read",
-            "stroke_count" to "needs the swimming data types, which are not requested",
-            "stroke_rate" to "needs the swimming data types, which are not requested",
-            "swolf" to "needs the swimming data types, which are not requested",
-            "lengths" to "needs the swimming data types, which are not requested",
         )
 
     /** Everything a full snapshot can hand to the formatter. */
@@ -160,5 +138,17 @@ class FieldCoverageTest {
         val TIMERS = setOf("timer_elapsed", "timer_moving", "timer_paused", "time_of_day", "sunrise", "sunset")
 
         val RACE_FIELDS = FieldCatalogue.raceStats.map { it.id }.toSet()
+    }
+
+    @Test
+    fun aRemovedFieldLeftOnAScreenIsAnEmptySlotRatherThanACrash() {
+        // Riders have layouts saved from before these fields were dropped. An id
+        // the catalogue no longer knows must degrade to an empty slot, not to an
+        // exception on the one screen that matters most.
+        val values =
+            FieldValues.snapshot(state = RecordingState(), nowEpochMs = NOW, sensors = SensorSnapshot())
+        listOf("swolf", "lap_time", "hr_pct_max", "temperature", "sensor_hr_battery").forEach {
+            assertEquals(null, values[it], "$it should be gone from the catalogue entirely")
+        }
     }
 }

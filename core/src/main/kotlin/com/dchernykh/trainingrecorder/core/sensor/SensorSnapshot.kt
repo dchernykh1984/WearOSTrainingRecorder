@@ -102,14 +102,9 @@ data class SensorSnapshot(
         val CUMULATIVE_FIELDS =
             setOf(
                 "distance_total",
-                "distance_lap",
-                "distance_lap_last",
                 "ascent_total",
                 "descent_total",
                 "calories",
-                "lap_count",
-                "stroke_count",
-                "lengths",
                 // Averages and maxima are facts about the ride so far, not
                 // measurements of this instant. Left out, they aged like a live
                 // reading: Health Services can batch minutes apart, and the
