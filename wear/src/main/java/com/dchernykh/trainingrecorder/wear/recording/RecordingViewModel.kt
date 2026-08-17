@@ -22,8 +22,7 @@ import com.dchernykh.trainingrecorder.core.sensor.SensorSnapshot
 import com.dchernykh.trainingrecorder.core.solar.SolarEvents
 import com.dchernykh.trainingrecorder.core.solar.SolarTimes
 import com.dchernykh.trainingrecorder.core.sport.SportType
-import com.dchernykh.trainingrecorder.core.track.AltitudeFusion
-import com.dchernykh.trainingrecorder.core.track.ClimbTotal
+import com.dchernykh.trainingrecorder.core.track.AltitudeTracker
 import com.dchernykh.trainingrecorder.core.track.Fix
 import com.dchernykh.trainingrecorder.core.track.RideAggregates
 import com.dchernykh.trainingrecorder.core.track.RideTrack
@@ -208,8 +207,7 @@ class RecordingViewModel(
 
     /** When the last point was written, so a second cannot be recorded twice. */
     private var lastPointAtEpochMs = 0L
-    private val altitude = AltitudeFusion()
-    private val climb = ClimbTotal()
+    private val altitude = AltitudeTracker()
     private val aggregates = RideAggregates()
 
     /**
@@ -333,7 +331,7 @@ class RecordingViewModel(
         lastFix = null
         lastPointAtEpochMs = 0
         altitude.clear()
-        climb.clear()
+
         aggregates.clear()
         // Cleared with the ride: the sun's timetable belongs to where and when
         // that ride was, and a ride started somewhere else tomorrow must not
@@ -702,18 +700,17 @@ class RecordingViewModel(
         // kilometres an hour.
         sample.fixes.forEach(track::record)
         // The barometer arrives as an ordinary reading; the fix carries its own.
-        // Which is used, and how the two are reconciled, is AltitudeFusion's.
-        val fused =
-            altitude.altitude(
-                barometricMeters = sample.readings["altitude"]?.value,
-                // The fix's own altitude, not the sample's - that one has already
-                // fallen back to the barometer, and calibrating a barometer
-                // against itself records a perfect agreement that means nothing
-                // and then holds it for an hour.
-                gnssMeters = sample.gnssAltitudeMeters,
-                nowEpochMs = nowEpochMs,
-            )
-        fused?.let(climb::record)
+        // Which reading is shown, which one the climb is measured from, and why
+        // they are not the same one, is AltitudeTracker's.
+        altitude.record(
+            barometricMeters = sample.readings["altitude"]?.value,
+            // The fix's own altitude, not the sample's - that one has already
+            // fallen back to the barometer, and calibrating a barometer against
+            // itself records a perfect agreement that means nothing and then
+            // holds it for an hour.
+            gnssMeters = sample.gnssAltitudeMeters,
+            nowEpochMs = nowEpochMs,
+        )
         aggregates.record(sensors.value.readings.mapValues { it.value.value })
 
         val moving = _state.value.movingMillisAt(nowEpochMs) / MILLIS_PER_SECOND
@@ -725,9 +722,16 @@ class RecordingViewModel(
                 // place.
                 if (track.distanceMeters > 0) put("distance_total", track.distanceMeters)
                 track.speedMps?.let { put("speed_current", it) }
-                fused?.let { put("altitude", it) }
-                if (climb.ascentMeters > 0) put("ascent_total", climb.ascentMeters)
-                if (climb.descentMeters > 0) put("descent_total", climb.descentMeters)
+                altitude.altitudeMeters?.let { put("altitude", it) }
+                // Published from the first reading onwards, zero included. Left
+                // to the platform's own total until ours was non-zero, the field
+                // showed a figure gathered on some other terms - and a ride that
+                // has climbed nothing has climbed nothing, which is a number
+                // worth showing rather than a gap.
+                if (altitude.measuring) {
+                    put("ascent_total", altitude.ascentMeters)
+                    put("descent_total", altitude.descentMeters)
+                }
                 putAll(
                     aggregates.snapshot(
                         distanceMeters = track.distanceMeters,
