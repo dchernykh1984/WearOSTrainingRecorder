@@ -137,6 +137,20 @@ class AltitudeFusion(
     private var calibratedAtEpochMs = 0L
 
     /**
+     * True once the barometer has been told where sea level is, or when there is
+     * no barometer and the fix's own altitude is used - which is already a
+     * height above the sea.
+     *
+     * Until then there is a reading but not an altitude, and the difference
+     * matters: a raw barometric value written into the track is a step waiting
+     * to happen, because the moment the datum arrives every later point jumps by
+     * hundreds of metres and any service reading the file counts that as a
+     * climb.
+     */
+    var hasDatum: Boolean = false
+        private set
+
+    /**
      * The altitude to record, or null when neither source has anything to say.
      *
      * [barometricMeters] is the watch's own pressure-derived altitude and
@@ -147,7 +161,10 @@ class AltitudeFusion(
         gnssMeters: Double?,
         nowEpochMs: Long,
     ): Double? {
-        if (barometricMeters == null) return gnssMeters
+        if (barometricMeters == null) {
+            hasDatum = gnssMeters != null
+            return gnssMeters
+        }
         val due = offsetMeters == null || nowEpochMs - calibratedAtEpochMs >= recalibrateAfterMs
         // Only ever against a fix. Without one there is nothing to calibrate to,
         // and an uncalibrated barometer is still the better *shape* - so it is
@@ -155,13 +172,16 @@ class AltitudeFusion(
         if (due && gnssMeters != null) {
             offsetMeters = gnssMeters - barometricMeters
             calibratedAtEpochMs = nowEpochMs
+            hasDatum = true
         }
-        return barometricMeters + (offsetMeters ?: 0.0)
+        val offset = offsetMeters ?: return null
+        return barometricMeters + offset
     }
 
     fun clear() {
         offsetMeters = null
         calibratedAtEpochMs = 0
+        hasDatum = false
     }
 
     private companion object {

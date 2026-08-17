@@ -3,6 +3,7 @@ package com.dchernykh.trainingrecorder.core.track
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -49,15 +50,19 @@ class AltitudeFusionTest {
     }
 
     @Test
-    fun theBarometerIsUsedEvenBeforeThereIsAFixToCalibrateAgainst() {
-        // Indoors, or in the first minute of a ride. The absolute number is
-        // whatever the sensor thought, but the climb is still right - and the
-        // first fix corrects the datum without disturbing it.
+    fun thereIsNoAltitudeUntilSomethingSaysWhereSeaLevelIs() {
+        // A barometer with no datum has a reading but not an altitude, and the
+        // two must not be confused. Writing the raw value into a track is a step
+        // waiting to happen: the moment the first fix lands, every later point
+        // jumps by hundreds of metres, and a service reading the file counts
+        // that jump as a climb.
         val fusion = AltitudeFusion()
-        assertEquals(120.0, fusion.altitude(barometricMeters = 120.0, gnssMeters = null, nowEpochMs = start))
-        assertEquals(140.0, fusion.altitude(barometricMeters = 140.0, gnssMeters = null, nowEpochMs = start + 1000))
-        val corrected = fusion.altitude(barometricMeters = 140.0, gnssMeters = 800.0, nowEpochMs = start + 2000)
-        assertEquals(800.0, corrected)
+        assertNull(fusion.altitude(barometricMeters = 120.0, gnssMeters = null, nowEpochMs = start))
+        assertFalse(fusion.hasDatum)
+        assertEquals(800.0, fusion.altitude(barometricMeters = 140.0, gnssMeters = 800.0, nowEpochMs = start + 2000))
+        assertTrue(fusion.hasDatum)
+        // And it keeps working from the barometer once it has been told.
+        assertEquals(820.0, fusion.altitude(barometricMeters = 160.0, gnssMeters = null, nowEpochMs = start + 3000))
     }
 
     @Test

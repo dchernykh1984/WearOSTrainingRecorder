@@ -1,5 +1,7 @@
 package com.dchernykh.trainingrecorder.core.fit
 
+import com.dchernykh.trainingrecorder.core.track.ClimbTotal
+
 /**
  * A ride recovered from a journal that outlived the process that wrote it.
  *
@@ -24,15 +26,31 @@ data class RecoveredRide(
         val lastTimestamp = points.lastOrNull()?.timestampEpochMs ?: startedAtEpochMs
         val elapsedSeconds = ((lastTimestamp - startedAtEpochMs).coerceAtLeast(0)) / MILLIS_PER_SECOND
         val movingSeconds = (movingMillis / MILLIS_PER_SECOND).coerceIn(0.0, elapsedSeconds)
+        val climbed = climb()
         return RecordedWorkout(
             sportTypeId = sportTypeId,
             startedAtEpochMs = startedAtEpochMs,
             totalTimerSeconds = movingSeconds,
             totalElapsedSeconds = elapsedSeconds,
             totalDistanceMeters = points.lastOrNull { it.distanceMeters != null }?.distanceMeters ?: 0.0,
+            // Worked out again from the altitudes rather than carried in the
+            // file. They are safe to add up: the journal only ever holds heights
+            // above the sea, never a raw barometric reading, so there is no
+            // calibration step in the series to be mistaken for a hill.
+            totalAscentMeters = climbed.ascentMeters,
+            totalDescentMeters = climbed.descentMeters,
             points = points,
         )
     }
+
+    /**
+     * The climb the recovered points describe.
+     *
+     * Safe to add up because the journal only ever holds heights above the sea:
+     * a raw barometric reading is never written, so the series has no
+     * calibration step in it to be mistaken for a hill.
+     */
+    private fun climb(): ClimbTotal = ClimbTotal().apply { points.mapNotNull { it.altitudeMeters }.forEach(::record) }
 
     private companion object {
         const val MILLIS_PER_SECOND = 1000.0

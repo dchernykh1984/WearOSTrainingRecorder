@@ -539,6 +539,11 @@ class RecordingViewModel(
             totalTimerSeconds = finished.movingMillisAt(now) / MILLIS_PER_SECOND,
             totalElapsedSeconds = finished.elapsedMillisAt(now) / MILLIS_PER_SECOND,
             totalDistanceMeters = sensors.value.value("distance_total") ?: 0.0,
+            // The watch's own totals rather than whatever a service derives from
+            // the altitude series: this is the only place that knows which part
+            // of a change in height was a hill and which was the datum arriving.
+            totalAscentMeters = altitude.ascentMeters,
+            totalDescentMeters = altitude.descentMeters,
             points = samples.toList(),
         )
     }
