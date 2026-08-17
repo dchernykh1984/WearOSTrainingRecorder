@@ -113,4 +113,24 @@ class AltitudeTrackerTest {
         assertEquals(0.0, tracker.ascentMeters, "an hour of barometer noise is not a climb")
         assertEquals(0.0, tracker.descentMeters)
     }
+
+    @Test
+    fun aWatchWithNoBarometerIsNotCreditedWithTheWanderOfItsFixes() {
+        // A satellite fix moves by ten metres and more while standing still, and
+        // a total only ever adds the upward half of that. Given a barometer's
+        // threshold it invents climb by the hundred over an hour.
+        val tracker = AltitudeTracker()
+        (0..3600).forEach {
+            val wobble = if (it % 2 == 0) 5.0 else -5.0
+            tracker.record(barometricMeters = null, gnssMeters = 800.0 + wobble, nowEpochMs = start + it * 1000L)
+        }
+        assertEquals(0.0, tracker.ascentMeters, "an hour of satellite wander is not a climb")
+    }
+
+    @Test
+    fun aRealClimbIsStillCountedWithoutABarometer() {
+        val tracker = AltitudeTracker()
+        (0..100).forEach { tracker.record(null, 800.0 + it * 2.0, start + it * 1000L) }
+        assertTrue(abs(tracker.ascentMeters - 200) < 15, "expected about 200 m, got ${tracker.ascentMeters}")
+    }
 }

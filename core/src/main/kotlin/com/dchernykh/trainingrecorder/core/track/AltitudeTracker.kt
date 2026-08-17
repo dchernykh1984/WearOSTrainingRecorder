@@ -24,16 +24,32 @@ package com.dchernykh.trainingrecorder.core.track
  */
 class AltitudeTracker(
     private val fusion: AltitudeFusion = AltitudeFusion(),
-    private val climb: ClimbTotal = ClimbTotal(),
+    private val barometricThresholdMeters: Double = BAROMETRIC_THRESHOLD_METERS,
+    private val satelliteThresholdMeters: Double = SATELLITE_THRESHOLD_METERS,
 ) {
+    /**
+     * Made on the first reading, with a threshold that suits whichever source
+     * gave it.
+     *
+     * A barometer resolves a metre; a satellite fix is lucky to be within
+     * fifteen, and its error wanders continuously. Counting climb from GNSS
+     * altitude against a barometer's threshold is how a flat road totals a
+     * mountain - and a total is the one figure that cannot self-correct, since
+     * only the upward wobbles are added and none of the downward ones cancel
+     * them.
+     *
+     * A watch has a barometer or it does not, so this is decided once.
+     */
+    private var climb: ClimbTotal? = null
+
     /** The height above the sea to show, or null before anything is known. */
     var altitudeMeters: Double? = null
         private set
 
     /** Climbed since this ride began, and nothing before it. */
-    val ascentMeters: Double get() = climb.ascentMeters
+    val ascentMeters: Double get() = climb?.ascentMeters ?: 0.0
 
-    val descentMeters: Double get() = climb.descentMeters
+    val descentMeters: Double get() = climb?.descentMeters ?: 0.0
 
     /** True once some source has given a height, which is when the totals mean anything. */
     var measuring: Boolean = false
@@ -49,15 +65,30 @@ class AltitudeTracker(
         // fused value: that one moves when the datum is corrected, and a datum
         // correction is not a hill.
         val measured = barometricMeters ?: gnssMeters ?: return
+        val counter =
+            climb ?: ClimbTotal(
+                if (barometricMeters != null) barometricThresholdMeters else satelliteThresholdMeters,
+            ).also { climb = it }
         measuring = true
-        climb.record(measured)
+        counter.record(measured)
     }
 
     /** Forgets the ride. The next one starts from nothing, as it must. */
     fun clear() {
         fusion.clear()
-        climb.clear()
+        climb = null
         altitudeMeters = null
         measuring = false
+    }
+
+    private companion object {
+        /** A barometer resolves about a metre; three is past its noise. */
+        const val BAROMETRIC_THRESHOLD_METERS = 3.0
+
+        /**
+         * A satellite fix wanders by ten metres and more while standing still,
+         * so a barometer's threshold applied to it invents climb by the hundred.
+         */
+        const val SATELLITE_THRESHOLD_METERS = 12.0
     }
 }
