@@ -138,7 +138,9 @@ class AltitudeTrackerTest {
         // barometer sat there giving a perfectly good height above the sea,
         // which is what the platform's elevation already is.
         val tracker = AltitudeTracker()
-        listOf(850.0, 855.0, 860.0).forEach { tracker.record(it, gnssMeters = null, nowEpochMs = start) }
+        listOf(850.0, 855.0, 860.0).forEachIndexed { index, metres ->
+            tracker.record(metres, gnssMeters = null, nowEpochMs = start + index * 10_000L)
+        }
         assertEquals(860.0, tracker.altitudeMeters)
         assertTrue(tracker.measuring)
         assertEquals(10.0, tracker.ascentMeters)
@@ -155,7 +157,7 @@ class AltitudeTrackerTest {
         assertEquals(855.0, tracker.altitudeMeters, "the height itself is the new one")
         assertEquals(0.0, tracker.ascentMeters, "nobody climbs eight hundred metres in a second")
         // And the ride carries on from where it really is.
-        tracker.record(865.0, null, start + 2000)
+        tracker.record(865.0, null, start + 11_000)
         assertEquals(10.0, tracker.ascentMeters)
     }
 
@@ -164,5 +166,27 @@ class AltitudeTrackerTest {
         val tracker = AltitudeTracker()
         tracker.record(barometricMeters = 850.0, gnssMeters = 900.0, nowEpochMs = start)
         assertEquals(850.0, tracker.altitudeMeters, "the barometer is the better source")
+    }
+
+    @Test
+    fun aHillClimbedBetweenTwoDeliveriesIsStillAHill() {
+        // Readings arrive when the platform delivers them, and with the screen
+        // off that can be a minute apart. A cap measured in metres rather than
+        // in metres per second would have thrown away the sixty metres of climb
+        // that happened while nobody was looking at the watch.
+        val tracker = AltitudeTracker()
+        tracker.record(800.0, null, start)
+        tracker.record(860.0, null, start + 60_000)
+        assertEquals(60.0, tracker.ascentMeters, "a minute of climbing is a climb")
+    }
+
+    @Test
+    fun aSensorSettlingIsStillRefusedHoweverLongTheGap() {
+        // Eight hundred metres in a second is nobody; the guard is a rate, so it
+        // still catches it.
+        val tracker = AltitudeTracker()
+        tracker.record(0.0, null, start)
+        tracker.record(855.0, null, start + 1000)
+        assertEquals(0.0, tracker.ascentMeters)
     }
 }

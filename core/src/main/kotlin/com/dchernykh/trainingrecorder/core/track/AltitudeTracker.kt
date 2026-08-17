@@ -18,18 +18,24 @@ import kotlin.math.abs
  * accepted reading rather than the last one seen - so a flat road totals nothing
  * while a long steady drag is not thrown away a metre at a time.
  *
- * One step is refused outright: a change too large to have been ridden. Total
- * ascent once came back equal to the height of the ground the ride started on,
- * because the series began at zero before the sensor had settled and the jump to
- * eight hundred metres was counted as a climb. Nobody climbs eight hundred metres
- * in a second, and the reference moves without the total following.
+ * One step is refused outright: a change faster than anyone climbs. Total ascent
+ * once came back equal to the height of the ground the ride started on, because
+ * the series began at zero before the sensor had settled and the jump to eight
+ * hundred metres was counted as a climb.
+ *
+ * Judged as a rate rather than a distance, which matters more than it looks:
+ * readings arrive whenever the platform delivers them, and with the screen off
+ * that can be a minute apart. Eight hundred metres in a second is a sensor
+ * settling; sixty metres in a minute is a hill, and a fixed cap in metres would
+ * have thrown the hill away.
  */
 class AltitudeTracker(
     private val barometricThresholdMeters: Double = BAROMETRIC_THRESHOLD_METERS,
     private val satelliteThresholdMeters: Double = SATELLITE_THRESHOLD_METERS,
-    private val impossibleStepMeters: Double = IMPOSSIBLE_STEP_METERS,
+    private val impossibleRateMps: Double = IMPOSSIBLE_RATE_MPS,
 ) {
     private var reference: Double? = null
+    private var referenceAtEpochMs = 0L
 
     /**
      * Chosen on the first reading, by whichever source gave it.
@@ -60,7 +66,7 @@ class AltitudeTracker(
     fun record(
         barometricMeters: Double?,
         gnssMeters: Double?,
-        @Suppress("UNUSED_PARAMETER") nowEpochMs: Long,
+        nowEpochMs: Long,
     ) {
         val measured = barometricMeters ?: gnssMeters ?: return
         altitudeMeters = measured
@@ -69,24 +75,34 @@ class AltitudeTracker(
             thresholdMeters =
                 if (barometricMeters != null) barometricThresholdMeters else satelliteThresholdMeters
             reference = measured
+            referenceAtEpochMs = nowEpochMs
             return
         }
         val change = measured - from
-        if (abs(change) > impossibleStepMeters) {
+        val seconds = (nowEpochMs - referenceAtEpochMs) / MILLIS_PER_SECOND
+        // Two readings sharing an instant give no rate to judge by, so they fall
+        // back to a plain cap. Refusing everything there would discard a real
+        // change; allowing everything would let a settling sensor through.
+        val allowed =
+            if (seconds > 0) maxOf(thresholdMeters, impossibleRateMps * seconds) else SETTLING_CAP_METERS
+        if (abs(change) > allowed) {
             // Not a hill: the sensor settling, or a datum moving under us. The
             // reference follows so the next reading is measured from where the
             // ride actually is.
             reference = measured
+            referenceAtEpochMs = nowEpochMs
             return
         }
         if (abs(change) < thresholdMeters) return
         if (change > 0) ascentMeters += change else descentMeters -= change
         reference = measured
+        referenceAtEpochMs = nowEpochMs
     }
 
     /** Forgets the ride. The next one starts from nothing, as it must. */
     fun clear() {
         reference = null
+        referenceAtEpochMs = 0
         altitudeMeters = null
         ascentMeters = 0.0
         descentMeters = 0.0
@@ -100,10 +116,15 @@ class AltitudeTracker(
         const val SATELLITE_THRESHOLD_METERS = 12.0
 
         /**
-         * Above this in one reading nobody rode: it is the sensor settling or a
-         * datum moving. A rider climbing at a thousand metres an hour covers
-         * under half a metre a second.
+         * Faster than this nobody climbs: two metres a second is seven thousand
+         * metres an hour, several times what the best climber in the world
+         * manages. Anything past it is the sensor settling or a datum moving.
          */
-        const val IMPOSSIBLE_STEP_METERS = 50.0
+        const val IMPOSSIBLE_RATE_MPS = 2.0
+
+        /** What a reading may change by when there is no interval to judge it over. */
+        const val SETTLING_CAP_METERS = 100.0
+
+        const val MILLIS_PER_SECOND = 1000.0
     }
 }
