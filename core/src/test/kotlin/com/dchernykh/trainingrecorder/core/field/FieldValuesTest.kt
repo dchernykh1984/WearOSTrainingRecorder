@@ -93,11 +93,10 @@ class FieldValuesTest {
         // Sharing one source is the easy mistake, and it makes average pace
         // jump around with the current speed - which is exactly what a rider
         // looks at average pace to avoid.
-        val readings = sensors("speed_current" to 5.0, "speed_avg" to 4.0, "speed_lap" to 2.5)
+        val readings = sensors("speed_current" to 5.0, "speed_avg" to 4.0)
         val values = FieldValues.snapshot(recording(), now, sensors = readings)
         assertEquals("3:20/km", values["pace_current"])
         assertEquals("4:10/km", values["pace_avg"])
-        assertEquals("6:40/km", values["pace_lap"])
     }
 
     @Test
@@ -108,33 +107,11 @@ class FieldValuesTest {
     }
 
     @Test
-    fun ratiosBelowOneKeepTheirDecimals() {
-        // Rounded to a whole number an intensity factor of 0.85 reads "1", which
-        // is not a rounding error but a different training session.
-        val values = FieldValues.snapshot(recording(), now, sensors = sensors("intensity_factor" to 0.85))
-        assertEquals("0.85", values["intensity_factor"])
-    }
-
-    @Test
-    fun percentagesReadAsPercentages() {
-        val readings = sensors("hr_pct_max" to 87.4, "sensor_hr_battery" to 60.0)
-        val values = FieldValues.snapshot(recording(), now, sensors = readings)
-        assertEquals("87%", values["hr_pct_max"])
-        assertEquals("60%", values["sensor_hr_battery"])
-    }
-
-    @Test
     fun gradeKeepsItsSign() {
         val values = FieldValues.snapshot(recording(), now, sensors = sensors("grade" to 6.5))
         assertEquals("+6.5%", values["grade"])
         val down = FieldValues.snapshot(recording(), now, sensors = sensors("grade" to -6.5))
         assertEquals("-6.5%", down["grade"])
-    }
-
-    @Test
-    fun lapTimesArriveInSecondsAndAreShownAsDurations() {
-        val values = FieldValues.snapshot(recording(), now, sensors = sensors("lap_time" to 305.0))
-        assertEquals("5:05", values["lap_time"])
     }
 
     @Test

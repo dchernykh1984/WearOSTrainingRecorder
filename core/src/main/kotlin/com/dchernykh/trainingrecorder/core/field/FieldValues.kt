@@ -36,37 +36,25 @@ data class Surroundings(
  * not once someone remembers to add a branch for it.
  */
 object FieldValues {
-    /** Durations the sensors report in seconds rather than the timer itself. */
-    private val DURATION_FIELDS = setOf("lap_time", "lap_time_last")
+    private val DISTANCE_FIELDS = setOf("distance_total")
 
-    private val DISTANCE_FIELDS = setOf("distance_total", "distance_lap", "distance_lap_last")
-
-    private val SPEED_FIELDS = setOf("speed_current", "speed_avg", "speed_max", "speed_lap")
+    private val SPEED_FIELDS = setOf("speed_current", "speed_avg", "speed_max")
 
     /** Each pace field over the speed it is the inverse of. */
     private val PACE_SOURCES =
         mapOf(
             "pace_current" to "speed_current",
             "pace_avg" to "speed_avg",
-            "pace_lap" to "speed_lap",
         )
 
     private val ELEVATION_FIELDS = setOf("altitude", "ascent_total", "descent_total")
 
     private val PERCENT_FIELDS =
         setOf(
-            "hr_pct_max",
-            "hr_pct_hrr",
             "power_balance",
             "pedal_smoothness",
             "torque_effectiveness",
-            "sensor_hr_battery",
-            "sensor_cadence_battery",
-            "sensor_power_battery",
         )
-
-    /** Ratios below one, which rounding to a whole number would erase. */
-    private val DECIMAL_FIELDS = setOf("intensity_factor", "power_per_kg")
 
     /**
      * Every field at once. The screens read a map rather than calling per field
@@ -105,14 +93,12 @@ object FieldValues {
         timerValue(id, state, now, surroundings)?.let { return it }
         val reading = sensors.value(id)
         return when {
-            id in DURATION_FIELDS -> FieldFormatter.duration(reading?.times(MILLIS_PER_SECOND)?.toLong())
             id in DISTANCE_FIELDS -> FieldFormatter.distance(reading, units)
             id in SPEED_FIELDS -> FieldFormatter.speed(reading, units)
             id in PACE_SOURCES -> FieldFormatter.pace(sensors.value(PACE_SOURCES.getValue(id)), units)
             id == "pace_100" -> FieldFormatter.pacePer100m(sensors.value("speed_current"))
             id in ELEVATION_FIELDS -> FieldFormatter.elevation(reading, units)
             id in PERCENT_FIELDS -> FieldFormatter.percent(reading)
-            id in DECIMAL_FIELDS -> FieldFormatter.decimal(reading)
             id == "grade" -> FieldFormatter.grade(reading)
             else -> FieldFormatter.integer(reading)
         }
@@ -142,6 +128,4 @@ object FieldValues {
                 FieldFormatter.clockTime(surroundings.solar?.sunsetEpochMs, surroundings.clockOffsetMinutes)
             else -> null
         }
-
-    private const val MILLIS_PER_SECOND = 1000.0
 }
