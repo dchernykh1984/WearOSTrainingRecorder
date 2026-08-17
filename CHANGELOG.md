@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.10.0...v0.11.0) (2026-08-17)
+
+
+### Features
+
+* remove the fields nothing will ever fill ([11a03f9](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/11a03f929b968f42df3ef2c318a20631ad4425a3))
+
+
+### Bug Fixes
+
+* **wear:** render a field this build no longer knows as an empty slot ([49bab29](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/49bab29d0faeaa81d7ad36bc7d071a6c1d2d64df))
+
 ## [0.10.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.6...v0.10.0) (2026-08-17)
 
 
