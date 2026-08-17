@@ -53,6 +53,7 @@ class FitActivityEncoderTest {
     private class Collector {
         val records = mutableListOf<RecordMesg>()
         val sessions = mutableListOf<SessionMesg>()
+        val laps = mutableListOf<com.garmin.fit.LapMesg>()
     }
 
     private fun decode(file: File): Collector {
@@ -60,6 +61,7 @@ class FitActivityEncoderTest {
         val broadcaster = MesgBroadcaster(Decode())
         broadcaster.addListener(com.garmin.fit.RecordMesgListener { collector.records += it })
         broadcaster.addListener(com.garmin.fit.SessionMesgListener { collector.sessions += it })
+        broadcaster.addListener(com.garmin.fit.LapMesgListener { collector.laps += it })
         file.inputStream().use { broadcaster.run(it) }
         return collector
     }
@@ -143,18 +145,79 @@ class FitActivityEncoderTest {
     @Test
     fun impossibleTotalsAreRejected() {
         assertFailsWith<IllegalArgumentException> {
-            RecordedWorkout("cycling_road", start, -1.0, 10.0, 0.0, emptyList())
+            RecordedWorkout("cycling_road", start, -1.0, 10.0, 0.0, points = emptyList())
         }
         assertFailsWith<IllegalArgumentException> {
-            RecordedWorkout("cycling_road", start, 100.0, 10.0, 0.0, emptyList())
+            RecordedWorkout("cycling_road", start, 100.0, 10.0, 0.0, points = emptyList())
         }
         assertFailsWith<IllegalArgumentException> {
-            RecordedWorkout("cycling_road", start, 10.0, 10.0, -1.0, emptyList())
+            RecordedWorkout("cycling_road", start, 10.0, 10.0, -1.0, points = emptyList())
         }
     }
 
     @Test
     fun theEndIsTheStartPlusTheElapsedTime() {
         assertEquals(start + 130_000L, workout().endedAtEpochMs)
+    }
+
+    @Test
+    fun `the watch's own climb totals are written into the file`() {
+        // Left out, the service derives them from the altitude series - and that
+        // series cannot tell a hill from the moment the barometer was told where
+        // sea level is. The watch can, so it says so.
+        val workout =
+            RecordedWorkout(
+                sportTypeId = "cycling_road",
+                startedAtEpochMs = start,
+                totalTimerSeconds = 120.0,
+                totalElapsedSeconds = 130.0,
+                totalDistanceMeters = 1000.0,
+                totalAscentMeters = 245.0,
+                totalDescentMeters = 190.0,
+                points = samplePoints(),
+            )
+
+        val decoded = decode(encodeToTemp(workout))
+
+        assertEquals(
+            245,
+            decoded.sessions
+                .single()
+                .totalAscent
+                ?.toInt(),
+        )
+        assertEquals(
+            190,
+            decoded.sessions
+                .single()
+                .totalDescent
+                ?.toInt(),
+        )
+        assertEquals(
+            245,
+            decoded.laps
+                .single()
+                .totalAscent
+                ?.toInt(),
+        )
+    }
+
+    @Test
+    fun `a ride that climbed nothing says nothing rather than leaving it out`() {
+        val decoded = decode(encodeToTemp(workout()))
+        assertEquals(
+            0,
+            decoded.sessions
+                .single()
+                .totalAscent
+                ?.toInt(),
+        )
+        assertEquals(
+            0,
+            decoded.sessions
+                .single()
+                .totalDescent
+                ?.toInt(),
+        )
     }
 }

@@ -40,12 +40,25 @@ data class RecordedWorkout(
     val totalTimerSeconds: Double,
     val totalElapsedSeconds: Double,
     val totalDistanceMeters: Double,
+    /**
+     * Climbed and dropped over the ride, as the watch worked it out.
+     *
+     * Written into the file rather than left for the service to derive from the
+     * altitude series, because that series carries a step the rider did not
+     * climb: the barometer starts on its own raw reading and the first satellite
+     * fix moves it to a height above the sea. The watch knows which part of that
+     * was a hill and the service does not.
+     */
+    val totalAscentMeters: Double = 0.0,
+    val totalDescentMeters: Double = 0.0,
     val points: List<TrackPoint>,
 ) {
     init {
         require(totalTimerSeconds >= 0) { "timer time cannot be negative" }
         require(totalElapsedSeconds >= totalTimerSeconds) { "elapsed time cannot be shorter than timer time" }
         require(totalDistanceMeters >= 0) { "distance cannot be negative" }
+        require(totalAscentMeters >= 0) { "ascent cannot be negative" }
+        require(totalDescentMeters >= 0) { "descent cannot be negative" }
     }
 
     val endedAtEpochMs: Long get() = startedAtEpochMs + (totalElapsedSeconds * MILLIS_PER_SECOND).toLong()
@@ -146,6 +159,8 @@ object FitActivityEncoder {
             totalElapsedTime = workout.totalElapsedSeconds.toFloat()
             totalTimerTime = workout.totalTimerSeconds.toFloat()
             totalDistance = workout.totalDistanceMeters.toFloat()
+            totalAscent = workout.totalAscentMeters.roundToInt()
+            totalDescent = workout.totalDescentMeters.roundToInt()
         }
 
     private fun session(workout: RecordedWorkout) =
@@ -159,6 +174,8 @@ object FitActivityEncoder {
             totalElapsedTime = workout.totalElapsedSeconds.toFloat()
             totalTimerTime = workout.totalTimerSeconds.toFloat()
             totalDistance = workout.totalDistanceMeters.toFloat()
+            totalAscent = workout.totalAscentMeters.roundToInt()
+            totalDescent = workout.totalDescentMeters.roundToInt()
             firstLapIndex = 0
             numLaps = 1
         }
