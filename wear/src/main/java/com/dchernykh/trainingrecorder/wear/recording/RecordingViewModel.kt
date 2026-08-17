@@ -219,6 +219,9 @@ class RecordingViewModel(
      * whenever its own session began.
      */
     private val platformTotals = CumulativeBaseline()
+
+    /** What the ride has reported so far, which cannot go down. */
+    private var reportedDistanceMeters = 0.0
     private val gradient = Gradient()
 
     /**
@@ -346,6 +349,7 @@ class RecordingViewModel(
         aggregates.clear()
         rollingPower.clear()
         platformTotals.clear()
+        reportedDistanceMeters = 0.0
         gradient.clear()
         // Cleared with the ride: the sun's timetable belongs to where and when
         // that ride was, and a ride started somewhere else tomorrow must not
@@ -763,7 +767,13 @@ class RecordingViewModel(
                 // and Health Services' own distance - from the accelerometer on
                 // a treadmill - is then the better answer and the one left in
                 // place.
-                if (track.distanceMeters > 0) put("distance_total", track.distanceMeters)
+                // Never less than it already was. Ground covered cannot be
+                // uncovered, and the moment the ride's own measurement takes
+                // over from the platform's the two need not agree - a file whose
+                // distance steps backwards is one a service has to guess about.
+                val platform = builtIn["distance_total"]?.value ?: 0.0
+                reportedDistanceMeters = maxOf(reportedDistanceMeters, track.distanceMeters, platform)
+                put("distance_total", reportedDistanceMeters)
                 track.speedMps?.let { put("speed_current", it) }
                 altitude.altitudeMeters?.let { put("altitude", it) }
                 // Published from the first reading onwards, zero included. Left
