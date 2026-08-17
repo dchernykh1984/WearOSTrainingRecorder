@@ -12,6 +12,20 @@ enum class SensorOrigin(
 
     /** The watch itself: optical heart rate, GNSS, barometer, accelerometer. */
     BUILT_IN("built_in"),
+
+    /**
+     * Worked out by the app from other readings rather than measured: averages,
+     * maxima, rolling power, gradient, climb.
+     *
+     * A third origin because the takeover rule is about two *sensors*
+     * disagreeing, and a statistic is not a sensor. Marked BUILT_IN, every
+     * derived power figure was thrown away the moment a power meter connected -
+     * which is the only time any of them mean anything - because the rule saw a
+     * field belonging to a connected profile and dropped the watch's answer,
+     * while the meter itself reports only instantaneous watts and never an
+     * average.
+     */
+    DERIVED("derived"),
     ;
 
     companion object {
@@ -110,6 +124,7 @@ data class SensorSnapshot(
                 "cadence_max",
                 "power_avg",
                 "power_max",
+                "power_normalized",
             )
 
         /**
@@ -136,7 +151,10 @@ data class SensorSnapshot(
             val superseded = fieldsCoveredBy(connectedProfiles)
             val merged = mutableMapOf<String, SensorReading>()
             builtIn.forEach { (fieldId, reading) ->
-                if (fieldId in superseded) return@forEach
+                // Only a measurement is superseded. What the app worked out for
+                // itself has no competitor: a power meter reports watts, never
+                // the thirty-second average of them.
+                if (reading.origin == SensorOrigin.BUILT_IN && fieldId in superseded) return@forEach
                 if (isCurrent(fieldId, reading, nowEpochMs, builtInStaleAfterMs)) merged[fieldId] = reading
             }
             external.forEach { (fieldId, reading) ->

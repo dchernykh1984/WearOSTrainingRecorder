@@ -310,4 +310,42 @@ class SensorSnapshotTest {
         assertEquals(178.0, merged.value("hr_max"))
         assertNull(merged.value("speed_current"), "the live one still ages")
     }
+
+    @Test
+    fun aPowerMeterDoesNotTakeAwayTheAveragesItCannotProduce() {
+        // The bug: every derived power figure carries the power meter's profile,
+        // so the takeover rule threw them away the moment a meter connected -
+        // which is the only time any of them mean anything. The meter reports
+        // instantaneous watts and never an average, so nothing replaced them.
+        val merged =
+            SensorSnapshot.merge(
+                external = mapOf("power" to SensorReading(250.0, SensorOrigin.EXTERNAL, now)),
+                builtIn =
+                    mapOf(
+                        "power_avg" to SensorReading(210.0, SensorOrigin.DERIVED, now),
+                        "power_3s" to SensorReading(260.0, SensorOrigin.DERIVED, now),
+                        "power_normalized" to SensorReading(230.0, SensorOrigin.DERIVED, now),
+                    ),
+                nowEpochMs = now,
+                connectedProfiles = setOf(SensorProfile.CYCLING_POWER),
+            )
+        assertEquals(250.0, merged.value("power"))
+        assertEquals(210.0, merged.value("power_avg"), "an average has no competitor")
+        assertEquals(260.0, merged.value("power_3s"))
+        assertEquals(230.0, merged.value("power_normalized"))
+    }
+
+    @Test
+    fun aConnectedSensorStillTakesOverWhatItActuallyMeasures() {
+        // The other half: the rule exists because two sensors measuring the same
+        // thing disagree, and that has not changed.
+        val merged =
+            SensorSnapshot.merge(
+                external = emptyMap(),
+                builtIn = mapOf("hr" to SensorReading(70.0, SensorOrigin.BUILT_IN, now)),
+                nowEpochMs = now,
+                connectedProfiles = setOf(SensorProfile.HEART_RATE),
+            )
+        assertNull(merged.value("hr"), "the watch's own reading still loses to the strap")
+    }
 }
