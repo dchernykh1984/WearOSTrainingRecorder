@@ -24,8 +24,10 @@ import com.dchernykh.trainingrecorder.core.solar.SolarTimes
 import com.dchernykh.trainingrecorder.core.sport.SportType
 import com.dchernykh.trainingrecorder.core.track.AltitudeTracker
 import com.dchernykh.trainingrecorder.core.track.Fix
+import com.dchernykh.trainingrecorder.core.track.Gradient
 import com.dchernykh.trainingrecorder.core.track.RideAggregates
 import com.dchernykh.trainingrecorder.core.track.RideTrack
+import com.dchernykh.trainingrecorder.core.track.RollingPower
 import com.dchernykh.trainingrecorder.core.workout.SportOrdering
 import com.dchernykh.trainingrecorder.wear.ble.SensorHub
 import com.dchernykh.trainingrecorder.wear.health.BuiltInSample
@@ -209,6 +211,8 @@ class RecordingViewModel(
     private var lastPointAtEpochMs = 0L
     private val altitude = AltitudeTracker()
     private val aggregates = RideAggregates()
+    private val rollingPower = RollingPower()
+    private val gradient = Gradient()
 
     /**
      * When the sun rises and sets where the ride is, and when that was worked
@@ -333,6 +337,8 @@ class RecordingViewModel(
         altitude.clear()
 
         aggregates.clear()
+        rollingPower.clear()
+        gradient.clear()
         // Cleared with the ride: the sun's timetable belongs to where and when
         // that ride was, and a ride started somewhere else tomorrow must not
         // inherit it.
@@ -717,6 +723,13 @@ class RecordingViewModel(
             nowEpochMs = nowEpochMs,
         )
         aggregates.record(sensors.value.readings.mapValues { it.value.value })
+        // Power as a rider reads it: instantaneous watts swing a hundred either
+        // way between the top and bottom of a pedal stroke, and nobody can hold
+        // to a number that moves ten times a second.
+        sensors.value.value("power")?.let { rollingPower.record(it, nowEpochMs) }
+        // How steep it is and how fast the height is coming, both measured over
+        // ground rather than between two samples.
+        altitude.altitudeMeters?.let { gradient.record(it, track.distanceMeters, nowEpochMs) }
 
         val moving = _state.value.movingMillisAt(nowEpochMs) / MILLIS_PER_SECOND
         val values =
@@ -737,6 +750,12 @@ class RecordingViewModel(
                     put("ascent_total", altitude.ascentMeters)
                     put("descent_total", altitude.descentMeters)
                 }
+                gradient.percent()?.let { put("grade", it) }
+                gradient.verticalSpeedMetersPerHour()?.let { put("vertical_speed", it) }
+                rollingPower.average(RollingPower.THREE_SECONDS_MS, nowEpochMs)?.let { put("power_3s", it) }
+                rollingPower.average(RollingPower.TEN_SECONDS_MS, nowEpochMs)?.let { put("power_10s", it) }
+                rollingPower.average(RollingPower.THIRTY_SECONDS_MS, nowEpochMs)?.let { put("power_30s", it) }
+                rollingPower.normalised()?.let { put("power_normalized", it) }
                 putAll(
                     aggregates.snapshot(
                         distanceMeters = track.distanceMeters,
@@ -745,7 +764,13 @@ class RecordingViewModel(
                     ),
                 )
             }
-        return values.mapValues { SensorReading(it.value, SensorOrigin.BUILT_IN, nowEpochMs) }
+        // Measurements keep the built-in origin, so a connected sensor still owns
+        // the field it measures. Statistics are marked as worked out: nothing
+        // measures an average, so nothing can take one over.
+        return values.mapValues {
+            val origin = if (it.key in MEASURED) SensorOrigin.BUILT_IN else SensorOrigin.DERIVED
+            SensorReading(it.value, origin, nowEpochMs)
+        }
     }
 
     /**
@@ -785,6 +810,12 @@ class RecordingViewModel(
         const val SOLAR_REFRESH_MS = 30 * 60 * 1000L
         const val MILLIS_PER_MINUTE = 60_000
         const val TICK_MS = 1000L
+
+        /**
+         * The fields in [derived] that are measurements rather than statistics,
+         * and so still lose to a sensor that measures the same thing.
+         */
+        val MEASURED = setOf("distance_total", "speed_current", "altitude")
 
         /**
          * The services a finished workout is owed to. Saving with an empty set
