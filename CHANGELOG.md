@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.6](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.5...v0.9.6) (2026-08-17)
+
+
+### Bug Fixes
+
+* **core:** match the climb threshold to the altitude source ([17a57b0](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/17a57b0de37e049658c133014903663f29b8b317))
+* **core:** put the watch's own climb totals into the recorded file ([247bd61](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/247bd61168355a54594d27653f928d54497db15b))
+* **core:** stop counting the altitude calibration as a climb ([24d3da5](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/24d3da5ab98ac1a18d729c61ba7ae798ee372039))
+
 ## [0.9.5](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.4...v0.9.5) (2026-08-16)
 
 
