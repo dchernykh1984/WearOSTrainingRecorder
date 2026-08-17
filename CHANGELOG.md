@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.10.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.6...v0.10.0) (2026-08-17)
+
+
+### Features
+
+* **core:** compute rolling power, normalised power, gradient and vertical speed ([d383b23](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/d383b2335b982de8177bbaa8ef65850b9cc765c7))
+* **wear:** show rolling power, gradient and vertical speed during a ride ([bd5f882](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/bd5f88260b41403ca9a2e91574a367af360d7b67))
+
+
+### Bug Fixes
+
+* **core:** judge an impossible altitude step by rate so a batched climb survives ([71a6ece](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/71a6ece9a46ce90c53e7dee52ac0bf6def09b33a))
+* **core:** stop a connected power meter erasing the averages it cannot produce ([618f966](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/618f966ed436fa2ef29f63b1b58bdd597f4279a7))
+* **core:** take the platform's elevation as the height it already is ([fc37a97](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/fc37a973e2f9638ae1fbaca4be63bbf455f2d9a6))
+* **wear:** count the platform's totals from the start of the ride ([5919f02](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/5919f024e0e8b628b9fe2423a2a1265b13b5cdc9))
+* **wear:** never let the reported distance go backwards ([2136225](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/2136225ecbb73dd8bb3421991cf0a4451b563b1b))
+
 ## [0.9.6](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.9.5...v0.9.6) (2026-08-17)
 
 
