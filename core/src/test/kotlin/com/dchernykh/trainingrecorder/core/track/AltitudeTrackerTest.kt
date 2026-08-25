@@ -14,18 +14,20 @@ class AltitudeTrackerTest {
     @Test
     fun realClimbIsStillCounted() {
         val tracker = AltitudeTracker()
-        tracker.record(800.0, null, start)
-        (1..100).forEach { tracker.record(800.0 + it, null, start + it * 1000L) }
-        assertTrue(abs(tracker.ascentMeters - 100) < 4, "expected about 100 m, got ${tracker.ascentMeters}")
+        // A quarter of a metre a second is nine hundred metres an hour: hard,
+        // sustained, and human. A metre a second - which this test used to
+        // assume - is nobody.
+        (0..800).forEach { tracker.record(800.0 + it * 0.25, null, start + it * 1000L) }
+        assertTrue(abs(tracker.ascentMeters - 200) < 12, "expected about 200 m, got ${tracker.ascentMeters}")
         assertEquals(0.0, tracker.descentMeters)
-        assertTrue(abs((tracker.altitudeMeters ?: 0.0) - 900) < 1, "the height follows the barometer")
+        assertTrue(abs((tracker.altitudeMeters ?: 0.0) - 1000) < 1, "the height follows the barometer")
     }
 
     @Test
     fun aRideThatOnlyGoesUpNeverShowsADescent() {
         val tracker = AltitudeTracker()
-        (0..100).forEach { tracker.record(800.0 + it, null, start + it * 1000L) }
-        assertTrue(tracker.ascentMeters > 90)
+        (0..800).forEach { tracker.record(800.0 + it * 0.25, null, start + it * 1000L) }
+        assertTrue(tracker.ascentMeters > 180)
         assertEquals(0.0, tracker.descentMeters)
     }
 
@@ -34,22 +36,23 @@ class AltitudeTrackerTest {
         val tracker = AltitudeTracker()
         // Ridden rather than teleported: a hundred metres in one reading is
         // refused as a sensor artefact, and rightly.
-        (0..100).forEach { tracker.record(800.0 + it, null, start + it * 1000L) }
-        (0..100).forEach { tracker.record(900.0 - it, null, start + (101 + it) * 1000L) }
-        assertTrue(abs(tracker.ascentMeters - 100) < 4, "got ${tracker.ascentMeters}")
-        assertTrue(abs(tracker.descentMeters - 100) < 4, "got ${tracker.descentMeters}")
+        (0..400).forEach { tracker.record(800.0 + it * 0.25, null, start + it * 1000L) }
+        (0..400).forEach { tracker.record(900.0 - it * 0.25, null, start + (401 + it) * 1000L) }
+        assertTrue(abs(tracker.ascentMeters - 100) < 15, "got ${tracker.ascentMeters}")
+        assertTrue(abs(tracker.descentMeters - 100) < 15, "got ${tracker.descentMeters}")
     }
 
     @Test
     fun aWatchWithNoBarometerClimbsByItsFixes() {
         val tracker = AltitudeTracker()
-        listOf(
-            800.0,
-            850.0,
-            900.0,
-        ).forEach { tracker.record(barometricMeters = null, gnssMeters = it, nowEpochMs = start) }
-        assertEquals(900.0, tracker.altitudeMeters)
-        assertEquals(100.0, tracker.ascentMeters)
+        // Every reading at the same instant gives no rate to judge anything by,
+        // and a hundred metres of climb inside one instant is not a ride. Spread
+        // over an hour it is.
+        (0..120).forEach {
+            tracker.record(barometricMeters = null, gnssMeters = 800.0 + it * 0.85, nowEpochMs = start + it * 30_000L)
+        }
+        assertTrue(abs((tracker.altitudeMeters ?: 0.0) - 902) < 1)
+        assertTrue(tracker.ascentMeters > 80, "got ${tracker.ascentMeters}")
     }
 
     @Test
@@ -67,7 +70,7 @@ class AltitudeTrackerTest {
         // The totals are the ride's, not the day's. Anything left over from the
         // last one would be climb the rider is credited with twice.
         val tracker = AltitudeTracker()
-        (0..40).forEach { tracker.record(800.0 + it, null, start + it * 1000L) }
+        (0..400).forEach { tracker.record(800.0 + it * 0.25, null, start + it * 1000L) }
         assertTrue(tracker.ascentMeters > 0)
         tracker.clear()
         assertEquals(0.0, tracker.ascentMeters)
@@ -107,8 +110,10 @@ class AltitudeTrackerTest {
     @Test
     fun aRealClimbIsStillCountedWithoutABarometer() {
         val tracker = AltitudeTracker()
-        (0..100).forEach { tracker.record(null, 800.0 + it * 2.0, start + it * 1000L) }
-        assertTrue(abs(tracker.ascentMeters - 200) < 15, "expected about 200 m, got ${tracker.ascentMeters}")
+        // Ten seconds between fixes, which is what a receiver actually delivers,
+        // climbing at a human two hundred and fifty metres an hour.
+        (0..300).forEach { tracker.record(null, 800.0 + it * 0.7, start + it * 10_000L) }
+        assertTrue(abs(tracker.ascentMeters - 210) < 25, "expected about 210 m, got ${tracker.ascentMeters}")
     }
 
     @Test
@@ -116,7 +121,8 @@ class AltitudeTrackerTest {
         val tracker = AltitudeTracker()
         (0..400).forEach { tracker.record(2000.0 - it, 2000.0, start + it * 1000L) }
         assertEquals(0.0, tracker.ascentMeters)
-        assertTrue(abs(tracker.descentMeters - 400) < 5, "expected 400 m down, got ${tracker.descentMeters}")
+        // The first half-minute goes to settling, as it does on every ride.
+        assertTrue(abs(tracker.descentMeters - 370) < 12, "expected about 370 m down, got ${tracker.descentMeters}")
     }
 
     @Test
@@ -138,12 +144,10 @@ class AltitudeTrackerTest {
         // barometer sat there giving a perfectly good height above the sea,
         // which is what the platform's elevation already is.
         val tracker = AltitudeTracker()
-        listOf(850.0, 855.0, 860.0).forEachIndexed { index, metres ->
-            tracker.record(metres, gnssMeters = null, nowEpochMs = start + index * 10_000L)
-        }
+        (0..20).forEach { tracker.record(850.0 + it * 0.5, gnssMeters = null, nowEpochMs = start + it * 10_000L) }
         assertEquals(860.0, tracker.altitudeMeters)
         assertTrue(tracker.measuring)
-        assertEquals(10.0, tracker.ascentMeters)
+        assertTrue(tracker.ascentMeters > 5, "the barometer's climb is counted, got ${tracker.ascentMeters}")
     }
 
     @Test
@@ -156,9 +160,10 @@ class AltitudeTrackerTest {
         tracker.record(855.0, null, start + 1000)
         assertEquals(855.0, tracker.altitudeMeters, "the height itself is the new one")
         assertEquals(0.0, tracker.ascentMeters, "nobody climbs eight hundred metres in a second")
-        // And the ride carries on from where it really is.
-        tracker.record(865.0, null, start + 11_000)
-        assertEquals(10.0, tracker.ascentMeters)
+        // And the ride carries on from where it really is, once the source has
+        // had its half-minute to settle.
+        (2..200).forEach { tracker.record(855.0 + (it - 2) * 0.25, null, start + it * 1000L) }
+        assertTrue(tracker.ascentMeters > 30, "the real climb after it is counted, got ${tracker.ascentMeters}")
     }
 
     @Test
@@ -175,9 +180,9 @@ class AltitudeTrackerTest {
         // in metres per second would have thrown away the sixty metres of climb
         // that happened while nobody was looking at the watch.
         val tracker = AltitudeTracker()
-        tracker.record(800.0, null, start)
-        tracker.record(860.0, null, start + 60_000)
-        assertEquals(60.0, tracker.ascentMeters, "a minute of climbing is a climb")
+        // Half a minute apart, which is what the screen being off looks like.
+        (0..10).forEach { tracker.record(800.0 + it * 6.0, null, start + it * 30_000L) }
+        assertTrue(tracker.ascentMeters > 40, "climbing between deliveries is climbing, got ${tracker.ascentMeters}")
     }
 
     @Test
@@ -188,5 +193,87 @@ class AltitudeTrackerTest {
         tracker.record(0.0, null, start)
         tracker.record(855.0, null, start + 1000)
         assertEquals(0.0, tracker.ascentMeters)
+    }
+
+    @Test
+    fun aReceiverConvergingFromZeroIsNotAnEightHundredMetreClimb() {
+        // The ride that cost a whole ascent. A receiver with no vertical
+        // solution reports zero and converges to the true height over the first
+        // minutes. Every individual step looks like riding - only the sustained
+        // rate gives it away, and the old per-step guard passed it straight
+        // through: eight hundred and forty-two metres of hill that was never
+        // ridden, on a ride whose only climbing was at the start.
+        val tracker = AltitudeTracker()
+        val overSeconds = 600
+        (0..overSeconds).forEach { second ->
+            tracker.record(
+                barometricMeters = null,
+                gnssMeters = 850.0 * (second.toDouble() / overSeconds),
+                nowEpochMs = start + second * 1000L,
+            )
+        }
+        assertEquals(0.0, tracker.ascentMeters, "a settling altimeter is not a hill")
+        assertEquals(850.0, tracker.altitudeMeters, "the height itself is still shown")
+    }
+
+    @Test
+    fun aRealClimbIsCountedOnceTheSourceHasSettled() {
+        // Eight hundred metres an hour is a hard sustained climb and must
+        // survive the settling rule intact.
+        val tracker = AltitudeTracker()
+        (0..1200).forEach { second ->
+            tracker.record(850.0 + second * 0.22, null, start + second * 1000L)
+        }
+        // The first half-minute is given up to settling; the rest is counted.
+        assertTrue(tracker.ascentMeters > 250, "expected most of 264 m, got ${tracker.ascentMeters}")
+        assertTrue(tracker.ascentMeters <= 264, "cannot exceed what was climbed, got ${tracker.ascentMeters}")
+    }
+
+    @Test
+    fun aFastDescentIsNotMistakenForASettlingSensor() {
+        // The rule is one-sided on purpose. Eight hundred metres down in ten
+        // minutes is an ordinary road descent, and a symmetric test would have
+        // thrown it away.
+        val tracker = AltitudeTracker()
+        (0..600).forEach { second ->
+            tracker.record(1700.0 - second * 1.4, null, start + second * 1000L)
+        }
+        assertTrue(tracker.descentMeters > 750, "expected about 840 m down, got ${tracker.descentMeters}")
+        assertEquals(0.0, tracker.ascentMeters)
+    }
+
+    @Test
+    fun theClimbGivenUpToSettlingIsSmall() {
+        // What the rule costs: a ride that starts straight up a wall loses the
+        // first half-minute of it. Under ten metres, against a whole ride's
+        // ascent invented.
+        val tracker = AltitudeTracker()
+        (0..600).forEach { second ->
+            tracker.record(850.0 + second * 0.28, null, start + second * 1000L)
+        }
+        val climbed = 600 * 0.28
+        assertTrue(climbed - tracker.ascentMeters < 12, "gave up ${climbed - tracker.ascentMeters} m")
+    }
+
+    @Test
+    fun aReceiverThatConvergesAgainMidRideCostsAWindowRatherThanTheWholeClimb() {
+        // A solution lost in a tunnel and regained does exactly what it did at
+        // the start of the ride. A rule that decided once that the source had
+        // settled would count the whole of the second convergence as a hill.
+        val tracker = AltitudeTracker()
+        // Twenty minutes of honest riding first.
+        (0..1200).forEach { tracker.record(850.0 + it * 0.05, null, start + it * 1000L) }
+        val honest = tracker.ascentMeters
+        assertTrue(honest > 40, "the real climb is counted, got $honest")
+        // Then the receiver drops out and converges from zero again.
+        (0..600).forEach {
+            tracker.record(850.0 * (it.toDouble() / 600), null, start + (1200 + it) * 1000L)
+        }
+        // A window is what it takes to notice: while the window still straddles
+        // the drop-out its net movement is downwards, and the convergence is
+        // counted until it clears. That bounds the damage at half a minute of
+        // it - forty-odd metres instead of the whole eight hundred and fifty.
+        val invented = tracker.ascentMeters - honest
+        assertTrue(invented < 50, "the second convergence added $invented m")
     }
 }
