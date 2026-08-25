@@ -128,8 +128,11 @@ object FieldValues {
         return when {
             id == "segment_name" -> segment.segment.name
             id == "segment_best" -> FieldFormatter.duration(segment.segment.referenceSeconds?.let { millis(it) })
-            segment.riding || segment.finished -> onTheSegment(id, segment, units)
-            id == "segment_to_start" -> FieldFormatter.distance(segment.toStartMeters, units)
+            // Zero rather than empty while the rider is on it: the way to the
+            // nearest segment, when it is under the wheels, is no way at all.
+            id == "segment_to_start" ->
+                FieldFormatter.distance(if (segment.timing) 0.0 else segment.toStartMeters, units)
+            segment.timing -> onTheSegment(id, segment, units)
             else -> FieldFormatter.empty
         }
     }
@@ -139,15 +142,36 @@ object FieldValues {
         id: String,
         segment: SegmentState,
         units: UnitSystem,
-    ): String =
+    ): String = clockOnTheSegment(id, segment) ?: groundOnTheSegment(id, segment, units)
+
+    /** What the effort is doing to the clock. */
+    private fun clockOnTheSegment(
+        id: String,
+        segment: SegmentState,
+    ): String? =
         when (id) {
             "segment_time" -> FieldFormatter.duration(millis(segment.elapsedSeconds))
-            "segment_remaining" -> FieldFormatter.distance(segment.remainingMeters, units)
+            "segment_time_left" -> FieldFormatter.duration(segment.estimatedRemainingSeconds?.let { millis(it) })
+            "segment_projected" -> FieldFormatter.duration(segment.projectedSeconds?.let { millis(it) })
             "segment_ahead" -> FieldFormatter.signedDuration(segment.aheadSeconds?.let { millis(it) })
+            else -> null
+        }
+
+    /** And what it is doing to the ground: distance covered, left, and climbed. */
+    private fun groundOnTheSegment(
+        id: String,
+        segment: SegmentState,
+        units: UnitSystem,
+    ): String =
+        when (id) {
+            "segment_covered" -> FieldFormatter.distance(segment.coveredMeters, units)
+            "segment_remaining" -> FieldFormatter.distance(segment.remainingMeters, units)
             "segment_ahead_distance" -> FieldFormatter.signedDistance(segment.aheadMeters, units)
+            "segment_ascent" -> FieldFormatter.elevation(segment.ascentMeters, units)
+            "segment_descent" -> FieldFormatter.elevation(segment.descentMeters, units)
             "segment_ascent_left" -> FieldFormatter.elevation(segment.remainingAscentMeters, units)
+            "segment_descent_left" -> FieldFormatter.elevation(segment.remainingDescentMeters, units)
             "segment_grade_left" -> FieldFormatter.grade(segment.remainingGradePercent)
-            // The way to the start, while riding the segment it started.
             else -> FieldFormatter.empty
         }
 

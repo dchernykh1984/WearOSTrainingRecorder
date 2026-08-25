@@ -107,8 +107,14 @@
     <string name="field_segment_ahead">समय बढ़त</string>
     <string name="field_segment_ahead_distance">दूरी बढ़त</string>
     <string name="field_segment_best">सेगमेंट रिकॉर्ड</string>
+    <string name="field_segment_projected">अनुमानित समय</string>
     <string name="field_segment_ascent_left">शेष चढ़ाई</string>
     <string name="field_segment_grade_left">शेष ढाल</string>
+    <string name="field_segment_time_left">शेष समय</string>
+    <string name="field_segment_covered">तय दूरी</string>
+    <string name="field_segment_ascent">सेगमेंट चढ़ाई</string>
+    <string name="field_segment_descent">सेगमेंट उतार</string>
+    <string name="field_segment_descent_left">शेष उतार</string>
     <string name="action_start">शुरू</string>
     <string name="action_pause">रोकें</string>
     <string name="action_resume">जारी रखें</string>

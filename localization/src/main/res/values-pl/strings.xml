@@ -24,8 +24,14 @@
     <string name="field_segment_ahead">Przewaga czasu</string>
     <string name="field_segment_ahead_distance">Przewaga dystansu</string>
     <string name="field_segment_best">Rekord segmentu</string>
+    <string name="field_segment_projected">Czas prognozowany</string>
     <string name="field_segment_ascent_left">Pozostały podjazd</string>
     <string name="field_segment_grade_left">Pozostałe nachylenie</string>
+    <string name="field_segment_time_left">Czas pozostały</string>
+    <string name="field_segment_covered">Przejechany dyst.</string>
+    <string name="field_segment_ascent">Podjazd segmentu</string>
+    <string name="field_segment_descent">Zjazd segmentu</string>
+    <string name="field_segment_descent_left">Pozostały zjazd</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Start</string>
     <string name="discipline_cycling">Kolarstwo</string>

@@ -116,11 +116,17 @@ object FieldCatalogue {
             DataFieldDef("segment_name", SEGMENT),
             DataFieldDef("segment_to_start", SEGMENT),
             DataFieldDef("segment_time", SEGMENT),
+            DataFieldDef("segment_time_left", SEGMENT),
+            DataFieldDef("segment_covered", SEGMENT),
             DataFieldDef("segment_remaining", SEGMENT),
             DataFieldDef("segment_ahead", SEGMENT),
             DataFieldDef("segment_ahead_distance", SEGMENT),
             DataFieldDef("segment_best", SEGMENT),
+            DataFieldDef("segment_projected", SEGMENT),
+            DataFieldDef("segment_ascent", SEGMENT),
+            DataFieldDef("segment_descent", SEGMENT),
             DataFieldDef("segment_ascent_left", SEGMENT),
+            DataFieldDef("segment_descent_left", SEGMENT),
             DataFieldDef("segment_grade_left", SEGMENT),
         )
 

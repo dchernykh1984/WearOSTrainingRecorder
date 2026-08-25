@@ -24,8 +24,14 @@
     <string name="field_segment_ahead">Отрыв, время</string>
     <string name="field_segment_ahead_distance">Отрыв, дист.</string>
     <string name="field_segment_best">Рекорд сегм.</string>
+    <string name="field_segment_projected">Прогноз итога</string>
     <string name="field_segment_ascent_left">Набор до фин.</string>
     <string name="field_segment_grade_left">Уклон до фин.</string>
+    <string name="field_segment_time_left">Прогноз время</string>
+    <string name="field_segment_covered">Проехано</string>
+    <string name="field_segment_ascent">Набор сегм.</string>
+    <string name="field_segment_descent">Сброс сегм.</string>
+    <string name="field_segment_descent_left">Сброс до фин.</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Старт</string>
     <string name="discipline_cycling">Велоспорт</string>

@@ -24,8 +24,14 @@
     <string name="field_segment_ahead">Tijdvoorsprong</string>
     <string name="field_segment_ahead_distance">Afstandsvoorsprong</string>
     <string name="field_segment_best">Segmentrecord</string>
+    <string name="field_segment_projected">Verwachte tijd</string>
     <string name="field_segment_ascent_left">Resterende klim</string>
     <string name="field_segment_grade_left">Resterende helling</string>
+    <string name="field_segment_time_left">Resterende tijd</string>
+    <string name="field_segment_covered">Afstand gereden</string>
+    <string name="field_segment_ascent">Segmentklim</string>
+    <string name="field_segment_descent">Segmentdaling</string>
+    <string name="field_segment_descent_left">Resterende daling</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Starten</string>
     <string name="discipline_cycling">Wielrennen</string>

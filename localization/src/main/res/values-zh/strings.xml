@@ -107,8 +107,14 @@
     <string name="field_segment_ahead">领先时间</string>
     <string name="field_segment_ahead_distance">领先距离</string>
     <string name="field_segment_best">路段最佳</string>
+    <string name="field_segment_projected">预计成绩</string>
     <string name="field_segment_ascent_left">剩余爬升</string>
     <string name="field_segment_grade_left">剩余坡度</string>
+    <string name="field_segment_time_left">预计剩余时间</string>
+    <string name="field_segment_covered">已骑距离</string>
+    <string name="field_segment_ascent">路段爬升</string>
+    <string name="field_segment_descent">路段下降</string>
+    <string name="field_segment_descent_left">剩余下降</string>
     <string name="action_start">开始</string>
     <string name="action_pause">暂停</string>
     <string name="action_resume">继续</string>
