@@ -28,14 +28,41 @@ import kotlin.math.abs
  * that can be a minute apart. Eight hundred metres in a second is a sensor
  * settling; sixty metres in a minute is a hill, and a fixed cap in metres would
  * have thrown the hill away.
+ *
+ * A per-step rate is still not enough on its own, and this cost a rider a whole
+ * ride's ascent. A receiver with no vertical solution reports zero and then
+ * *converges* to the true height over the first minutes. Every individual step
+ * of that convergence looks like riding; only the sustained rate gives it away.
+ * Eight hundred and fifty metres over ten minutes is one and a half metres a
+ * second held for ten minutes - five thousand metres an hour, where the best
+ * climber alive manages under two thousand.
+ *
+ * So nothing is counted until the source has settled, which is judged over a
+ * window: a sustained *climb* faster than any human is a sensor converging, not
+ * a hill. The test is deliberately one-sided. Ascent has a physiological
+ * ceiling and descent does not - eight hundred metres down in ten minutes is an
+ * ordinary road descent, and a symmetric rule would have thrown it away.
+ *
+ * The cost is the first half-minute of climb on a ride that starts up a wall:
+ * under ten metres, against a whole ride's ascent invented.
  */
 class AltitudeTracker(
     private val barometricThresholdMeters: Double = BAROMETRIC_THRESHOLD_METERS,
     private val satelliteThresholdMeters: Double = SATELLITE_THRESHOLD_METERS,
     private val impossibleRateMps: Double = IMPOSSIBLE_RATE_MPS,
+    private val settleWindowMs: Long = SETTLE_WINDOW_MS,
+    private val sustainedClimbMps: Double = SUSTAINED_CLIMB_MPS,
 ) {
     private var reference: Double? = null
     private var referenceAtEpochMs = 0L
+
+    /** Recent readings, kept only long enough to judge whether the source has settled. */
+    private val recent = ArrayDeque<Reading>()
+
+    private data class Reading(
+        val meters: Double,
+        val atEpochMs: Long,
+    )
 
     /**
      * Chosen on the first reading, by whichever source gave it.
@@ -70,6 +97,24 @@ class AltitudeTracker(
     ) {
         val measured = barometricMeters ?: gnssMeters ?: return
         altitudeMeters = measured
+        recent.addLast(Reading(measured, nowEpochMs))
+        while (recent.size > 1 && nowEpochMs - recent.first().atEpochMs > settleWindowMs) {
+            recent.removeFirst()
+        }
+        // Nothing is counted while the source is climbing faster than anybody
+        // rides. The anchor follows, so counting resumes from where the ride
+        // actually is.
+        //
+        // Asked of every reading rather than latched once at the start: a
+        // receiver that loses its solution in a tunnel and converges again in
+        // the middle of a ride does exactly what it did at the beginning, and a
+        // rule that had already decided the source was settled would count the
+        // whole of it as a hill.
+        if (!hasSettled(nowEpochMs)) {
+            reference = measured
+            referenceAtEpochMs = nowEpochMs
+            return
+        }
         val from = reference
         if (from == null) {
             thresholdMeters =
@@ -99,8 +144,25 @@ class AltitudeTracker(
         referenceAtEpochMs = nowEpochMs
     }
 
+    /**
+     * True once the source has stopped converging.
+     *
+     * Judged over a window rather than between two readings, and only upwards:
+     * a climb held faster than anybody can ride is a receiver settling. A
+     * descent that fast is a road.
+     */
+    @Suppress("ReturnCount")
+    private fun hasSettled(nowEpochMs: Long): Boolean {
+        val first = recent.first()
+        val seconds = (nowEpochMs - first.atEpochMs) / MILLIS_PER_SECOND
+        if (seconds < settleWindowMs / MILLIS_PER_SECOND) return false
+        val rise = recent.last().meters - first.meters
+        return rise / seconds <= sustainedClimbMps
+    }
+
     /** Forgets the ride. The next one starts from nothing, as it must. */
     fun clear() {
+        recent.clear()
         reference = null
         referenceAtEpochMs = 0
         altitudeMeters = null
@@ -124,6 +186,19 @@ class AltitudeTracker(
 
         /** What a reading may change by when there is no interval to judge it over. */
         const val SETTLING_CAP_METERS = 100.0
+
+        /**
+         * Long enough for a convergence to show itself, short enough that the
+         * climb it costs at the start of a ride is under ten metres.
+         */
+        const val SETTLE_WINDOW_MS = 30_000L
+
+        /**
+         * A metre a second held for half a minute is three and a half thousand
+         * metres an hour. The best climber alive does under two thousand, so
+         * anything past this is the altimeter finding itself rather than a road.
+         */
+        const val SUSTAINED_CLIMB_MPS = 1.0
 
         const val MILLIS_PER_SECOND = 1000.0
     }
