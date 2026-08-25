@@ -705,6 +705,28 @@ class RecordingViewModel(
     }
 
     /**
+     * What the ride says about height.
+     *
+     * The altitude only once the source has settled: written while the altimeter
+     * is still converging it goes into the recorded track as a ramp, and a
+     * service computing its own ascent from that ramp hands back the very climb
+     * we refused to count.
+     *
+     * The totals from the first reading onwards, zero included. Left to the
+     * platform's own figure until ours was non-zero, the field showed something
+     * gathered on other terms - and a ride that has climbed nothing has climbed
+     * nothing, which is worth showing rather than a gap.
+     */
+    private fun heightValues(): Map<String, Double> =
+        buildMap {
+            if (altitude.trustworthy) altitude.altitudeMeters?.let { put("altitude", it) }
+            if (altitude.measuring) {
+                put("ascent_total", altitude.ascentMeters)
+                put("descent_total", altitude.descentMeters)
+            }
+        }
+
+    /**
      * The platform's readings, with its running totals rebased on this ride.
      *
      * An exercise session that was already under way hands over its accumulated
@@ -775,16 +797,7 @@ class RecordingViewModel(
                 reportedDistanceMeters = maxOf(reportedDistanceMeters, track.distanceMeters, platform)
                 put("distance_total", reportedDistanceMeters)
                 track.speedMps?.let { put("speed_current", it) }
-                altitude.altitudeMeters?.let { put("altitude", it) }
-                // Published from the first reading onwards, zero included. Left
-                // to the platform's own total until ours was non-zero, the field
-                // showed a figure gathered on some other terms - and a ride that
-                // has climbed nothing has climbed nothing, which is a number
-                // worth showing rather than a gap.
-                if (altitude.measuring) {
-                    put("ascent_total", altitude.ascentMeters)
-                    put("descent_total", altitude.descentMeters)
-                }
+                putAll(heightValues())
                 gradient.percent()?.let { put("grade", it) }
                 gradient.verticalSpeedMetersPerHour()?.let { put("vertical_speed", it) }
                 rollingPower.average(RollingPower.THREE_SECONDS_MS, nowEpochMs)?.let { put("power_3s", it) }

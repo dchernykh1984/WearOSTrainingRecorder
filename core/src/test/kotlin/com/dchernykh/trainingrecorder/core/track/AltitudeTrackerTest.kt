@@ -4,6 +4,7 @@ import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -275,5 +276,24 @@ class AltitudeTrackerTest {
         // it - forty-odd metres instead of the whole eight hundred and fifty.
         val invented = tracker.ascentMeters - honest
         assertTrue(invented < 50, "the second convergence added $invented m")
+    }
+
+    @Test
+    fun aConvergingHeightIsNotWorthWritingDown() {
+        // Refusing to count a convergence is only half of it. The recorded track
+        // carries altitudes of its own, and a service computes its own ascent
+        // from them - so a ramp from zero left in the file hands back the very
+        // climb we refused.
+        val tracker = AltitudeTracker()
+        (0..120).forEach { second ->
+            tracker.record(null, 850.0 * (second / 600.0), start + second * 1000L)
+        }
+        assertFalse(tracker.trustworthy, "a converging height must stay out of the track")
+        // Once it settles, the height is written down again.
+        (121..300).forEach { second ->
+            tracker.record(null, 170.0 + (second - 120) * 0.2, start + second * 1000L)
+        }
+        assertTrue(tracker.trustworthy)
+        assertNotNull(tracker.altitudeMeters)
     }
 }
