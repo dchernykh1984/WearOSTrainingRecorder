@@ -89,6 +89,18 @@ class AltitudeTracker(
     /** True once some source has given a height, which is when the totals mean anything. */
     val measuring: Boolean get() = altitudeMeters != null
 
+    /**
+     * Whether the height is worth writing down.
+     *
+     * False while the source is still converging - and that matters beyond the
+     * screen. Our own total can refuse a convergence, but the *series* we record
+     * cannot: a service reading the file computes its own ascent from the
+     * altitudes in it, so a ramp from zero left in the track hands the phantom
+     * climb straight back however carefully we refused it ourselves.
+     */
+    var trustworthy: Boolean = false
+        private set
+
     @Suppress("ReturnCount")
     fun record(
         barometricMeters: Double?,
@@ -110,7 +122,8 @@ class AltitudeTracker(
         // the middle of a ride does exactly what it did at the beginning, and a
         // rule that had already decided the source was settled would count the
         // whole of it as a hill.
-        if (!hasSettled(nowEpochMs)) {
+        trustworthy = hasSettled(nowEpochMs)
+        if (!trustworthy) {
             reference = measured
             referenceAtEpochMs = nowEpochMs
             return
@@ -163,6 +176,7 @@ class AltitudeTracker(
     /** Forgets the ride. The next one starts from nothing, as it must. */
     fun clear() {
         recent.clear()
+        trustworthy = false
         reference = null
         referenceAtEpochMs = 0
         altitudeMeters = null
