@@ -62,6 +62,7 @@ object Labels {
             "elevation" to R.string.category_elevation,
             "energy" to R.string.category_energy,
             "swimming" to R.string.category_swimming,
+            "segment" to R.string.category_segment,
             "race_stats" to R.string.category_race_stats,
         )
 
@@ -117,6 +118,15 @@ object Labels {
             "gap_next_group_delta" to R.string.field_gap_next_group_delta,
             "gap_leader_group_delta" to R.string.field_gap_leader_group_delta,
             "laps" to R.string.field_laps,
+            "segment_name" to R.string.field_segment_name,
+            "segment_to_start" to R.string.field_segment_to_start,
+            "segment_time" to R.string.field_segment_time,
+            "segment_remaining" to R.string.field_segment_remaining,
+            "segment_ahead" to R.string.field_segment_ahead,
+            "segment_ahead_distance" to R.string.field_segment_ahead_distance,
+            "segment_best" to R.string.field_segment_best,
+            "segment_ascent_left" to R.string.field_segment_ascent_left,
+            "segment_grade_left" to R.string.field_segment_grade_left,
         )
 
     /** Zero when the id is unknown, which the caller renders as a blank slot. */

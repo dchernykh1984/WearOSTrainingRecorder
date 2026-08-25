@@ -95,7 +95,7 @@ class FieldCoverageTest {
 
     @Test
     fun everyFieldIsEitherProducedOrOnTheListOfWorkOutstanding() {
-        val accounted = produced + notYet.keys + DERIVED_FROM_PRODUCED + TIMERS + RACE_FIELDS
+        val accounted = produced + notYet.keys + DERIVED_FROM_PRODUCED + TIMERS + RACE_FIELDS + SEGMENT_FIELDS
         val unaccounted = FieldCatalogue.all.map { it.id }.filterNot { it in accounted }
         assertTrue(
             unaccounted.isEmpty(),
@@ -138,6 +138,9 @@ class FieldCoverageTest {
         val TIMERS = setOf("timer_elapsed", "timer_moving", "timer_paused", "time_of_day", "sunrise", "sunset")
 
         val RACE_FIELDS = FieldCatalogue.raceStats.map { it.id }.toSet()
+
+        /** Filled by the segment tracker rather than by any sensor. */
+        val SEGMENT_FIELDS = FieldCatalogue.segment.map { it.id }.toSet()
     }
 
     @Test

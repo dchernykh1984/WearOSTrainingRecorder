@@ -25,7 +25,12 @@ enum class UnitSystem(
  * decisions are - a pace of zero is not "0:00" but nothing at all, a duration
  * drops its hours until there are some, and a distance changes precision as it
  * grows. All of that is worth testing without a screen.
+ *
+ * One function per shape of value, deliberately: the alternative is flags on
+ * fewer functions, and a formatter whose output depends on a boolean is exactly
+ * the thing that renders the wrong field wrongly halfway up a climb.
  */
+@Suppress("TooManyFunctions")
 object FieldFormatter {
     private const val SECONDS_PER_MINUTE = 60
     private const val MINUTES_PER_HOUR = 60
@@ -143,6 +148,28 @@ object FieldFormatter {
         val value = if (units == UnitSystem.METRIC) meters else meters / METERS_PER_FOOT
         val suffix = if (units == UnitSystem.METRIC) "m" else "ft"
         return "${value.roundToLong()} $suffix"
+    }
+
+    /**
+     * A gap against another effort, which means nothing without its sign.
+     *
+     * Positive is ahead, following every device that has ever shown this: a
+     * rider glancing down mid-effort reads the sign before the number.
+     */
+    fun signedDuration(millis: Long?): String {
+        if (millis == null) return empty
+        val sign = if (millis < 0) "-" else "+"
+        return "$sign${duration(abs(millis))}"
+    }
+
+    /** The same gap measured up the road rather than on the clock. */
+    fun signedDistance(
+        meters: Double?,
+        units: UnitSystem = UnitSystem.METRIC,
+    ): String {
+        if (meters == null) return empty
+        val sign = if (meters < 0) "-" else "+"
+        return "$sign${distance(abs(meters), units)}"
     }
 
     fun integer(

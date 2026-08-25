@@ -47,6 +47,7 @@
     <string name="category_energy">Enerji</string>
     <string name="category_swimming">Yuzme</string>
     <string name="category_race_stats">Yaris</string>
+    <string name="category_segment">Segmentler</string>
     <string name="field_timer_elapsed">Sure</string>
     <string name="field_timer_moving">Hareket suresi</string>
     <string name="field_timer_paused">Duraklatilan</string>
@@ -99,6 +100,15 @@
     <string name="field_gap_next_group_delta">Arka degisim grup</string>
     <string name="field_gap_leader_group_delta">Lider degisim grup</string>
     <string name="field_laps">Turlar</string>
+    <string name="field_segment_name">Segment</string>
+    <string name="field_segment_to_start">Segmente kalan</string>
+    <string name="field_segment_time">Segment süresi</string>
+    <string name="field_segment_remaining">Kalan mesafe</string>
+    <string name="field_segment_ahead">Zaman farkı</string>
+    <string name="field_segment_ahead_distance">Mesafe farkı</string>
+    <string name="field_segment_best">Segment rekoru</string>
+    <string name="field_segment_ascent_left">Kalan tırmanış</string>
+    <string name="field_segment_grade_left">Kalan eğim</string>
     <string name="action_start">Basla</string>
     <string name="action_pause">Duraklat</string>
     <string name="action_resume">Devam</string>

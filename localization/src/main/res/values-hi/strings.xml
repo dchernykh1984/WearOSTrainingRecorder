@@ -47,6 +47,7 @@
     <string name="category_energy">ऊर्जा</string>
     <string name="category_swimming">तैराकी</string>
     <string name="category_race_stats">रेस</string>
+    <string name="category_segment">सेगमेंट</string>
     <string name="field_timer_elapsed">समय</string>
     <string name="field_timer_moving">गति में</string>
     <string name="field_timer_paused">रुका हुआ</string>
@@ -99,6 +100,15 @@
     <string name="field_gap_next_group_delta">पीछे बदलाव समूह</string>
     <string name="field_gap_leader_group_delta">लीडर बदलाव समूह</string>
     <string name="field_laps">लैप</string>
+    <string name="field_segment_name">सेगमेंट</string>
+    <string name="field_segment_to_start">सेगमेंट तक</string>
+    <string name="field_segment_time">सेगमेंट समय</string>
+    <string name="field_segment_remaining">शेष दूरी</string>
+    <string name="field_segment_ahead">समय बढ़त</string>
+    <string name="field_segment_ahead_distance">दूरी बढ़त</string>
+    <string name="field_segment_best">सेगमेंट रिकॉर्ड</string>
+    <string name="field_segment_ascent_left">शेष चढ़ाई</string>
+    <string name="field_segment_grade_left">शेष ढाल</string>
     <string name="action_start">शुरू</string>
     <string name="action_pause">रोकें</string>
     <string name="action_resume">जारी रखें</string>

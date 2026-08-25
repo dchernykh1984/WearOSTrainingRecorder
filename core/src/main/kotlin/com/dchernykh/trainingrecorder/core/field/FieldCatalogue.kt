@@ -7,6 +7,7 @@ import com.dchernykh.trainingrecorder.core.field.FieldCategory.ENERGY
 import com.dchernykh.trainingrecorder.core.field.FieldCategory.HEART_RATE
 import com.dchernykh.trainingrecorder.core.field.FieldCategory.POWER
 import com.dchernykh.trainingrecorder.core.field.FieldCategory.RACE_STATS
+import com.dchernykh.trainingrecorder.core.field.FieldCategory.SEGMENT
 import com.dchernykh.trainingrecorder.core.field.FieldCategory.SPEED
 import com.dchernykh.trainingrecorder.core.field.FieldCategory.SWIMMING
 import com.dchernykh.trainingrecorder.core.field.FieldCategory.TIME
@@ -102,6 +103,28 @@ object FieldCatalogue {
         )
 
     /**
+     * Live segments, against the rider's own best effort.
+     *
+     * Strava retired public leaderboards for third-party apps in 2020, so the
+     * rival here is the rider's previous self rather than the KOM - the same
+     * comparison Garmin calls "PR" and by some distance the one most riders
+     * actually chase. The field names follow Garmin's, because a rider who has
+     * used live segments before should not have to learn a second vocabulary.
+     */
+    val segment: List<DataFieldDef> =
+        listOf(
+            DataFieldDef("segment_name", SEGMENT),
+            DataFieldDef("segment_to_start", SEGMENT),
+            DataFieldDef("segment_time", SEGMENT),
+            DataFieldDef("segment_remaining", SEGMENT),
+            DataFieldDef("segment_ahead", SEGMENT),
+            DataFieldDef("segment_ahead_distance", SEGMENT),
+            DataFieldDef("segment_best", SEGMENT),
+            DataFieldDef("segment_ascent_left", SEGMENT),
+            DataFieldDef("segment_grade_left", SEGMENT),
+        )
+
+    /**
      * Ids match the timing server's JSON keys one for one. `qty_abs` and
      * `qty_group` are intentionally absent: the server sends them, but they are
      * rendered as the denominator of the place fields rather than on their own,
@@ -128,7 +151,7 @@ object FieldCatalogue {
 
     val all: List<DataFieldDef> =
         time + distance + speed + heartRate + cadence + power +
-            elevation + energy + swimming + raceStats
+            elevation + energy + swimming + segment + raceStats
 
     /** Shown in an empty slot and wherever a value is not available yet. */
     const val EMPTY_VALUE = "--"
