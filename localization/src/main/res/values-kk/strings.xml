@@ -17,6 +17,15 @@
     <string name="field_gap_next_group_delta">Динам ар тп</string>
     <string name="field_gap_leader_group_delta">Динам лд тп</string>
     <string name="field_laps">Айналым</string>
+    <string name="field_segment_name">Сегмент</string>
+    <string name="field_segment_to_start">Сегментке дейін</string>
+    <string name="field_segment_time">Сегмент уақыты</string>
+    <string name="field_segment_remaining">Қалғаны</string>
+    <string name="field_segment_ahead">Уақыт айырмасы</string>
+    <string name="field_segment_ahead_distance">Қашықтық айырм.</string>
+    <string name="field_segment_best">Сегмент рекорды</string>
+    <string name="field_segment_ascent_left">Қалған көтерілу</string>
+    <string name="field_segment_grade_left">Қалған еңіс</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Бастау</string>
     <string name="discipline_cycling">Велоспорт</string>
@@ -64,6 +73,7 @@
     <string name="category_energy">Энергия</string>
     <string name="category_swimming">Жүзу</string>
     <string name="category_race_stats">Жарыс</string>
+    <string name="category_segment">Сегменттер</string>
     <string name="field_timer_elapsed">Уақыт</string>
     <string name="field_timer_moving">Қозғалыста</string>
     <string name="field_timer_paused">Кідірісте</string>

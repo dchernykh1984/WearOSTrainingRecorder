@@ -5,6 +5,7 @@ import com.dchernykh.trainingrecorder.core.format.UnitSystem
 import com.dchernykh.trainingrecorder.core.race.RaceStatsFormatter
 import com.dchernykh.trainingrecorder.core.race.RaceStatsSnapshot
 import com.dchernykh.trainingrecorder.core.recording.RecordingState
+import com.dchernykh.trainingrecorder.core.segment.SegmentState
 import com.dchernykh.trainingrecorder.core.sensor.SensorSnapshot
 import com.dchernykh.trainingrecorder.core.solar.SolarEvents
 
@@ -36,6 +37,8 @@ data class Surroundings(
  * not once someone remembers to add a branch for it.
  */
 object FieldValues {
+    private const val MILLIS_PER_SECOND = 1000.0
+
     private val DISTANCE_FIELDS = setOf("distance_total")
 
     private val SPEED_FIELDS = setOf("speed_current", "speed_avg", "speed_max")
@@ -64,6 +67,7 @@ object FieldValues {
      * location service, so this stays deterministic; the caller is what knows
      * where the watch is.
      */
+    @Suppress("LongParameterList")
     fun snapshot(
         state: RecordingState,
         nowEpochMs: Long,
@@ -71,9 +75,10 @@ object FieldValues {
         race: RaceStatsSnapshot = RaceStatsSnapshot.EMPTY,
         units: UnitSystem = UnitSystem.METRIC,
         surroundings: Surroundings = Surroundings(),
+        segment: SegmentState? = null,
     ): Map<String, String> =
         FieldCatalogue.all.associate { definition ->
-            definition.id to value(definition, state, sensors, race, units, nowEpochMs, surroundings)
+            definition.id to value(definition, state, sensors, race, units, nowEpochMs, surroundings, segment)
         }
 
     @Suppress("LongParameterList", "ReturnCount")
@@ -85,11 +90,13 @@ object FieldValues {
         units: UnitSystem,
         now: Long,
         surroundings: Surroundings,
+        segment: SegmentState?,
     ): String {
         val id = definition.id
         // Race stats arrive pre-formatted from the server; reformatting them
         // would only be a chance to disagree with the timing screen.
         if (definition.category == FieldCategory.RACE_STATS) return RaceStatsFormatter.displayValue(id, race)
+        if (definition.category == FieldCategory.SEGMENT) return segmentValue(id, segment, units)
         timerValue(id, state, now, surroundings)?.let { return it }
         val reading = sensors.value(id)
         return when {
@@ -103,6 +110,48 @@ object FieldValues {
             else -> FieldFormatter.integer(reading)
         }
     }
+
+    /**
+     * What the live segment reads, or empty where there is nothing to say.
+     *
+     * Every one of these is empty most of the ride, and that is correct: there
+     * is no segment under the wheels most of the time. The one exception is the
+     * distance to the next segment, which is worth knowing precisely when the
+     * rider is not on one yet.
+     */
+    private fun segmentValue(
+        id: String,
+        segment: SegmentState?,
+        units: UnitSystem,
+    ): String {
+        if (segment == null) return FieldFormatter.empty
+        return when {
+            id == "segment_name" -> segment.segment.name
+            id == "segment_best" -> FieldFormatter.duration(segment.segment.referenceSeconds?.let { millis(it) })
+            segment.riding || segment.finished -> onTheSegment(id, segment, units)
+            id == "segment_to_start" -> FieldFormatter.distance(segment.toStartMeters, units)
+            else -> FieldFormatter.empty
+        }
+    }
+
+    /** The fields that only mean anything once the effort has begun. */
+    private fun onTheSegment(
+        id: String,
+        segment: SegmentState,
+        units: UnitSystem,
+    ): String =
+        when (id) {
+            "segment_time" -> FieldFormatter.duration(millis(segment.elapsedSeconds))
+            "segment_remaining" -> FieldFormatter.distance(segment.remainingMeters, units)
+            "segment_ahead" -> FieldFormatter.signedDuration(segment.aheadSeconds?.let { millis(it) })
+            "segment_ahead_distance" -> FieldFormatter.signedDistance(segment.aheadMeters, units)
+            "segment_ascent_left" -> FieldFormatter.elevation(segment.remainingAscentMeters, units)
+            "segment_grade_left" -> FieldFormatter.grade(segment.remainingGradePercent)
+            // The way to the start, while riding the segment it started.
+            else -> FieldFormatter.empty
+        }
+
+    private fun millis(seconds: Double): Long = (seconds * MILLIS_PER_SECOND).toLong()
 
     /** The fields the recording itself owns, rather than any sensor. */
     private fun timerValue(

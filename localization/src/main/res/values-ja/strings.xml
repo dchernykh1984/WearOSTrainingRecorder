@@ -47,6 +47,7 @@
     <string name="category_energy">エネルギー</string>
     <string name="category_swimming">スイミング</string>
     <string name="category_race_stats">レース</string>
+    <string name="category_segment">セグメント</string>
     <string name="field_timer_elapsed">時間</string>
     <string name="field_timer_moving">移動時間</string>
     <string name="field_timer_paused">停止時間</string>
@@ -99,6 +100,15 @@
     <string name="field_gap_next_group_delta">後の変化 組</string>
     <string name="field_gap_leader_group_delta">先頭の変化 組</string>
     <string name="field_laps">ラップ</string>
+    <string name="field_segment_name">セグメント</string>
+    <string name="field_segment_to_start">セグメントまで</string>
+    <string name="field_segment_time">セグメント時間</string>
+    <string name="field_segment_remaining">残り距離</string>
+    <string name="field_segment_ahead">タイム差</string>
+    <string name="field_segment_ahead_distance">距離差</string>
+    <string name="field_segment_best">セグメント自己ベスト</string>
+    <string name="field_segment_ascent_left">残り獲得標高</string>
+    <string name="field_segment_grade_left">残り勾配</string>
     <string name="action_start">開始</string>
     <string name="action_pause">一時停止</string>
     <string name="action_resume">再開</string>

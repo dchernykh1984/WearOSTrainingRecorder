@@ -17,6 +17,15 @@
     <string name="field_gap_next_group_delta">Dynam bh gr</string>
     <string name="field_gap_leader_group_delta">Dynam ld gr</string>
     <string name="field_laps">Giri</string>
+    <string name="field_segment_name">Segmento</string>
+    <string name="field_segment_to_start">Al segmento</string>
+    <string name="field_segment_time">Tempo segmento</string>
+    <string name="field_segment_remaining">Dist. rimasta</string>
+    <string name="field_segment_ahead">Vantaggio tempo</string>
+    <string name="field_segment_ahead_distance">Vantaggio dist.</string>
+    <string name="field_segment_best">Record segmento</string>
+    <string name="field_segment_ascent_left">Dislivello rimasto</string>
+    <string name="field_segment_grade_left">Pendenza rimasta</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Avvia</string>
     <string name="discipline_cycling">Ciclismo</string>
@@ -64,6 +73,7 @@
     <string name="category_energy">Energia</string>
     <string name="category_swimming">Nuoto</string>
     <string name="category_race_stats">Gara</string>
+    <string name="category_segment">Segmenti</string>
     <string name="field_timer_elapsed">Tempo</string>
     <string name="field_timer_moving">In movimento</string>
     <string name="field_timer_paused">In pausa</string>

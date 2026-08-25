@@ -18,6 +18,7 @@ enum class FieldCategory(
     ELEVATION("elevation"),
     ENERGY("energy"),
     SWIMMING("swimming"),
+    SEGMENT("segment"),
     RACE_STATS("race_stats"),
     ;
 

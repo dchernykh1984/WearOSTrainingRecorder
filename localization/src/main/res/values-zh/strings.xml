@@ -47,6 +47,7 @@
     <string name="category_energy">能量</string>
     <string name="category_swimming">游泳</string>
     <string name="category_race_stats">比赛</string>
+    <string name="category_segment">路段</string>
     <string name="field_timer_elapsed">时间</string>
     <string name="field_timer_moving">运动时间</string>
     <string name="field_timer_paused">暂停时间</string>
@@ -99,6 +100,15 @@
     <string name="field_gap_next_group_delta">后车动态 组</string>
     <string name="field_gap_leader_group_delta">领骑动态 组</string>
     <string name="field_laps">圈数</string>
+    <string name="field_segment_name">路段</string>
+    <string name="field_segment_to_start">距路段</string>
+    <string name="field_segment_time">路段用时</string>
+    <string name="field_segment_remaining">剩余距离</string>
+    <string name="field_segment_ahead">领先时间</string>
+    <string name="field_segment_ahead_distance">领先距离</string>
+    <string name="field_segment_best">路段最佳</string>
+    <string name="field_segment_ascent_left">剩余爬升</string>
+    <string name="field_segment_grade_left">剩余坡度</string>
     <string name="action_start">开始</string>
     <string name="action_pause">暂停</string>
     <string name="action_resume">继续</string>

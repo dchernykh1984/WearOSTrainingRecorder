@@ -167,9 +167,10 @@ class SegmentTrackerTest {
         ride(tracker, segment, toMeters = 700.0, speedMps = 7.0)
 
         val state = assertNotNull(tracker.state)
-        val behind = assertNotNull(state.aheadSeconds, "there is a reference effort to compare against")
+        val ahead = assertNotNull(state.aheadSeconds, "there is a reference effort to compare against")
         // 700 m at 7 m/s is 100 s; the reference took 87.5 s to the same point.
-        assertTrue(behind > 10.0, "expected to be well over ten seconds down, got $behind")
+        // Ahead is positive, so being down reads as a negative number.
+        assertTrue(ahead < -10.0, "expected to be well over ten seconds down, got $ahead")
         val metres = assertNotNull(state.aheadMeters)
         assertTrue(metres < -50.0, "expected to be nearly a hundred metres back, got $metres")
     }
@@ -183,7 +184,7 @@ class SegmentTrackerTest {
 
         val state = assertNotNull(tracker.state)
         val ahead = assertNotNull(state.aheadSeconds)
-        assertTrue(ahead < -5.0, "expected to be seconds up, got $ahead")
+        assertTrue(ahead > 5.0, "expected to be seconds up, got $ahead")
         assertTrue(assertNotNull(state.aheadMeters) > 20.0, "expected to be metres up the road")
     }
 

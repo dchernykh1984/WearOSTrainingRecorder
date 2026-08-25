@@ -17,6 +17,15 @@
     <string name="field_gap_next_group_delta">Динам сз гр</string>
     <string name="field_gap_leader_group_delta">Динам лд гр</string>
     <string name="field_laps">Круги</string>
+    <string name="field_segment_name">Сегмент</string>
+    <string name="field_segment_to_start">До сегмента</string>
+    <string name="field_segment_time">Время сегм.</string>
+    <string name="field_segment_remaining">Осталось</string>
+    <string name="field_segment_ahead">Отрыв, время</string>
+    <string name="field_segment_ahead_distance">Отрыв, дист.</string>
+    <string name="field_segment_best">Рекорд сегм.</string>
+    <string name="field_segment_ascent_left">Набор до фин.</string>
+    <string name="field_segment_grade_left">Уклон до фин.</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Старт</string>
     <string name="discipline_cycling">Велоспорт</string>
@@ -64,6 +73,7 @@
     <string name="category_energy">Энергия</string>
     <string name="category_swimming">Плавание</string>
     <string name="category_race_stats">Гонка</string>
+    <string name="category_segment">Сегменты</string>
     <string name="field_timer_elapsed">Время</string>
     <string name="field_timer_moving">В движении</string>
     <string name="field_timer_paused">На паузе</string>

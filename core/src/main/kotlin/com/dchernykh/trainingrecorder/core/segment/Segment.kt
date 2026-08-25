@@ -58,8 +58,8 @@ data class Segment(
 
     /** Height at a point along the line, where the segment carries altitudes. */
     fun altitudeAt(distanceMeters: Double): Double? {
-        val known = points.filter { it.altitudeMeters != null }
-        return interpolate(known, distanceMeters, { it.distanceMeters }, { it.altitudeMeters!! })
+        val known = points.mapNotNull { point -> point.altitudeMeters?.let { point.distanceMeters to it } }
+        return interpolate(known, distanceMeters, { it.first }, { it.second })
     }
 
     /** Metres of climbing still to come from this point on. */

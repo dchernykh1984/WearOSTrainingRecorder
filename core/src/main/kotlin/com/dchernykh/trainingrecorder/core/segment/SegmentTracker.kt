@@ -22,7 +22,7 @@ data class SegmentState(
     val remainingMeters: Double get() = (segment.distanceMeters - coveredMeters).coerceAtLeast(0.0)
 
     /**
-     * Seconds behind the reference effort, negative when ahead of it.
+     * Seconds ahead of the reference effort, negative when behind it.
      *
      * Null without a reference, which is what a segment the rider has never
      * ridden looks like: there is a segment to time, just nobody to race.
@@ -31,7 +31,7 @@ data class SegmentState(
         get() {
             if (!timing) return null
             val reference = segment.referenceSecondsAt(coveredMeters) ?: return null
-            return elapsedSeconds - reference
+            return reference - elapsedSeconds
         }
 
     /** Metres ahead of where the reference effort was at this point in the effort. */

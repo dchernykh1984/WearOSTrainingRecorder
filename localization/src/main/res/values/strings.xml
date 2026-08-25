@@ -55,6 +55,7 @@
     <string name="category_energy">Energy</string>
     <string name="category_swimming">Swimming</string>
     <string name="category_race_stats">Race Stats</string>
+    <string name="category_segment">Segments</string>
 
     <!-- Data fields -->
     <string name="field_timer_elapsed">Timer</string>
@@ -109,6 +110,15 @@
     <string name="field_gap_next_group_delta">Dynam bh gr</string>
     <string name="field_gap_leader_group_delta">Dynam ld gr</string>
     <string name="field_laps">Laps</string>
+    <string name="field_segment_name">Segment</string>
+    <string name="field_segment_to_start">To Segment</string>
+    <string name="field_segment_time">Segment Time</string>
+    <string name="field_segment_remaining">Dist to Go</string>
+    <string name="field_segment_ahead">Time Ahead</string>
+    <string name="field_segment_ahead_distance">Dist Ahead</string>
+    <string name="field_segment_best">Segment PR</string>
+    <string name="field_segment_ascent_left">Climb to Go</string>
+    <string name="field_segment_grade_left">Grade to Go</string>
 
     <!-- Recording controls -->
     <string name="action_start">Start</string>
