@@ -419,7 +419,12 @@ class RecordingViewModel(
             // Services sends whatever that batch happened to carry, so an update
             // without the distance aggregate would blank the field - and, at the
             // end of a ride, save a workout that says it covered nothing.
-            builtIn += fromStartOfRide(sample.readings)
+            // The platform's own elevation is deliberately not folded in. It goes
+            // to the altitude tracker as an input and comes back out through
+            // `derived`, which is the only thing that knows whether the source
+            // has settled - folded in here as well it would reach the recorded
+            // track behind that judgement's back.
+            builtIn += fromStartOfRide(sample.readings.filterKeys { it != "altitude" })
             builtIn += derived(sample, timestamp)
             sensors.value =
                 SensorSnapshot.merge(
