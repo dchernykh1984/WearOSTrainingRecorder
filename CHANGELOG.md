@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.11.1](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.11.0...v0.11.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **core:** stop a settling altimeter being counted as a climb ([d3aa624](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/d3aa6246e3eadea434102c27c91c4121c583f9df))
+* **wear:** keep an unsettled altitude out of the recorded track ([5670511](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/567051145074848d7c0749770da6fc49564f2fc8))
+* **wear:** let only the altitude tracker decide what height reaches the track ([9d2132e](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/9d2132e9a7a1c02118d2a0ccaf8416564d62dbe6))
+
 ## [0.11.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.10.0...v0.11.0) (2026-08-17)
 
 
