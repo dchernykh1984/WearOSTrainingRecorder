@@ -21,11 +21,25 @@ object Haversine {
     fun metresBetween(
         from: Fix,
         to: Fix,
+    ): Double = metresBetween(from.latitudeDeg, from.longitudeDeg, to.latitudeDeg, to.longitudeDeg)
+
+    /**
+     * The same, from bare coordinates.
+     *
+     * Segment matching compares one fix against dozens of points on a line
+     * every second, and wrapping each of those in a [Fix] with a timestamp it
+     * has no use for would be allocation for nothing.
+     */
+    fun metresBetween(
+        fromLatitudeDeg: Double,
+        fromLongitudeDeg: Double,
+        toLatitudeDeg: Double,
+        toLongitudeDeg: Double,
     ): Double {
-        val lat1 = radians(from.latitudeDeg)
-        val lat2 = radians(to.latitudeDeg)
-        val halfDeltaLat = radians(to.latitudeDeg - from.latitudeDeg) / 2
-        val halfDeltaLon = radians(to.longitudeDeg - from.longitudeDeg) / 2
+        val lat1 = radians(fromLatitudeDeg)
+        val lat2 = radians(toLatitudeDeg)
+        val halfDeltaLat = radians(toLatitudeDeg - fromLatitudeDeg) / 2
+        val halfDeltaLon = radians(toLongitudeDeg - fromLongitudeDeg) / 2
         val a =
             sin(halfDeltaLat) * sin(halfDeltaLat) +
                 cos(lat1) * cos(lat2) * sin(halfDeltaLon) * sin(halfDeltaLon)
