@@ -107,8 +107,14 @@
     <string name="field_segment_ahead">タイム差</string>
     <string name="field_segment_ahead_distance">距離差</string>
     <string name="field_segment_best">セグメント自己ベスト</string>
+    <string name="field_segment_projected">予想タイム</string>
     <string name="field_segment_ascent_left">残り獲得標高</string>
     <string name="field_segment_grade_left">残り勾配</string>
+    <string name="field_segment_time_left">残り予想時間</string>
+    <string name="field_segment_covered">走行距離</string>
+    <string name="field_segment_ascent">セグメント獲得標高</string>
+    <string name="field_segment_descent">セグメント下り</string>
+    <string name="field_segment_descent_left">残り下り</string>
     <string name="action_start">開始</string>
     <string name="action_pause">一時停止</string>
     <string name="action_resume">再開</string>

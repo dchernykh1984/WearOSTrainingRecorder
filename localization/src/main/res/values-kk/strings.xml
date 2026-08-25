@@ -24,8 +24,14 @@
     <string name="field_segment_ahead">Уақыт айырмасы</string>
     <string name="field_segment_ahead_distance">Қашықтық айырм.</string>
     <string name="field_segment_best">Сегмент рекорды</string>
+    <string name="field_segment_projected">Болжамды нәтиже</string>
     <string name="field_segment_ascent_left">Қалған көтерілу</string>
     <string name="field_segment_grade_left">Қалған еңіс</string>
+    <string name="field_segment_time_left">Болжам уақыт</string>
+    <string name="field_segment_covered">Жүрілген</string>
+    <string name="field_segment_ascent">Сегмент көтер.</string>
+    <string name="field_segment_descent">Сегмент төмен.</string>
+    <string name="field_segment_descent_left">Қалған төмендеу</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Бастау</string>
     <string name="discipline_cycling">Велоспорт</string>

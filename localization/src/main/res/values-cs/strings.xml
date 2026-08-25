@@ -24,8 +24,14 @@
     <string name="field_segment_ahead">Náskok čas</string>
     <string name="field_segment_ahead_distance">Náskok vzdálenost</string>
     <string name="field_segment_best">Rekord segmentu</string>
+    <string name="field_segment_projected">Odhad výsledku</string>
     <string name="field_segment_ascent_left">Zbývající stoupání</string>
     <string name="field_segment_grade_left">Zbývající sklon</string>
+    <string name="field_segment_time_left">Zbývající čas</string>
+    <string name="field_segment_covered">Ujetá vzdálenost</string>
+    <string name="field_segment_ascent">Stoupání segmentu</string>
+    <string name="field_segment_descent">Klesání segmentu</string>
+    <string name="field_segment_descent_left">Zbývající klesání</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Start</string>
     <string name="discipline_cycling">Cyklistika</string>

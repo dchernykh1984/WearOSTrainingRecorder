@@ -28,6 +28,20 @@ class SegmentFieldValuesTest {
             reference = (0..150).map { EffortPoint(it * (1000.0 / 150.0), it.toDouble()) },
         )
 
+    /** Up fifty metres over the first half, down thirty over the second. */
+    private val rolling =
+        Segment(
+            id = 2L,
+            name = "Rolling",
+            points =
+                (0..20).map {
+                    val metres = it * 50.0
+                    val height = if (it <= 10) 100.0 + it * 5.0 else 150.0 - (it - 10) * 3.0
+                    SegmentPoint(55.0 + it * 0.0001, 37.0, metres, altitudeMeters = height)
+                },
+            reference = (0..150).map { EffortPoint(it * (1000.0 / 150.0), it.toDouble()) },
+        )
+
     private fun values(segment: SegmentState?) =
         FieldValues.snapshot(
             state = RecordingState(),
@@ -112,6 +126,72 @@ class SegmentFieldValuesTest {
         assertEquals("2:28", values["segment_time"])
         assertEquals("+0:02", values["segment_ahead"], "two seconds off their best")
         assertEquals("0 m", values["segment_remaining"])
+    }
+
+    @Test
+    fun theWayToTheSegmentIsNoWayAtAllWhileRidingIt() {
+        val values = values(SegmentState(hill, riding = true, coveredMeters = 300.0, elapsedSeconds = 45.0))
+
+        assertEquals("0 m", values["segment_to_start"], "the nearest segment is the one underneath")
+        assertEquals("300 m", values["segment_covered"])
+    }
+
+    @Test
+    fun climbingAndDescendingBothCountAndBothAddUp() {
+        // Three quarters of the way: all fifty metres of the climb, and fifteen
+        // of the thirty metres of descent.
+        val values =
+            values(SegmentState(rolling, riding = true, coveredMeters = 750.0, elapsedSeconds = 110.0))
+
+        assertEquals("50 m", values["segment_ascent"])
+        assertEquals("15 m", values["segment_descent"])
+        assertEquals("0 m", values["segment_ascent_left"], "the top is behind them")
+        assertEquals("15 m", values["segment_descent_left"])
+    }
+
+    @Test
+    fun theTimeLeftIsTheirOwnPaceAppliedToWhatTheyHaveNotRidden() {
+        // Half the segment in 60 s where their best took 75: twenty percent up,
+        // so the remaining 75 s of the reference should come out around 60.
+        val values =
+            values(SegmentState(hill, riding = true, coveredMeters = 500.0, elapsedSeconds = 60.0))
+
+        assertEquals("1:00", values["segment_time_left"])
+    }
+
+    @Test
+    fun theProjectedFinishSitsBesideTheBestForComparison() {
+        // Twenty percent up at half way: 2:30 becomes about 2:00.
+        val values =
+            values(SegmentState(hill, riding = true, coveredMeters = 500.0, elapsedSeconds = 60.0))
+
+        assertEquals("2:00", values["segment_projected"])
+        assertEquals("2:30", values["segment_best"])
+    }
+
+    @Test
+    fun onceFinishedTheProjectionIsSimplyTheTime() {
+        val values =
+            values(SegmentState(hill, finished = true, coveredMeters = 1000.0, elapsedSeconds = 148.0))
+
+        assertEquals("2:28", values["segment_projected"], "nothing left to predict")
+    }
+
+    @Test
+    fun withNoBestToScaleByThereIsNoEstimate() {
+        val fresh = hill.copy(reference = emptyList())
+        val values =
+            values(SegmentState(fresh, riding = true, coveredMeters = 500.0, elapsedSeconds = 60.0))
+
+        assertEquals(FieldCatalogue.EMPTY_VALUE, values["segment_time_left"])
+    }
+
+    @Test
+    fun atTheStartLineThereIsNothingToScaleAndSoNoEstimate() {
+        val values = values(SegmentState(hill, riding = true, coveredMeters = 0.0, elapsedSeconds = 0.0))
+
+        assertEquals(FieldCatalogue.EMPTY_VALUE, values["segment_time_left"], "one fix predicts nothing")
+        assertEquals("0:00", values["segment_time"])
     }
 
     private companion object {

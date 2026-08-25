@@ -10,7 +10,7 @@ import kotlin.math.sin
 /** Where the ride stands with respect to a segment. */
 data class SegmentState(
     val segment: Segment,
-    /** Metres to the start, before it has been reached. */
+    /** Metres to the start, and zero once the rider is on it. */
     val toStartMeters: Double? = null,
     /** True while the rider is on the segment. */
     val riding: Boolean = false,
@@ -19,7 +19,32 @@ data class SegmentState(
     val coveredMeters: Double = 0.0,
     val elapsedSeconds: Double = 0.0,
 ) {
+    /** True whenever there is an effort to report on, running or just done. */
+    val timing: Boolean get() = riding || finished
+
     val remainingMeters: Double get() = (segment.distanceMeters - coveredMeters).coerceAtLeast(0.0)
+
+    /**
+     * Metres climbed and dropped so far, and still to come.
+     *
+     * All four are read off the segment's own profile rather than the watch's
+     * altimeter, which is what makes them add up: what the rider has climbed
+     * plus what is left is exactly what the segment climbs, every time. An
+     * altimeter settling mid-effort would break that, and a rider watching two
+     * fields that should agree and do not stops believing either.
+     */
+    val ascentMeters: Double? get() = ifTiming { segment.ascentBetween(0.0, coveredMeters) }
+
+    val descentMeters: Double? get() = ifTiming { segment.descentBetween(0.0, coveredMeters) }
+
+    val remainingAscentMeters: Double?
+        get() = ifTiming { segment.ascentBetween(coveredMeters, segment.distanceMeters) }
+
+    val remainingDescentMeters: Double?
+        get() = ifTiming { segment.descentBetween(coveredMeters, segment.distanceMeters) }
+
+    /** Average gradient of what is left, as a percentage. */
+    val remainingGradePercent: Double? get() = ifTiming { segment.gradeAfter(coveredMeters) }
 
     /**
      * Seconds ahead of the reference effort, negative when behind it.
@@ -28,27 +53,68 @@ data class SegmentState(
      * ridden looks like: there is a segment to time, just nobody to race.
      */
     val aheadSeconds: Double?
-        get() {
-            if (!timing) return null
-            val reference = segment.referenceSecondsAt(coveredMeters) ?: return null
-            return reference - elapsedSeconds
-        }
+        get() =
+            ifTiming {
+                val reference = segment.referenceSecondsAt(coveredMeters) ?: return@ifTiming null
+                reference - elapsedSeconds
+            }
 
     /** Metres ahead of where the reference effort was at this point in the effort. */
     val aheadMeters: Double?
-        get() {
-            if (!timing) return null
-            val reference = segment.referenceMetersAt(elapsedSeconds) ?: return null
-            return coveredMeters - reference
-        }
+        get() =
+            ifTiming {
+                val reference = segment.referenceMetersAt(elapsedSeconds) ?: return@ifTiming null
+                coveredMeters - reference
+            }
 
-    /** Metres of climbing left on the segment, where its heights are known. */
-    val remainingAscentMeters: Double? get() = if (timing) segment.ascentAfter(coveredMeters) else null
+    /**
+     * How much longer this effort is likely to take.
+     *
+     * Worked out the way a rider would: the reference effort says how long the
+     * rest of the segment took last time, and the part already ridden says how
+     * today compares. Ride the first half five percent quicker and the rest is
+     * expected five percent quicker too.
+     *
+     * Null until there is enough of an effort to scale by - at the start line
+     * the honest answer is the reference time itself, and a moment later a
+     * fraction of a second of riding would otherwise predict an hour or a
+     * heartbeat depending on which way the first fix fell.
+     */
+    val estimatedRemainingSeconds: Double?
+        get() =
+            ifTiming {
+                val total = segment.referenceSeconds ?: return@ifTiming null
+                val soFar = segment.referenceSecondsAt(coveredMeters) ?: return@ifTiming null
+                if (soFar < MINIMUM_SCALE_SECONDS) return@ifTiming null
+                val pace = elapsedSeconds / soFar
+                ((total - soFar) * pace).coerceAtLeast(0.0)
+            }
 
-    /** Average gradient of what is left, as a percentage. */
-    val remainingGradePercent: Double? get() = if (timing) segment.gradeAfter(coveredMeters) else null
+    /**
+     * What this effort is on course to come to.
+     *
+     * The number a rider actually wants at the foot of a climb, and the only one
+     * that can be held against their best directly: put the projected finish
+     * beside [Segment.referenceSeconds] and the whole comparison is two fields
+     * and no arithmetic.
+     */
+    val projectedSeconds: Double?
+        get() =
+            ifTiming {
+                if (finished) return@ifTiming elapsedSeconds
+                val remaining = estimatedRemainingSeconds ?: return@ifTiming null
+                elapsedSeconds + remaining
+            }
 
-    private val timing: Boolean get() = riding || finished
+    private fun ifTiming(value: () -> Double?): Double? = if (timing) value() else null
+
+    private companion object {
+        /**
+         * Below this the part ridden is too short to say anything about the
+         * rest, and scaling by it turns a rounding error into minutes.
+         */
+        const val MINIMUM_SCALE_SECONDS = 5.0
+    }
 }
 
 /**

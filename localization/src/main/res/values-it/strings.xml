@@ -24,8 +24,14 @@
     <string name="field_segment_ahead">Vantaggio tempo</string>
     <string name="field_segment_ahead_distance">Vantaggio dist.</string>
     <string name="field_segment_best">Record segmento</string>
+    <string name="field_segment_projected">Tempo previsto</string>
     <string name="field_segment_ascent_left">Dislivello rimasto</string>
     <string name="field_segment_grade_left">Pendenza rimasta</string>
+    <string name="field_segment_time_left">Tempo rimasto</string>
+    <string name="field_segment_covered">Dist. percorsa</string>
+    <string name="field_segment_ascent">Dislivello + segm.</string>
+    <string name="field_segment_descent">Dislivello - segm.</string>
+    <string name="field_segment_descent_left">Discesa rimasta</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Avvia</string>
     <string name="discipline_cycling">Ciclismo</string>

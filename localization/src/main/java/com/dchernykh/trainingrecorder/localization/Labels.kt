@@ -125,8 +125,14 @@ object Labels {
             "segment_ahead" to R.string.field_segment_ahead,
             "segment_ahead_distance" to R.string.field_segment_ahead_distance,
             "segment_best" to R.string.field_segment_best,
+            "segment_projected" to R.string.field_segment_projected,
             "segment_ascent_left" to R.string.field_segment_ascent_left,
             "segment_grade_left" to R.string.field_segment_grade_left,
+            "segment_time_left" to R.string.field_segment_time_left,
+            "segment_covered" to R.string.field_segment_covered,
+            "segment_ascent" to R.string.field_segment_ascent,
+            "segment_descent" to R.string.field_segment_descent,
+            "segment_descent_left" to R.string.field_segment_descent_left,
         )
 
     /** Zero when the id is unknown, which the caller renders as a blank slot. */

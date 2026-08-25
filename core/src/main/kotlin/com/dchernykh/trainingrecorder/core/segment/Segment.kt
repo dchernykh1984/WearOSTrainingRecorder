@@ -62,17 +62,44 @@ data class Segment(
         return interpolate(known, distanceMeters, { it.first }, { it.second })
     }
 
-    /** Metres of climbing still to come from this point on. */
-    fun ascentAfter(distanceMeters: Double): Double? {
-        val heights =
+    /** Metres of climbing between two points on the line, where heights are known. */
+    fun ascentBetween(
+        fromMeters: Double,
+        toMeters: Double,
+    ): Double? = climbBetween(fromMeters, toMeters)?.first
+
+    /** And metres of descending, which on a rolling segment is not the same figure. */
+    fun descentBetween(
+        fromMeters: Double,
+        toMeters: Double,
+    ): Double? = climbBetween(fromMeters, toMeters)?.second
+
+    /**
+     * Up and down over a stretch of the line.
+     *
+     * Both are wanted at once and both come from the same walk over the same
+     * heights, so they are worked out together. Every rise counts and every drop
+     * counts, with no threshold to sort real ground from noise: these are
+     * Strava's own smoothed altitudes for a fixed piece of road, not a barometer
+     * breathing on a wrist, and a segment's profile is the same today as it was
+     * the last time the rider went up it.
+     */
+    private fun climbBetween(
+        fromMeters: Double,
+        toMeters: Double,
+    ): Pair<Double, Double>? {
+        val from = altitudeAt(fromMeters) ?: return null
+        val to = altitudeAt(toMeters) ?: return null
+        val between =
             points
-                .filter { it.distanceMeters >= distanceMeters }
+                .filter { it.distanceMeters > fromMeters && it.distanceMeters < toMeters }
                 .mapNotNull { it.altitudeMeters }
-        val from = altitudeAt(distanceMeters) ?: return null
-        if (heights.isEmpty()) return null
-        return (listOf(from) + heights)
-            .zipWithNext { lower, upper -> (upper - lower).coerceAtLeast(0.0) }
-            .sum()
+        var up = 0.0
+        var down = 0.0
+        (listOf(from) + between + listOf(to)).zipWithNext { lower, upper ->
+            if (upper > lower) up += upper - lower else down += lower - upper
+        }
+        return up to down
     }
 
     /**
@@ -80,7 +107,7 @@ data class Segment(
      *
      * The average, not the climbing: on a segment that goes up and then down,
      * what is left to climb and how steep the rest averages out are different
-     * questions, and a rider looking at the top of a hill wants both.
+     * questions, and a rider at the top of a hill wants both.
      */
     fun gradeAfter(distanceMeters: Double): Double? {
         val remaining = this.distanceMeters - distanceMeters
