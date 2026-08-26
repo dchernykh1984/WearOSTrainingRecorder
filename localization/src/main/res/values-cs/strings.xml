@@ -17,34 +17,7 @@
     <string name="field_gap_next_group_delta">Dynam bh gr</string>
     <string name="field_gap_leader_group_delta">Dynam ld gr</string>
     <string name="field_laps">Kola</string>
-    <string name="field_segment_name">Segment</string>
-    <string name="field_segment_to_start">K segmentu</string>
-    <string name="field_segment_time">Čas segmentu</string>
-    <string name="field_segment_remaining">Zbývá</string>
-    <string name="field_segment_ahead">Náskok čas</string>
-    <string name="field_segment_ahead_distance">Náskok vzdálenost</string>
-    <string name="field_segment_best">Rekord segmentu</string>
-    <string name="field_segment_projected">Odhad výsledku</string>
-    <string name="field_segment_ascent_left">Zbývající stoupání</string>
-    <string name="field_segment_grade_left">Zbývající sklon</string>
 
-    <!-- Live segments -->
-    <string name="segments_title">Živé segmenty</string>
-    <string name="segments_explain">Tvoje označené segmenty ze Stravy, závod s tvým vlastním nejlepším časem. Strava už žebříčky jiným aplikacím neposkytuje, cizí čas tedy zobrazit nelze.</string>
-    <string name="segments_sync_now">Synchronizovat</string>
-    <string name="segments_syncing">Kontroluji…</string>
-    <string name="segments_updated">Aktuální</string>
-    <string name="segments_rate_limited">Strava žádá o pár minut strpení</string>
-    <string name="segments_not_connected">Nejprve připoj Stravu</string>
-    <string name="segments_failed">Strava není dostupná</string>
-    <string name="segments_none">Zatím žádné označené segmenty. Označ segment ve Stravě a synchronizuj.</string>
-    <string name="segments_best">%1$s · rekord %2$s</string>
-    <string name="segments_no_effort">%1$s · nikdy nejeto</string>
-    <string name="field_segment_time_left">Zbývající čas</string>
-    <string name="field_segment_covered">Ujetá vzdálenost</string>
-    <string name="field_segment_ascent">Stoupání segmentu</string>
-    <string name="field_segment_descent">Klesání segmentu</string>
-    <string name="field_segment_descent_left">Zbývající klesání</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Start</string>
     <string name="discipline_cycling">Cyklistika</string>
@@ -235,4 +208,33 @@
     <string name="connect_wrong_credentials">Garmin toto prihlaseni a heslo neprijal.</string>
     <string name="connect_code_label">Overovaci kod</string>
     <string name="connect_submit_code">Potvrdit kod</string>
+
+    <!-- Live segments -->
+    <string name="field_segment_name">Segment</string>
+    <string name="field_segment_to_start">K segmentu</string>
+    <string name="field_segment_time">Čas segmentu</string>
+    <string name="field_segment_time_left">Zbývající čas</string>
+    <string name="field_segment_covered">Ujetá vzdálenost</string>
+    <string name="field_segment_remaining">Zbývá</string>
+    <string name="field_segment_ahead">Náskok čas</string>
+    <string name="field_segment_ahead_distance">Náskok vzdálenost</string>
+    <string name="field_segment_best">Rekord segmentu</string>
+    <string name="field_segment_projected">Odhad výsledku</string>
+    <string name="field_segment_ascent">Stoupání segmentu</string>
+    <string name="field_segment_descent">Klesání segmentu</string>
+    <string name="field_segment_ascent_left">Zbývající stoupání</string>
+    <string name="field_segment_descent_left">Zbývající klesání</string>
+    <string name="field_segment_grade_left">Zbývající sklon</string>
+    <string name="segments_title">Živé segmenty</string>
+    <string name="segments_explain">Tvoje označené segmenty ze Stravy, závod s tvým vlastním nejlepším časem. Strava už žebříčky jiným aplikacím neposkytuje, cizí čas tedy zobrazit nelze.</string>
+    <string name="segments_sync_now">Synchronizovat</string>
+    <string name="segments_syncing">Kontroluji…</string>
+    <string name="segments_updated">Aktuální</string>
+    <string name="segments_rate_limited">Strava žádá o pár minut strpení</string>
+    <string name="segments_not_connected">Nejprve připoj Stravu</string>
+    <string name="segments_failed">Strava není dostupná</string>
+    <string name="segments_none">Zatím žádné označené segmenty. Označ segment ve Stravě a synchronizuj.</string>
+    <string name="segments_best">%1$s · rekord %2$s</string>
+    <string name="segments_no_effort">%1$s · nikdy nejeto</string>
+
 </resources>

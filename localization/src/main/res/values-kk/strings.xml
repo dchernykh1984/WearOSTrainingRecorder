@@ -17,34 +17,7 @@
     <string name="field_gap_next_group_delta">Динам ар тп</string>
     <string name="field_gap_leader_group_delta">Динам лд тп</string>
     <string name="field_laps">Айналым</string>
-    <string name="field_segment_name">Сегмент</string>
-    <string name="field_segment_to_start">Сегментке дейін</string>
-    <string name="field_segment_time">Сегмент уақыты</string>
-    <string name="field_segment_remaining">Қалғаны</string>
-    <string name="field_segment_ahead">Уақыт айырмасы</string>
-    <string name="field_segment_ahead_distance">Қашықтық айырм.</string>
-    <string name="field_segment_best">Сегмент рекорды</string>
-    <string name="field_segment_projected">Болжамды нәтиже</string>
-    <string name="field_segment_ascent_left">Қалған көтерілу</string>
-    <string name="field_segment_grade_left">Қалған еңіс</string>
 
-    <!-- Live segments -->
-    <string name="segments_title">Тікелей сегменттер</string>
-    <string name="segments_explain">Strava-дағы таңдаулы сегменттер — өз үздік уақытыңызбен жарыс. Strava көшбасшылар кестесін бөгде қосымшаларға бермейді, сондықтан бөтен уақытты көрсету мүмкін емес.</string>
-    <string name="segments_sync_now">Жаңарту</string>
-    <string name="segments_syncing">Тексерілуде…</string>
-    <string name="segments_updated">Бәрі жаңа</string>
-    <string name="segments_rate_limited">Strava бірнеше минут күтуді сұрады</string>
-    <string name="segments_not_connected">Алдымен Strava-ны қосыңыз</string>
-    <string name="segments_failed">Strava-мен байланысу мүмкін болмады</string>
-    <string name="segments_none">Таңдаулы сегменттер жоқ. Strava-да сегментті белгілеп, жаңартыңыз.</string>
-    <string name="segments_best">%1$s · үздігі %2$s</string>
-    <string name="segments_no_effort">%1$s · әлі жүрілмеген</string>
-    <string name="field_segment_time_left">Болжам уақыт</string>
-    <string name="field_segment_covered">Жүрілген</string>
-    <string name="field_segment_ascent">Сегмент көтер.</string>
-    <string name="field_segment_descent">Сегмент төмен.</string>
-    <string name="field_segment_descent_left">Қалған төмендеу</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Бастау</string>
     <string name="discipline_cycling">Велоспорт</string>
@@ -235,4 +208,33 @@
     <string name="connect_wrong_credentials">Garmin бұл логин мен құпия сөзді қабылдамады.</string>
     <string name="connect_code_label">Растау коды</string>
     <string name="connect_submit_code">Растау</string>
+
+    <!-- Live segments -->
+    <string name="field_segment_name">Сегмент</string>
+    <string name="field_segment_to_start">Сегментке дейін</string>
+    <string name="field_segment_time">Сегмент уақыты</string>
+    <string name="field_segment_time_left">Болжам уақыт</string>
+    <string name="field_segment_covered">Жүрілген</string>
+    <string name="field_segment_remaining">Қалғаны</string>
+    <string name="field_segment_ahead">Уақыт айырмасы</string>
+    <string name="field_segment_ahead_distance">Қашықтық айырм.</string>
+    <string name="field_segment_best">Сегмент рекорды</string>
+    <string name="field_segment_projected">Болжамды нәтиже</string>
+    <string name="field_segment_ascent">Сегмент көтер.</string>
+    <string name="field_segment_descent">Сегмент төмен.</string>
+    <string name="field_segment_ascent_left">Қалған көтерілу</string>
+    <string name="field_segment_descent_left">Қалған төмендеу</string>
+    <string name="field_segment_grade_left">Қалған еңіс</string>
+    <string name="segments_title">Тікелей сегменттер</string>
+    <string name="segments_explain">Strava-дағы таңдаулы сегменттер — өз үздік уақытыңызбен жарыс. Strava көшбасшылар кестесін бөгде қосымшаларға бермейді, сондықтан бөтен уақытты көрсету мүмкін емес.</string>
+    <string name="segments_sync_now">Жаңарту</string>
+    <string name="segments_syncing">Тексерілуде…</string>
+    <string name="segments_updated">Бәрі жаңа</string>
+    <string name="segments_rate_limited">Strava бірнеше минут күтуді сұрады</string>
+    <string name="segments_not_connected">Алдымен Strava-ны қосыңыз</string>
+    <string name="segments_failed">Strava-мен байланысу мүмкін болмады</string>
+    <string name="segments_none">Таңдаулы сегменттер жоқ. Strava-да сегментті белгілеп, жаңартыңыз.</string>
+    <string name="segments_best">%1$s · үздігі %2$s</string>
+    <string name="segments_no_effort">%1$s · әлі жүрілмеген</string>
+
 </resources>

@@ -17,34 +17,7 @@
     <string name="field_gap_next_group_delta">Dynam bh gr</string>
     <string name="field_gap_leader_group_delta">Dynam ld gr</string>
     <string name="field_laps">Ronden</string>
-    <string name="field_segment_name">Segment</string>
-    <string name="field_segment_to_start">Tot segment</string>
-    <string name="field_segment_time">Segmenttijd</string>
-    <string name="field_segment_remaining">Resterend</string>
-    <string name="field_segment_ahead">Tijdvoorsprong</string>
-    <string name="field_segment_ahead_distance">Afstandsvoorsprong</string>
-    <string name="field_segment_best">Segmentrecord</string>
-    <string name="field_segment_projected">Verwachte tijd</string>
-    <string name="field_segment_ascent_left">Resterende klim</string>
-    <string name="field_segment_grade_left">Resterende helling</string>
 
-    <!-- Live segments -->
-    <string name="segments_title">Live segmenten</string>
-    <string name="segments_explain">Je gemarkeerde Strava-segmenten, in race tegen je eigen besttijd. Strava geeft klassementen niet meer vrij aan andere apps, dus andermans tijd kan niet worden getoond.</string>
-    <string name="segments_sync_now">Nu synchroniseren</string>
-    <string name="segments_syncing">Controleren…</string>
-    <string name="segments_updated">Bijgewerkt</string>
-    <string name="segments_rate_limited">Strava vraagt om een paar minuten geduld</string>
-    <string name="segments_not_connected">Verbind eerst Strava</string>
-    <string name="segments_failed">Strava niet bereikbaar</string>
-    <string name="segments_none">Nog geen gemarkeerde segmenten. Markeer er een op Strava en synchroniseer.</string>
-    <string name="segments_best">%1$s · best %2$s</string>
-    <string name="segments_no_effort">%1$s · nooit gereden</string>
-    <string name="field_segment_time_left">Resterende tijd</string>
-    <string name="field_segment_covered">Afstand gereden</string>
-    <string name="field_segment_ascent">Segmentklim</string>
-    <string name="field_segment_descent">Segmentdaling</string>
-    <string name="field_segment_descent_left">Resterende daling</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Starten</string>
     <string name="discipline_cycling">Wielrennen</string>
@@ -235,4 +208,33 @@
     <string name="connect_wrong_credentials">Garmin accepteerde deze login en dit wachtwoord niet.</string>
     <string name="connect_code_label">Verificatiecode</string>
     <string name="connect_submit_code">Code bevestigen</string>
+
+    <!-- Live segments -->
+    <string name="field_segment_name">Segment</string>
+    <string name="field_segment_to_start">Tot segment</string>
+    <string name="field_segment_time">Segmenttijd</string>
+    <string name="field_segment_time_left">Resterende tijd</string>
+    <string name="field_segment_covered">Afstand gereden</string>
+    <string name="field_segment_remaining">Resterend</string>
+    <string name="field_segment_ahead">Tijdvoorsprong</string>
+    <string name="field_segment_ahead_distance">Afstandsvoorsprong</string>
+    <string name="field_segment_best">Segmentrecord</string>
+    <string name="field_segment_projected">Verwachte tijd</string>
+    <string name="field_segment_ascent">Segmentklim</string>
+    <string name="field_segment_descent">Segmentdaling</string>
+    <string name="field_segment_ascent_left">Resterende klim</string>
+    <string name="field_segment_descent_left">Resterende daling</string>
+    <string name="field_segment_grade_left">Resterende helling</string>
+    <string name="segments_title">Live segmenten</string>
+    <string name="segments_explain">Je gemarkeerde Strava-segmenten, in race tegen je eigen besttijd. Strava geeft klassementen niet meer vrij aan andere apps, dus andermans tijd kan niet worden getoond.</string>
+    <string name="segments_sync_now">Nu synchroniseren</string>
+    <string name="segments_syncing">Controleren…</string>
+    <string name="segments_updated">Bijgewerkt</string>
+    <string name="segments_rate_limited">Strava vraagt om een paar minuten geduld</string>
+    <string name="segments_not_connected">Verbind eerst Strava</string>
+    <string name="segments_failed">Strava niet bereikbaar</string>
+    <string name="segments_none">Nog geen gemarkeerde segmenten. Markeer er een op Strava en synchroniseer.</string>
+    <string name="segments_best">%1$s · best %2$s</string>
+    <string name="segments_no_effort">%1$s · nooit gereden</string>
+
 </resources>
