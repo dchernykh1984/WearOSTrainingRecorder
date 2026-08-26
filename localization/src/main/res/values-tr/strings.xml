@@ -110,6 +110,19 @@
     <string name="field_segment_projected">Tahmini süre</string>
     <string name="field_segment_ascent_left">Kalan tırmanış</string>
     <string name="field_segment_grade_left">Kalan eğim</string>
+
+    <!-- Live segments -->
+    <string name="segments_title">Canlı segmentler</string>
+    <string name="segments_explain">Strava\'da yıldızladığın segmentler, kendi en iyi zamanına karşı. Strava sıralamaları artık başka uygulamalara açmıyor, bu yüzden başkasının zamanı gösterilemiyor.</string>
+    <string name="segments_sync_now">Şimdi eşitle</string>
+    <string name="segments_syncing">Kontrol ediliyor…</string>
+    <string name="segments_updated">Güncel</string>
+    <string name="segments_rate_limited">Strava birkaç dakika beklememizi istedi</string>
+    <string name="segments_not_connected">Önce Strava\'yı bağla</string>
+    <string name="segments_failed">Strava\'ya ulaşılamadı</string>
+    <string name="segments_none">Henüz yıldızlı segment yok. Strava\'da bir segment yıldızla ve eşitle.</string>
+    <string name="segments_best">%1$s · en iyi %2$s</string>
+    <string name="segments_no_effort">%1$s · hiç gidilmedi</string>
     <string name="field_segment_time_left">Kalan süre</string>
     <string name="field_segment_covered">Gidilen mesafe</string>
     <string name="field_segment_ascent">Segment tırmanış</string>

@@ -27,6 +27,19 @@
     <string name="field_segment_projected">Prognosezeit</string>
     <string name="field_segment_ascent_left">Restanstieg</string>
     <string name="field_segment_grade_left">Restneigung</string>
+
+    <!-- Live segments -->
+    <string name="segments_title">Live-Segmente</string>
+    <string name="segments_explain">Deine markierten Strava-Segmente, im Rennen gegen deine eigene Bestzeit. Strava gibt Bestenlisten nicht mehr an andere Apps weiter, fremde Zeiten lassen sich daher nicht anzeigen.</string>
+    <string name="segments_sync_now">Jetzt abgleichen</string>
+    <string name="segments_syncing">Wird geprüft…</string>
+    <string name="segments_updated">Aktuell</string>
+    <string name="segments_rate_limited">Strava bittet um ein paar Minuten Pause</string>
+    <string name="segments_not_connected">Zuerst Strava verbinden</string>
+    <string name="segments_failed">Strava nicht erreichbar</string>
+    <string name="segments_none">Noch keine markierten Segmente. Markiere eins bei Strava und gleiche ab.</string>
+    <string name="segments_best">%1$s · Bestzeit %2$s</string>
+    <string name="segments_no_effort">%1$s · noch nie gefahren</string>
     <string name="field_segment_time_left">Restzeit (Prog.)</string>
     <string name="field_segment_covered">Segmentstrecke</string>
     <string name="field_segment_ascent">Segmentanstieg</string>

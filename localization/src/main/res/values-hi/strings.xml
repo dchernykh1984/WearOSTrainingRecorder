@@ -110,6 +110,19 @@
     <string name="field_segment_projected">अनुमानित समय</string>
     <string name="field_segment_ascent_left">शेष चढ़ाई</string>
     <string name="field_segment_grade_left">शेष ढाल</string>
+
+    <!-- Live segments -->
+    <string name="segments_title">लाइव सेगमेंट</string>
+    <string name="segments_explain">आपके तारांकित Strava सेगमेंट, आपके अपने सर्वश्रेष्ठ समय के विरुद्ध। Strava अब लीडरबोर्ड दूसरे ऐप्स को नहीं देता, इसलिए किसी और का समय नहीं दिखाया जा सकता।</string>
+    <string name="segments_sync_now">अभी सिंक करें</string>
+    <string name="segments_syncing">जाँच हो रही है…</string>
+    <string name="segments_updated">अद्यतित</string>
+    <string name="segments_rate_limited">Strava ने कुछ मिनट रुकने को कहा</string>
+    <string name="segments_not_connected">पहले Strava जोड़ें</string>
+    <string name="segments_failed">Strava से संपर्क नहीं हो सका</string>
+    <string name="segments_none">अभी कोई तारांकित सेगमेंट नहीं। Strava पर सेगमेंट तारांकित करें और सिंक करें।</string>
+    <string name="segments_best">%1$s · सर्वश्रेष्ठ %2$s</string>
+    <string name="segments_no_effort">%1$s · कभी नहीं चलाया</string>
     <string name="field_segment_time_left">शेष समय</string>
     <string name="field_segment_covered">तय दूरी</string>
     <string name="field_segment_ascent">सेगमेंट चढ़ाई</string>

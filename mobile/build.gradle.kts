@@ -149,6 +149,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.work.runtime)
     implementation(libs.play.services.wearable)
     implementation(libs.kotlinx.coroutines.play.services)
 
