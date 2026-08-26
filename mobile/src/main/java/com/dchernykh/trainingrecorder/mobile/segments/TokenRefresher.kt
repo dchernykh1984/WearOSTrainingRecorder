@@ -7,6 +7,11 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
+/** Whatever can turn a stale set of credentials into a working access token. */
+fun interface TokenRefresher {
+    fun refresh(credentials: Map<String, String>): Map<String, String>?
+}
+
 /**
  * Trades a refresh token for a working access token.
  *
@@ -16,8 +21,8 @@ import java.net.URLEncoder
  * replaces the one that was sent - dropping it strands the rider at the next
  * expiry with nothing to renew from.
  */
-class TokenRefresher {
-    fun refresh(credentials: Map<String, String>): Map<String, String>? {
+class StravaTokenRefresher : TokenRefresher {
+    override fun refresh(credentials: Map<String, String>): Map<String, String>? {
         val clientId = credentials[StravaProtocol.CLIENT_ID].orEmpty()
         val clientSecret = credentials[StravaProtocol.CLIENT_SECRET].orEmpty()
         val refreshToken = credentials[StravaProtocol.REFRESH_TOKEN].orEmpty()

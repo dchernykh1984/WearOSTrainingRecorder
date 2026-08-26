@@ -21,8 +21,21 @@ object StravaProtocol {
     const val TOKEN_URL = "https://www.strava.com/oauth/token"
     const val UPLOAD_URL = "https://www.strava.com/api/v3/uploads"
 
-    /** `activity:write` is the narrowest scope that can create an upload. */
-    const val SCOPE = "activity:write,read"
+    /**
+     * The narrowest set that does the job.
+     *
+     * `activity:write` creates an upload, `read` lists the rider's starred
+     * segments, and `activity:read` is what lets a segment effort of theirs be
+     * read back as the curve live segments race against.
+     *
+     * Deliberately not `read_all` or `activity:read_all`. Those would hand the
+     * app every private segment and every private activity the rider owns, and
+     * the only thing it would buy is live segments on climbs they have kept
+     * private - which fall back to an even-paced comparison instead. A rider
+     * cannot audit what an app does with a scope they granted, so the app asks
+     * for less.
+     */
+    const val SCOPE = "activity:write,read,activity:read"
 
     val credentialFields =
         listOf(

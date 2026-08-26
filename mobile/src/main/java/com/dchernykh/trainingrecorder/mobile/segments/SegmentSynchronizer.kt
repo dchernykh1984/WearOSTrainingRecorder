@@ -9,7 +9,7 @@ import com.dchernykh.trainingrecorder.core.connector.SyncTrigger
 import com.dchernykh.trainingrecorder.core.segment.EffortPoint
 import com.dchernykh.trainingrecorder.core.segment.Segment
 import com.dchernykh.trainingrecorder.mobile.settings.PhoneSettingsStore
-import com.dchernykh.trainingrecorder.mobile.sync.SegmentPublisher
+import com.dchernykh.trainingrecorder.mobile.sync.SegmentTarget
 
 /** How a refresh ended, in terms the rider's screen can say out loud. */
 sealed interface SyncOutcome {
@@ -48,9 +48,9 @@ sealed interface SyncOutcome {
 class SegmentSynchronizer(
     private val store: SegmentStore,
     private val settings: PhoneSettingsStore,
-    private val publisher: SegmentPublisher,
-    private val reader: StravaReader = StravaReader(),
-    private val refresher: TokenRefresher = TokenRefresher(),
+    private val publisher: SegmentTarget,
+    private val reader: StravaReader = HttpStravaReader(),
+    private val refresher: TokenRefresher = StravaTokenRefresher(),
     private val now: () -> Long = System::currentTimeMillis,
 ) {
     @Suppress("ReturnCount")

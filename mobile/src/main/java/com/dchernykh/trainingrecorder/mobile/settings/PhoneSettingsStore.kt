@@ -15,10 +15,19 @@ import java.io.File
  * spelled out in [CredentialContract].
  */
 class PhoneSettingsStore(
-    context: Context,
-    private val settingsFile: File = File(context.filesDir, "settings.json"),
-    private val credentialsFile: File = File(context.filesDir, "credentials.json"),
+    private val settingsFile: File,
+    private val credentialsFile: File,
 ) {
+    /**
+     * The app's own directory. A second constructor rather than defaulted
+     * parameters so the file-only form needs no Context, which is what lets
+     * everything that reads credentials be tested on a plain JVM.
+     */
+    constructor(context: Context) : this(
+        File(context.filesDir, "settings.json"),
+        File(context.filesDir, "credentials.json"),
+    )
+
     fun readSettings(): WatchSettings? =
         if (settingsFile.exists()) SyncContract.decode(settingsFile.readText()) else null
 
