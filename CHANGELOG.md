@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.12.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.11.1...v0.12.0) (2026-08-26)
+
+
+### Features
+
+* **core:** add the live segment fields in every language ([b8e0894](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/b8e0894eb8244e36517d3238799cdb197701521f))
+* **core:** carry a segment from the phone to the watch ([7009a86](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/7009a860fe751387717a11a01891fbb3733c0805))
+* **core:** decide when segments are worth refetching from strava ([9fbe590](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/9fbe59080fb0dcc207e79617809dbdff06683551))
+* **core:** follow a ride against a starred segment ([b800cfc](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/b800cfc93d66c0a8e32dd481161d0daab05ab25e))
+* **core:** read starred segments and their best efforts from strava ([3c82c9e](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/3c82c9ec4d9f8382f0cf3706a3edc19903b34150))
+* **mobile:** ask strava for the scope live segments need ([ba9d795](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/ba9d795d20e66fee59cbc0e576c4f0a327acb0c8))
+* **mobile:** fetch starred segments from strava and send them to the watch ([7520e9d](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/7520e9dce58f1b4bc54200a32e95a2a7567b196c))
+* **wear:** race the ride against the segments the phone sent ([463076d](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/463076d744d6a311c89d3315ea309b9221ab28c4))
+
+
+### Bug Fixes
+
+* **core:** show a level segment gap without a sign ([481142d](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/481142d2edc952d1a1e6d4a58ba9f50a4d998ce7))
+* **core:** start the segment clock at the line, not at the run-up ([f62ddce](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/f62ddce1137a5288120114dd53e9574adafbc005))
+* **mobile:** stop retrying a segment sync strava will never accept ([5d2dc8b](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/5d2dc8bd02829e7a40488223458845438d00b2f1))
+* **mobile:** take every page of starred segments, and drop none on a short answer ([0da4668](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/0da4668a156715f54f0cc21ecdcb037284e6afbe))
+
+
+### Performance Improvements
+
+* **wear:** read the starred segments off the tap that starts a ride ([d5bdfa6](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/d5bdfa622060f329d91140be846499e51bfaf437))
+
 ## [0.11.1](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.11.0...v0.11.1) (2026-08-25)
 
 
