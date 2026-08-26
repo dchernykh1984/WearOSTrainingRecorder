@@ -141,6 +141,28 @@ class SegmentTrackerTest {
     }
 
     @Test
+    fun theClockStartsAtTheLineRatherThanAtTheRunUp() {
+        val segment = straightSegment()
+        val tracker = SegmentTracker(listOf(segment))
+        var atEpochMs = start
+
+        // Twenty metres of run-up inside the start radius, then the line itself.
+        // A clock started at the first fix inside the radius would already read
+        // seven seconds by the time the rider reached the start.
+        listOf(-20.0, -12.0, -4.0, 0.0, 8.0).forEach { metres ->
+            tracker.record(
+                Fix(baseLat + metres / METERS_PER_DEGREE_LATITUDE, baseLon, atEpochMs),
+            )
+            atEpochMs += 1000
+        }
+
+        val state = assertNotNull(tracker.state)
+        assertTrue(state.riding)
+        // Nearest the start at the fourth fix, one second before the fifth.
+        assertEquals(1.0, state.elapsedSeconds, "the run-up is not part of the effort")
+    }
+
+    @Test
     fun aKilometreRiddenIsAKilometreTimed() {
         val segment = straightSegment()
         val tracker = SegmentTracker(listOf(segment))
