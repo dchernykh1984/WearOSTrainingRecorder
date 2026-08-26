@@ -39,17 +39,31 @@ class SegmentSyncWorker(
             // Both mean "Strava could not answer now", which is exactly what a
             // retry with a backoff is for. A rate limit resets on the quarter
             // hour and the first backoff is longer than that.
-            is SyncOutcome.RateLimited -> Result.retry()
-            is SyncOutcome.Failed -> Result.retry()
+            is SyncOutcome.RateLimited -> retryOrGiveUp()
+            is SyncOutcome.Failed -> retryOrGiveUp()
             else -> Result.success()
         }
     }
+
+    /**
+     * Stops retrying eventually.
+     *
+     * WorkManager retries a one-off request forever by default, so a rider whose
+     * Strava application has been deleted would have their phone waking every
+     * half hour for the rest of the year to be refused again. Segments are worth
+     * a few attempts and nothing like that: giving up here costs at most a stale
+     * list until the next ride, an app launch, or tomorrow.
+     */
+    private fun retryOrGiveUp(): Result = if (runAttemptCount < MAX_ATTEMPTS) Result.retry() else Result.success()
 
     companion object {
         private const val KEY_TRIGGER = "trigger"
         private const val ONE_OFF = "segment-sync"
         private const val DAILY = "segment-sync-daily"
         private const val BACKOFF_MINUTES = 30L
+
+        /** Two hours of trying, at the backoff above. */
+        private const val MAX_ATTEMPTS = 4
 
         fun synchronizer(context: Context) =
             SegmentSynchronizer(
