@@ -89,6 +89,17 @@ class SegmentFieldValuesTest {
     }
 
     @Test
+    fun levelWithTheirBestReadsAsLevelRatherThanAsASign() {
+        // Half way in exactly the 75 s their best took. A sign here would
+        // flicker between plus and minus over a difference of milliseconds.
+        val values =
+            values(SegmentState(hill, riding = true, coveredMeters = 500.0, elapsedSeconds = 75.0))
+
+        assertEquals("0:00", values["segment_ahead"])
+        assertEquals("0 m", values["segment_ahead_distance"])
+    }
+
+    @Test
     fun theGapIsAlsoShownAsGroundUpTheRoad() {
         // At 70 s their best had covered 466.7 m; the rider is on 500.
         val values =
