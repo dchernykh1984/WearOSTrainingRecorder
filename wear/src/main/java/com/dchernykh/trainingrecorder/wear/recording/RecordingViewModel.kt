@@ -15,6 +15,7 @@ import com.dchernykh.trainingrecorder.core.race.RaceStatsSnapshot
 import com.dchernykh.trainingrecorder.core.recording.RecordingAction
 import com.dchernykh.trainingrecorder.core.recording.RecordingPhase
 import com.dchernykh.trainingrecorder.core.recording.RecordingState
+import com.dchernykh.trainingrecorder.core.segment.Segment
 import com.dchernykh.trainingrecorder.core.segment.SegmentTracker
 import com.dchernykh.trainingrecorder.core.sensor.FixStatus
 import com.dchernykh.trainingrecorder.core.sensor.SensorOrigin
@@ -229,6 +230,18 @@ class RecordingViewModel(
      * ride, and the constructor is already long.
      */
     private val segmentStore = SegmentStore(application)
+
+    /**
+     * The segments as last read from disk, kept in memory.
+     *
+     * Read here rather than when the ride starts, because starting a ride is
+     * the one moment in the app that must not stall: a rider with ninety
+     * starred climbs would otherwise have a megabyte of JSON parsed under the
+     * tap that begins their ride. Volatile because the read happens on the IO
+     * dispatcher and the tap that uses it does not.
+     */
+    @Volatile
+    private var storedSegments: List<Segment> = emptyList()
     private val altitude = AltitudeTracker()
     private val aggregates = RideAggregates()
     private val rollingPower = RollingPower()
@@ -278,6 +291,7 @@ class RecordingViewModel(
         // Off the main thread: applying settings reads a file, and this now runs
         // on every push from the phone rather than once at startup.
         viewModelScope.launch(Dispatchers.IO) { SettingsStore.revision.collect { applySettings() } }
+        readSegments()
         // On the first construction after a launch, which is exactly when a ride
         // the last process never got to finish is sitting on disk waiting to be
         // noticed.
@@ -337,7 +351,15 @@ class RecordingViewModel(
             // phone had already fetched them would otherwise have none until the
             // rider starred something new.
             SegmentStore.fetchExisting(getApplication()).forEach { segmentStore.write(it) }
+            readSegments()
             applySettings()
+        }
+    }
+
+    /** Reads the starred segments off the main thread. */
+    private fun readSegments() {
+        viewModelScope.launch(Dispatchers.IO) {
+            storedSegments = runCatching { segmentStore.read() }.getOrDefault(emptyList())
         }
     }
 
@@ -376,7 +398,11 @@ class RecordingViewModel(
         gradient.clear()
         // Read from disk here rather than held: a segment that arrived from the
         // phone while the watch sat at the trailhead should be raced today.
-        segments = SegmentTracker(runCatching { segmentStore.read() }.getOrDefault(emptyList()))
+        segments = SegmentTracker(storedSegments)
+        // And go back to disk for the next ride, so a segment that arrived from
+        // the phone while the watch sat at the trailhead is raced tomorrow even
+        // if the app is never reopened.
+        readSegments()
         // Cleared with the ride: the sun's timetable belongs to where and when
         // that ride was, and a ride started somewhere else tomorrow must not
         // inherit it.
