@@ -17,34 +17,7 @@
     <string name="field_gap_next_group_delta">Динам сз гр</string>
     <string name="field_gap_leader_group_delta">Динам лд гр</string>
     <string name="field_laps">Круги</string>
-    <string name="field_segment_name">Сегмент</string>
-    <string name="field_segment_to_start">До сегмента</string>
-    <string name="field_segment_time">Время сегм.</string>
-    <string name="field_segment_remaining">Осталось</string>
-    <string name="field_segment_ahead">Отрыв, время</string>
-    <string name="field_segment_ahead_distance">Отрыв, дист.</string>
-    <string name="field_segment_best">Рекорд сегм.</string>
-    <string name="field_segment_projected">Прогноз итога</string>
-    <string name="field_segment_ascent_left">Набор до фин.</string>
-    <string name="field_segment_grade_left">Уклон до фин.</string>
 
-    <!-- Live segments -->
-    <string name="segments_title">Живые сегменты</string>
-    <string name="segments_explain">Избранные сегменты из Strava — гонка с вашим собственным лучшим временем. Strava больше не отдаёт таблицы лидеров сторонним приложениям, поэтому чужое время показать нельзя.</string>
-    <string name="segments_sync_now">Обновить</string>
-    <string name="segments_syncing">Проверяем…</string>
-    <string name="segments_updated">Всё актуально</string>
-    <string name="segments_rate_limited">Strava попросила подождать несколько минут</string>
-    <string name="segments_not_connected">Сначала подключите Strava</string>
-    <string name="segments_failed">Не удалось связаться со Strava</string>
-    <string name="segments_none">Избранных сегментов пока нет. Отметьте сегмент в Strava и обновите.</string>
-    <string name="segments_best">%1$s · лучшее %2$s</string>
-    <string name="segments_no_effort">%1$s · ещё не проезжали</string>
-    <string name="field_segment_time_left">Прогноз время</string>
-    <string name="field_segment_covered">Проехано</string>
-    <string name="field_segment_ascent">Набор сегм.</string>
-    <string name="field_segment_descent">Сброс сегм.</string>
-    <string name="field_segment_descent_left">Сброс до фин.</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Старт</string>
     <string name="discipline_cycling">Велоспорт</string>
@@ -235,4 +208,33 @@
     <string name="connect_wrong_credentials">Garmin не принял этот логин и пароль.</string>
     <string name="connect_code_label">Код подтверждения</string>
     <string name="connect_submit_code">Подтвердить</string>
+
+    <!-- Live segments -->
+    <string name="field_segment_name">Сегмент</string>
+    <string name="field_segment_to_start">До сегмента</string>
+    <string name="field_segment_time">Время сегм.</string>
+    <string name="field_segment_time_left">Прогноз время</string>
+    <string name="field_segment_covered">Проехано</string>
+    <string name="field_segment_remaining">Осталось</string>
+    <string name="field_segment_ahead">Отрыв, время</string>
+    <string name="field_segment_ahead_distance">Отрыв, дист.</string>
+    <string name="field_segment_best">Рекорд сегм.</string>
+    <string name="field_segment_projected">Прогноз итога</string>
+    <string name="field_segment_ascent">Набор сегм.</string>
+    <string name="field_segment_descent">Сброс сегм.</string>
+    <string name="field_segment_ascent_left">Набор до фин.</string>
+    <string name="field_segment_descent_left">Сброс до фин.</string>
+    <string name="field_segment_grade_left">Уклон до фин.</string>
+    <string name="segments_title">Живые сегменты</string>
+    <string name="segments_explain">Избранные сегменты из Strava — гонка с вашим собственным лучшим временем. Strava больше не отдаёт таблицы лидеров сторонним приложениям, поэтому чужое время показать нельзя.</string>
+    <string name="segments_sync_now">Обновить</string>
+    <string name="segments_syncing">Проверяем…</string>
+    <string name="segments_updated">Всё актуально</string>
+    <string name="segments_rate_limited">Strava попросила подождать несколько минут</string>
+    <string name="segments_not_connected">Сначала подключите Strava</string>
+    <string name="segments_failed">Не удалось связаться со Strava</string>
+    <string name="segments_none">Избранных сегментов пока нет. Отметьте сегмент в Strava и обновите.</string>
+    <string name="segments_best">%1$s · лучшее %2$s</string>
+    <string name="segments_no_effort">%1$s · ещё не проезжали</string>
+
 </resources>

@@ -17,34 +17,7 @@
     <string name="field_gap_next_group_delta">Dynam bh gr</string>
     <string name="field_gap_leader_group_delta">Dynam ld gr</string>
     <string name="field_laps">Giri</string>
-    <string name="field_segment_name">Segmento</string>
-    <string name="field_segment_to_start">Al segmento</string>
-    <string name="field_segment_time">Tempo segmento</string>
-    <string name="field_segment_remaining">Dist. rimasta</string>
-    <string name="field_segment_ahead">Vantaggio tempo</string>
-    <string name="field_segment_ahead_distance">Vantaggio dist.</string>
-    <string name="field_segment_best">Record segmento</string>
-    <string name="field_segment_projected">Tempo previsto</string>
-    <string name="field_segment_ascent_left">Dislivello rimasto</string>
-    <string name="field_segment_grade_left">Pendenza rimasta</string>
 
-    <!-- Live segments -->
-    <string name="segments_title">Segmenti live</string>
-    <string name="segments_explain">I tuoi segmenti preferiti di Strava, in gara contro il tuo miglior tempo. Strava non apre più le classifiche ad altre app, quindi il tempo di un rivale non è mostrabile.</string>
-    <string name="segments_sync_now">Sincronizza</string>
-    <string name="segments_syncing">Controllo…</string>
-    <string name="segments_updated">Aggiornato</string>
-    <string name="segments_rate_limited">Strava chiede di attendere qualche minuto</string>
-    <string name="segments_not_connected">Collega prima Strava</string>
-    <string name="segments_failed">Strava non raggiungibile</string>
-    <string name="segments_none">Nessun segmento preferito. Aggiungine uno su Strava e sincronizza.</string>
-    <string name="segments_best">%1$s · record %2$s</string>
-    <string name="segments_no_effort">%1$s · mai percorso</string>
-    <string name="field_segment_time_left">Tempo rimasto</string>
-    <string name="field_segment_covered">Dist. percorsa</string>
-    <string name="field_segment_ascent">Dislivello + segm.</string>
-    <string name="field_segment_descent">Dislivello - segm.</string>
-    <string name="field_segment_descent_left">Discesa rimasta</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Avvia</string>
     <string name="discipline_cycling">Ciclismo</string>
@@ -235,4 +208,33 @@
     <string name="connect_wrong_credentials">Garmin non ha accettato queste credenziali.</string>
     <string name="connect_code_label">Codice di verifica</string>
     <string name="connect_submit_code">Conferma codice</string>
+
+    <!-- Live segments -->
+    <string name="field_segment_name">Segmento</string>
+    <string name="field_segment_to_start">Al segmento</string>
+    <string name="field_segment_time">Tempo segmento</string>
+    <string name="field_segment_time_left">Tempo rimasto</string>
+    <string name="field_segment_covered">Dist. percorsa</string>
+    <string name="field_segment_remaining">Dist. rimasta</string>
+    <string name="field_segment_ahead">Vantaggio tempo</string>
+    <string name="field_segment_ahead_distance">Vantaggio dist.</string>
+    <string name="field_segment_best">Record segmento</string>
+    <string name="field_segment_projected">Tempo previsto</string>
+    <string name="field_segment_ascent">Dislivello + segm.</string>
+    <string name="field_segment_descent">Dislivello - segm.</string>
+    <string name="field_segment_ascent_left">Dislivello rimasto</string>
+    <string name="field_segment_descent_left">Discesa rimasta</string>
+    <string name="field_segment_grade_left">Pendenza rimasta</string>
+    <string name="segments_title">Segmenti live</string>
+    <string name="segments_explain">I tuoi segmenti preferiti di Strava, in gara contro il tuo miglior tempo. Strava non apre più le classifiche ad altre app, quindi il tempo di un rivale non è mostrabile.</string>
+    <string name="segments_sync_now">Sincronizza</string>
+    <string name="segments_syncing">Controllo…</string>
+    <string name="segments_updated">Aggiornato</string>
+    <string name="segments_rate_limited">Strava chiede di attendere qualche minuto</string>
+    <string name="segments_not_connected">Collega prima Strava</string>
+    <string name="segments_failed">Strava non raggiungibile</string>
+    <string name="segments_none">Nessun segmento preferito. Aggiungine uno su Strava e sincronizza.</string>
+    <string name="segments_best">%1$s · record %2$s</string>
+    <string name="segments_no_effort">%1$s · mai percorso</string>
+
 </resources>

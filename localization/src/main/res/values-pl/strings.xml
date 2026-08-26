@@ -17,34 +17,7 @@
     <string name="field_gap_next_group_delta">Dynam bh gr</string>
     <string name="field_gap_leader_group_delta">Dynam ld gr</string>
     <string name="field_laps">Okrążenia</string>
-    <string name="field_segment_name">Segment</string>
-    <string name="field_segment_to_start">Do segmentu</string>
-    <string name="field_segment_time">Czas segmentu</string>
-    <string name="field_segment_remaining">Pozostały dystans</string>
-    <string name="field_segment_ahead">Przewaga czasu</string>
-    <string name="field_segment_ahead_distance">Przewaga dystansu</string>
-    <string name="field_segment_best">Rekord segmentu</string>
-    <string name="field_segment_projected">Czas prognozowany</string>
-    <string name="field_segment_ascent_left">Pozostały podjazd</string>
-    <string name="field_segment_grade_left">Pozostałe nachylenie</string>
 
-    <!-- Live segments -->
-    <string name="segments_title">Segmenty na żywo</string>
-    <string name="segments_explain">Twoje oznaczone segmenty ze Stravy, ścigane z twoim własnym najlepszym czasem. Strava nie udostępnia już rankingów innym aplikacjom, więc cudzego czasu nie da się pokazać.</string>
-    <string name="segments_sync_now">Synchronizuj</string>
-    <string name="segments_syncing">Sprawdzanie…</string>
-    <string name="segments_updated">Aktualne</string>
-    <string name="segments_rate_limited">Strava prosi o kilka minut przerwy</string>
-    <string name="segments_not_connected">Najpierw połącz Stravę</string>
-    <string name="segments_failed">Nie udało się połączyć ze Stravą</string>
-    <string name="segments_none">Brak oznaczonych segmentów. Oznacz segment w Stravie i zsynchronizuj.</string>
-    <string name="segments_best">%1$s · rekord %2$s</string>
-    <string name="segments_no_effort">%1$s · nigdy nie przejechany</string>
-    <string name="field_segment_time_left">Czas pozostały</string>
-    <string name="field_segment_covered">Przejechany dyst.</string>
-    <string name="field_segment_ascent">Podjazd segmentu</string>
-    <string name="field_segment_descent">Zjazd segmentu</string>
-    <string name="field_segment_descent_left">Pozostały zjazd</string>
     <string name="app_name">Training Recorder</string>
     <string name="screen_title_start">Start</string>
     <string name="discipline_cycling">Kolarstwo</string>
@@ -235,4 +208,33 @@
     <string name="connect_wrong_credentials">Garmin nie zaakceptowal tego loginu i hasla.</string>
     <string name="connect_code_label">Kod weryfikacyjny</string>
     <string name="connect_submit_code">Potwierdz kod</string>
+
+    <!-- Live segments -->
+    <string name="field_segment_name">Segment</string>
+    <string name="field_segment_to_start">Do segmentu</string>
+    <string name="field_segment_time">Czas segmentu</string>
+    <string name="field_segment_time_left">Czas pozostały</string>
+    <string name="field_segment_covered">Przejechany dyst.</string>
+    <string name="field_segment_remaining">Pozostały dystans</string>
+    <string name="field_segment_ahead">Przewaga czasu</string>
+    <string name="field_segment_ahead_distance">Przewaga dystansu</string>
+    <string name="field_segment_best">Rekord segmentu</string>
+    <string name="field_segment_projected">Czas prognozowany</string>
+    <string name="field_segment_ascent">Podjazd segmentu</string>
+    <string name="field_segment_descent">Zjazd segmentu</string>
+    <string name="field_segment_ascent_left">Pozostały podjazd</string>
+    <string name="field_segment_descent_left">Pozostały zjazd</string>
+    <string name="field_segment_grade_left">Pozostałe nachylenie</string>
+    <string name="segments_title">Segmenty na żywo</string>
+    <string name="segments_explain">Twoje oznaczone segmenty ze Stravy, ścigane z twoim własnym najlepszym czasem. Strava nie udostępnia już rankingów innym aplikacjom, więc cudzego czasu nie da się pokazać.</string>
+    <string name="segments_sync_now">Synchronizuj</string>
+    <string name="segments_syncing">Sprawdzanie…</string>
+    <string name="segments_updated">Aktualne</string>
+    <string name="segments_rate_limited">Strava prosi o kilka minut przerwy</string>
+    <string name="segments_not_connected">Najpierw połącz Stravę</string>
+    <string name="segments_failed">Nie udało się połączyć ze Stravą</string>
+    <string name="segments_none">Brak oznaczonych segmentów. Oznacz segment w Stravie i zsynchronizuj.</string>
+    <string name="segments_best">%1$s · rekord %2$s</string>
+    <string name="segments_no_effort">%1$s · nigdy nie przejechany</string>
+
 </resources>
