@@ -7,6 +7,13 @@ import com.dchernykh.trainingrecorder.core.segment.Segment
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 
+/** Where a fetched segment goes next. */
+interface SegmentTarget {
+    fun publish(segment: Segment)
+
+    fun remove(id: Long)
+}
+
 /**
  * Sends segments to the watch, one Data Layer item each.
  *
@@ -17,8 +24,8 @@ import com.google.android.gms.wearable.Wearable
  */
 class SegmentPublisher(
     private val context: Context,
-) {
-    fun publish(segment: Segment) {
+) : SegmentTarget {
+    override fun publish(segment: Segment) {
         val request =
             PutDataMapRequest.create(SegmentContract.path(segment.id)).apply {
                 dataMap.putString(SegmentContract.KEY_PAYLOAD, SegmentContract.encode(segment))
@@ -31,7 +38,7 @@ class SegmentPublisher(
     }
 
     /** Unstarring a segment on Strava has to take it off the watch too. */
-    fun remove(id: Long) {
+    override fun remove(id: Long) {
         Wearable.getDataClient(context).deleteDataItems(Uri.parse("wear://*${SegmentContract.path(id)}"))
     }
 

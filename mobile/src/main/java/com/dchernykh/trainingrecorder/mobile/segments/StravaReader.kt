@@ -33,12 +33,24 @@ data class ApiResponse(
 /**
  * The one request shape reading segments needs: a GET with a bearer token.
  *
+ * An interface so the part above it - which requests, in what order, and what
+ * to do when one is refused - can be tested without a network, which is the
+ * whole of what is worth testing there.
+ */
+fun interface StravaReader {
+    fun get(
+        url: String,
+        accessToken: String,
+    ): ApiResponse
+}
+
+/**
  * Written against [HttpURLConnection] like the rest of the app's networking,
  * for the same reason: this is two dozen lines against a dependency that would
  * have to be carried, locked and updated for the life of the project.
  */
-class StravaReader {
-    fun get(
+class HttpStravaReader : StravaReader {
+    override fun get(
         url: String,
         accessToken: String,
     ): ApiResponse {
