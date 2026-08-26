@@ -189,4 +189,15 @@ object StravaSegments {
 
     /** Strava's own page size; asking for more is refused rather than truncated. */
     const val PAGE_SIZE = 30
+
+    /**
+     * How many pages of starred segments to take.
+     *
+     * A limit rather than "all of them" because each new segment costs two
+     * requests and an item on the watch, and a rider who has starred four
+     * hundred climbs over ten years is not racing all of them. Ninety is far
+     * past what anyone has starred deliberately, and it keeps the first sync
+     * inside a single rate-limit window.
+     */
+    const val MAX_PAGES = 3
 }
