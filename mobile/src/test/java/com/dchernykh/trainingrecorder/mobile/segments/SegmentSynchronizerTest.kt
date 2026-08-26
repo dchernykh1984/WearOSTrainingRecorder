@@ -237,6 +237,48 @@ class SegmentSynchronizerTest {
     }
 
     @Test
+    fun aRiderWithMoreThanOnePageGetsThemAll() {
+        // A full page means there may be another; a short one means there is not.
+        val first = starred(*(1L..30L).map { it to 500.0 }.toTypedArray())
+        val second = starred(*(31L..35L).map { it to 500.0 }.toTypedArray())
+
+        val outcome =
+            synchronizer { url ->
+                when {
+                    url.contains("?page=1&") -> ok(first)
+                    url.contains("?page=2&") -> ok(second)
+                    url.contains("/streams") -> ok(streams)
+                    else -> ok(effort)
+                }
+            }.sync(SyncTrigger.MANUAL)
+
+        assertEquals(35, (outcome as SyncOutcome.Updated).segments)
+        // Deliberately "?page=3&": "per_page=30" contains "page=3" too, and a
+        // test that matched that would pass whatever the code did.
+        assertFalse("the third page is never asked for", asked.any { it.contains("?page=3&") })
+    }
+
+    @Test
+    fun aListingCutShortDoesNotUnstarAnything() {
+        val store = store()
+        synchronizer(store) { url ->
+            when {
+                url.contains("/segments/starred") -> ok(starred(1L to 553.0, 2L to 400.0))
+                url.contains("/streams") -> ok(streams)
+                else -> ok(effort)
+            }
+        }.sync(SyncTrigger.MANUAL)
+        assertEquals(2, store.read().size)
+        removed.clear()
+
+        // A page that comes back rate limited is not a rider unstarring things.
+        synchronizer(store) { ApiResponse(429, "rate limited") }.sync(SyncTrigger.MANUAL)
+
+        assertTrue("nothing should have been taken off the watch", removed.isEmpty())
+        assertEquals(2, store.read().size)
+    }
+
+    @Test
     fun theStarredListIsTheFirstThingAskedFor() {
         synchronizer { ok("[]") }.sync(SyncTrigger.MANUAL)
 

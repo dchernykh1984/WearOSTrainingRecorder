@@ -223,6 +223,10 @@ class SegmentTracker(
         active = segment
         activeIndex = 0
         startedAtEpochMs = fix.atEpochMs
+        // Cleared with the effort. Left from the last segment, one stray fix
+        // would be measured against a timestamp from an hour ago and abandon
+        // this one on the spot.
+        strayingSinceEpochMs = 0L
         finishedAtEpochMs = 0L
         state = SegmentState(segment, toStartMeters = 0.0, riding = true)
     }

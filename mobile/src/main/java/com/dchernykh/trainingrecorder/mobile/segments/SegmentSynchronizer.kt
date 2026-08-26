@@ -3,6 +3,7 @@ package com.dchernykh.trainingrecorder.mobile.segments
 import com.dchernykh.trainingrecorder.core.connector.SegmentPlan
 import com.dchernykh.trainingrecorder.core.connector.SegmentSync
 import com.dchernykh.trainingrecorder.core.connector.StarredSegment
+import com.dchernykh.trainingrecorder.core.connector.StoredSegment
 import com.dchernykh.trainingrecorder.core.connector.StravaProtocol
 import com.dchernykh.trainingrecorder.core.connector.StravaSegments
 import com.dchernykh.trainingrecorder.core.connector.SyncTrigger
@@ -60,28 +61,62 @@ class SegmentSynchronizer(
         if (!SegmentSync.isDue(trigger, store.lastSyncEpochMs(), now())) return SyncOutcome.TooSoon
         val token = freshToken(credentials) ?: return SyncOutcome.Failed("the Strava token could not be renewed")
 
-        val listing = reader.get(StravaSegments.starredUrl(), token)
-        if (listing.rateLimited) return SyncOutcome.RateLimited(fetched = 0)
-        if (!listing.ok) return SyncOutcome.Failed("Strava answered ${listing.statusCode} to the starred list")
-        val starred = StravaSegments.starredFrom(listing.body)
+        val starred = starred(token) ?: return SyncOutcome.Failed("Strava would not list the starred segments")
 
         val held = store.read().associateBy { it.id }
-        val plan = SegmentSync.plan(store.stored(), starred)
-        val fetched = fetchAll(plan, starred.associateBy { it.id }, held, token)
-        plan.toDrop.forEach {
-            store.delete(it)
-            publisher.remove(it)
+        val plan = SegmentSync.plan(held.values.map(::asStored), starred.segments)
+        val fetched = fetchAll(plan, starred.segments.associateBy { it.id }, held, token)
+        // Nothing is dropped from a listing that was cut short: a segment the
+        // rate limit stopped us reading is not a segment the rider unstarred,
+        // and deleting it would take a climb off the watch for no reason.
+        if (!starred.limited) {
+            plan.toDrop.forEach {
+                store.delete(it)
+                publisher.remove(it)
+            }
         }
         // Only a clean pass counts as a sync. Recording one that stopped at the
         // rate limit would tell the next trigger there was nothing to do, and
         // the segments left unfetched would wait a day for no reason.
-        if (!fetched.limited) store.markSynced(now())
-        return if (fetched.limited) {
+        val limited = fetched.limited || starred.limited
+        if (!limited) store.markSynced(now())
+        return if (limited) {
             SyncOutcome.RateLimited(fetched.count)
         } else {
-            SyncOutcome.Updated(segments = starred.size, fetched = fetched.count, dropped = plan.toDrop.size)
+            SyncOutcome.Updated(segments = starred.segments.size, fetched = fetched.count, dropped = plan.toDrop.size)
         }
     }
+
+    private data class Starred(
+        val segments: List<StarredSegment>,
+        val limited: Boolean,
+    )
+
+    /**
+     * The starred listing, a page at a time.
+     *
+     * Paged because a rider with more than thirty starred segments would
+     * otherwise get the first thirty and no sign that the rest existed - and
+     * "my climb is missing and nothing says why" is the worst kind of bug to
+     * have in a feature that is quiet by design.
+     */
+    private fun starred(token: String): Starred? {
+        val all = mutableListOf<StarredSegment>()
+        for (page in 1..StravaSegments.MAX_PAGES) {
+            val response = reader.get(StravaSegments.starredUrl(page), token)
+            if (response.rateLimited) return Starred(all, limited = true)
+            // A failure on the first page is a failure; on a later one it is a
+            // partial answer, and the segments already listed are still good.
+            if (!response.ok) return if (page == 1) null else Starred(all, limited = false)
+            val listed = StravaSegments.starredFrom(response.body)
+            all += listed
+            if (listed.size < StravaSegments.PAGE_SIZE) break
+        }
+        return Starred(all, limited = false)
+    }
+
+    private fun asStored(segment: Segment) =
+        StoredSegment(segment.id, hasLine = segment.points.size >= 2, bestSeconds = segment.referenceSeconds)
 
     private data class Fetched(
         val count: Int,
