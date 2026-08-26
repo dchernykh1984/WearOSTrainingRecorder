@@ -154,6 +154,7 @@ class SegmentTracker(
     private var previousFix: Fix? = null
     private var headingDeg: Double? = null
     private var startedAtEpochMs = 0L
+    private var closestToStartMeters = Double.MAX_VALUE
     private var strayingSinceEpochMs = 0L
     private var finishedAtEpochMs = 0L
 
@@ -223,6 +224,7 @@ class SegmentTracker(
         active = segment
         activeIndex = 0
         startedAtEpochMs = fix.atEpochMs
+        closestToStartMeters = metresTo(fix, segment.start)
         // Cleared with the effort. Left from the last segment, one stray fix
         // would be measured against a timestamp from an hour ago and abandon
         // this one on the spot.
@@ -248,6 +250,7 @@ class SegmentTracker(
             return
         }
         strayingSinceEpochMs = 0L
+        settleStart(segment, fix, here)
         activeIndex = here
         val last = segment.points.lastIndex
         val done = here == last
@@ -265,6 +268,32 @@ class SegmentTracker(
             activeIndex = 0
             finishedAtEpochMs = fix.atEpochMs
         }
+    }
+
+    /**
+     * Starts the clock at the rider's closest approach to the start, not at the
+     * first fix inside the radius.
+     *
+     * The radius has to be generous - a receiver a few metres out, a line drawn
+     * across a road at an angle - but starting the clock the moment the rider is
+     * anywhere inside it hands them the run-up as elapsed time. On a walking pace
+     * that is eight seconds of nothing, and it comes straight off the gap against
+     * their best, which is the one field the whole feature exists to show.
+     *
+     * So while the rider is still closing on the start point, the clock keeps
+     * being reset to now. The moment they begin moving away from it, they have
+     * crossed the line and the clock stands.
+     */
+    private fun settleStart(
+        segment: Segment,
+        fix: Fix,
+        here: Int,
+    ) {
+        if (here > 0) return
+        val metres = metresTo(fix, segment.start)
+        if (metres >= closestToStartMeters) return
+        closestToStartMeters = metres
+        startedAtEpochMs = fix.atEpochMs
     }
 
     /**
@@ -345,6 +374,7 @@ class SegmentTracker(
         active = null
         activeIndex = 0
         startedAtEpochMs = 0
+        closestToStartMeters = Double.MAX_VALUE
         strayingSinceEpochMs = 0L
     }
 
