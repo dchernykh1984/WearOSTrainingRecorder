@@ -15,6 +15,7 @@ import com.dchernykh.trainingrecorder.core.race.RaceStatsSnapshot
 import com.dchernykh.trainingrecorder.core.recording.RecordingAction
 import com.dchernykh.trainingrecorder.core.recording.RecordingPhase
 import com.dchernykh.trainingrecorder.core.recording.RecordingState
+import com.dchernykh.trainingrecorder.core.segment.SegmentTracker
 import com.dchernykh.trainingrecorder.core.sensor.FixStatus
 import com.dchernykh.trainingrecorder.core.sensor.SensorOrigin
 import com.dchernykh.trainingrecorder.core.sensor.SensorReading
@@ -34,6 +35,7 @@ import com.dchernykh.trainingrecorder.wear.ble.SensorHub
 import com.dchernykh.trainingrecorder.wear.health.BuiltInSample
 import com.dchernykh.trainingrecorder.wear.health.ExerciseRecorder
 import com.dchernykh.trainingrecorder.wear.race.RaceStatsPoller
+import com.dchernykh.trainingrecorder.wear.segment.SegmentStore
 import com.dchernykh.trainingrecorder.wear.service.RecordingService
 import com.dchernykh.trainingrecorder.wear.storage.TrackJournalStore
 import com.dchernykh.trainingrecorder.wear.storage.WorkoutRepository
@@ -210,6 +212,23 @@ class RecordingViewModel(
 
     /** When the last point was written, so a second cannot be recorded twice. */
     private var lastPointAtEpochMs = 0L
+
+    /**
+     * The rider's starred segments, and where the ride stands against them.
+     *
+     * Loaded when the ride starts and not touched again. Everything it needs was
+     * fetched on the phone beforehand, which is what lets it work on a climb
+     * with no signal - and rebuilding it mid-ride to pick up a segment starred
+     * five minutes ago would throw away the effort the rider is in the middle of.
+     */
+    private var segments = SegmentTracker()
+
+    /**
+     * Where the starred segments live. Owned rather than injected for the same
+     * reason the journal is: nothing outside this model reads them during a
+     * ride, and the constructor is already long.
+     */
+    private val segmentStore = SegmentStore(application)
     private val altitude = AltitudeTracker()
     private val aggregates = RideAggregates()
     private val rollingPower = RollingPower()
@@ -314,6 +333,10 @@ class RecordingViewModel(
             CredentialStore.fetchExisting(getApplication())?.let {
                 CredentialStore(getApplication()).write(it)
             }
+            // Segments too, and for the same reason: a watch installed after the
+            // phone had already fetched them would otherwise have none until the
+            // rider starred something new.
+            SegmentStore.fetchExisting(getApplication()).forEach { segmentStore.write(it) }
             applySettings()
         }
     }
@@ -351,6 +374,9 @@ class RecordingViewModel(
         platformTotals.clear()
         reportedDistanceMeters = 0.0
         gradient.clear()
+        // Read from disk here rather than held: a segment that arrived from the
+        // phone while the watch sat at the trailhead should be raced today.
+        segments = SegmentTracker(runCatching { segmentStore.read() }.getOrDefault(emptyList()))
         // Cleared with the ride: the sun's timetable belongs to where and when
         // that ride was, and a ride started somewhere else tomorrow must not
         // inherit it.
@@ -703,6 +729,7 @@ class RecordingViewModel(
                         clockOffsetMinutes = TimeZone.getDefault().getOffset(now) / MILLIS_PER_MINUTE,
                         solar = solar,
                     ),
+                segment = segments.state,
             )
         // After the merge, so the point carries exactly the values the screen is
         // about to show.
@@ -766,6 +793,9 @@ class RecordingViewModel(
         // minute of travel into a few milliseconds and reads as hundreds of
         // kilometres an hour.
         sample.fixes.forEach(track::record)
+        // The same fixes, against the segments the phone sent. Nothing is
+        // fetched here and nothing can be: this runs on a climb.
+        sample.fixes.forEach(segments::record)
         // The barometer arrives as an ordinary reading; the fix carries its own.
         // Which reading is shown, which one the climb is measured from, and why
         // they are not the same one, is AltitudeTracker's.
