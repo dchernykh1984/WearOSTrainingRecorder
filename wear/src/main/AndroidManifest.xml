@@ -112,6 +112,10 @@
                      that are never delivered, and every upload fails to log in
                      with nothing anywhere saying why. -->
                 <data android:scheme="wear" android:host="*" android:pathPrefix="/credentials" />
+                <!-- And segments, one item each. Without this line the phone
+                     publishes the rider's starred climbs and the watch is never
+                     woken to store them. -->
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/segment/" />
             </intent-filter>
         </service>
 

@@ -2,8 +2,10 @@ package com.dchernykh.trainingrecorder.wear.sync
 
 import android.content.Context
 import com.dchernykh.trainingrecorder.core.connector.CredentialContract
+import com.dchernykh.trainingrecorder.core.datalayer.SegmentContract
 import com.dchernykh.trainingrecorder.core.datalayer.SyncContract
 import com.dchernykh.trainingrecorder.core.datalayer.WatchSettings
+import com.dchernykh.trainingrecorder.wear.segment.SegmentStore
 import com.dchernykh.trainingrecorder.wear.upload.CredentialStore
 import com.dchernykh.trainingrecorder.wear.upload.UploadWorker
 import com.google.android.gms.wearable.DataEvent
@@ -32,9 +34,17 @@ class SettingsListener : WearableListenerService() {
             // rider has just disconnected.
             if (event.type == DataEvent.TYPE_DELETED) {
                 if (event.dataItem.uri.path == CredentialContract.PATH) CredentialStore(this).clear()
+                // A segment the rider unstarred. Deleting rather than ignoring,
+                // or the watch keeps timing a climb Strava no longer has a place
+                // for and the effort goes nowhere.
+                SegmentContract.idFrom(event.dataItem.uri.path)?.let { SegmentStore(this).delete(it) }
                 return@forEach
             }
             val dataMap = DataMapItem.fromDataItem(event.dataItem).dataMap
+            SegmentContract.idFrom(event.dataItem.uri.path)?.let {
+                dataMap.getString(SegmentContract.KEY_PAYLOAD)?.let { payload -> SegmentStore(this).write(payload) }
+                return@forEach
+            }
             when (event.dataItem.uri.path) {
                 WatchSettings.PATH ->
                     dataMap.getString(SettingsStore.KEY_PAYLOAD)?.let { SettingsStore(this).write(it) }
