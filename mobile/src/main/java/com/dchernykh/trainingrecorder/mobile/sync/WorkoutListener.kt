@@ -1,8 +1,12 @@
 package com.dchernykh.trainingrecorder.mobile.sync
 
 import android.content.Context
+import com.dchernykh.trainingrecorder.core.connector.StravaProtocol
+import com.dchernykh.trainingrecorder.core.connector.SyncTrigger
 import com.dchernykh.trainingrecorder.core.datalayer.WorkoutSummaryContract
+import com.dchernykh.trainingrecorder.core.workout.UploadState
 import com.dchernykh.trainingrecorder.core.workout.WorkoutSummary
+import com.dchernykh.trainingrecorder.mobile.segments.SegmentSyncWorker
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
@@ -21,6 +25,25 @@ import java.io.File
  * open would be empty every time it was opened.
  */
 class WorkoutListener : WearableListenerService() {
+    /**
+     * A ride landing on Strava is the moment a personal best changes.
+     *
+     * The best trigger there is for refreshing segments: the climbs the rider
+     * just went up are exactly the ones they care about, the new time is minutes
+     * old, and the phone is awake anyway because the watch just woke it. Whether
+     * it is actually worth going is not decided here - `SegmentSync` throttles
+     * it, so a watch that publishes its list five times in a minute still costs
+     * one refresh.
+     */
+    private fun refreshSegmentsIfARideReachedStrava(payload: String) {
+        val uploaded =
+            WorkoutSummaryContract
+                .decode(payload)
+                .orEmpty()
+                .any { it.uploads[StravaProtocol.ID] == UploadState.UPLOADED }
+        if (uploaded) SegmentSyncWorker.runNow(this, SyncTrigger.AFTER_UPLOAD)
+    }
+
     override fun onDataChanged(events: DataEventBuffer) {
         events.forEach { event ->
             if (event.dataItem.uri.path != WorkoutSummaryContract.PATH) return@forEach
@@ -33,7 +56,10 @@ class WorkoutListener : WearableListenerService() {
                 .fromDataItem(event.dataItem)
                 .dataMap
                 .getString(WorkoutSummaryContract.KEY_PAYLOAD)
-                ?.let { WorkoutHistoryStore(this).write(it) }
+                ?.let {
+                    WorkoutHistoryStore(this).write(it)
+                    refreshSegmentsIfARideReachedStrava(it)
+                }
         }
     }
 }

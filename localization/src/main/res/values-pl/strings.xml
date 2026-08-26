@@ -27,6 +27,19 @@
     <string name="field_segment_projected">Czas prognozowany</string>
     <string name="field_segment_ascent_left">Pozostały podjazd</string>
     <string name="field_segment_grade_left">Pozostałe nachylenie</string>
+
+    <!-- Live segments -->
+    <string name="segments_title">Segmenty na żywo</string>
+    <string name="segments_explain">Twoje oznaczone segmenty ze Stravy, ścigane z twoim własnym najlepszym czasem. Strava nie udostępnia już rankingów innym aplikacjom, więc cudzego czasu nie da się pokazać.</string>
+    <string name="segments_sync_now">Synchronizuj</string>
+    <string name="segments_syncing">Sprawdzanie…</string>
+    <string name="segments_updated">Aktualne</string>
+    <string name="segments_rate_limited">Strava prosi o kilka minut przerwy</string>
+    <string name="segments_not_connected">Najpierw połącz Stravę</string>
+    <string name="segments_failed">Nie udało się połączyć ze Stravą</string>
+    <string name="segments_none">Brak oznaczonych segmentów. Oznacz segment w Stravie i zsynchronizuj.</string>
+    <string name="segments_best">%1$s · rekord %2$s</string>
+    <string name="segments_no_effort">%1$s · nigdy nie przejechany</string>
     <string name="field_segment_time_left">Czas pozostały</string>
     <string name="field_segment_covered">Przejechany dyst.</string>
     <string name="field_segment_ascent">Podjazd segmentu</string>

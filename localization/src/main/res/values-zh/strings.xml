@@ -110,6 +110,19 @@
     <string name="field_segment_projected">预计成绩</string>
     <string name="field_segment_ascent_left">剩余爬升</string>
     <string name="field_segment_grade_left">剩余坡度</string>
+
+    <!-- Live segments -->
+    <string name="segments_title">实时路段</string>
+    <string name="segments_explain">你在 Strava 收藏的路段，与你自己的最好成绩比拼。Strava 已不再向第三方应用开放排行榜，因此无法显示他人成绩。</string>
+    <string name="segments_sync_now">立即同步</string>
+    <string name="segments_syncing">检查中…</string>
+    <string name="segments_updated">已是最新</string>
+    <string name="segments_rate_limited">Strava 要求稍等几分钟</string>
+    <string name="segments_not_connected">请先连接 Strava</string>
+    <string name="segments_failed">无法连接 Strava</string>
+    <string name="segments_none">还没有收藏的路段。在 Strava 收藏一个路段后同步。</string>
+    <string name="segments_best">%1$s · 最好 %2$s</string>
+    <string name="segments_no_effort">%1$s · 从未骑过</string>
     <string name="field_segment_time_left">预计剩余时间</string>
     <string name="field_segment_covered">已骑距离</string>
     <string name="field_segment_ascent">路段爬升</string>

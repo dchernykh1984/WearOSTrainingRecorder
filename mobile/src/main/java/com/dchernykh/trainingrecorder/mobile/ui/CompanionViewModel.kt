@@ -11,6 +11,7 @@ import com.dchernykh.trainingrecorder.core.config.ScreenSet
 import com.dchernykh.trainingrecorder.core.config.reset
 import com.dchernykh.trainingrecorder.core.config.resolve
 import com.dchernykh.trainingrecorder.core.config.withScreensFor
+import com.dchernykh.trainingrecorder.core.connector.SyncTrigger
 import com.dchernykh.trainingrecorder.core.datalayer.WatchSettings
 import com.dchernykh.trainingrecorder.core.format.UnitSystem
 import com.dchernykh.trainingrecorder.core.race.RaceStatsConfig
@@ -19,6 +20,7 @@ import com.dchernykh.trainingrecorder.localization.AppLanguage
 import com.dchernykh.trainingrecorder.localization.R
 import com.dchernykh.trainingrecorder.mobile.connect.GarminAuthorization
 import com.dchernykh.trainingrecorder.mobile.connect.StravaAuthorization
+import com.dchernykh.trainingrecorder.mobile.segments.SegmentSyncWorker
 import com.dchernykh.trainingrecorder.mobile.settings.PhoneSettingsStore
 import com.dchernykh.trainingrecorder.mobile.sync.SettingsPublisher
 import com.dchernykh.trainingrecorder.mobile.sync.WorkoutHistoryStore
@@ -53,6 +55,8 @@ class CompanionViewModel(
     /** Credentials and sign-ins, which have their own lifecycle entirely. */
     val connections: ServiceConnections =
         ServiceConnections(store, publisher, StravaAuthorization(application), GarminAuthorization()),
+    /** The rider's starred segments, which reach the network on their own schedule. */
+    val segments: SegmentSettings = SegmentSettings(SegmentSyncWorker.synchronizer(application)),
 ) : AndroidViewModel(application) {
     /**
      * Kotlin default arguments do not emit a one-argument constructor, and
@@ -100,7 +104,14 @@ class CompanionViewModel(
             _workouts.value = withContext(Dispatchers.IO) { history.read() }
             refreshWorkouts()
             connections.load()
+            segments.load()
         }
+        // Opening the app is the third of the three moments worth refreshing
+        // segments at, and the one that catches a star added on the website
+        // between rides. The standing daily job is registered here too: it is
+        // kept rather than replaced, so this costs nothing after the first run.
+        SegmentSyncWorker.schedule(application)
+        SegmentSyncWorker.runNow(application, SyncTrigger.APP_OPENED)
     }
 
     /**
@@ -117,6 +128,11 @@ class CompanionViewModel(
             }
             _workouts.value = withContext(Dispatchers.IO) { history.read() }
         }
+    }
+
+    /** Goes to Strava for the segments now, because the rider asked. */
+    fun syncSegments() {
+        viewModelScope.launch { segments.syncNow() }
     }
 
     fun updateScreens(

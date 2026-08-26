@@ -211,6 +211,17 @@ private fun ConnectionList(
             )
             HorizontalDivider()
         }
+        // Under the services rather than in a tab of its own: segments come from
+        // Strava, and the first thing this panel says to a rider who has not
+        // connected it is to go and do that - three inches above the field that
+        // does it.
+        item(key = "segments") {
+            SegmentPanel(
+                settings = model.segments,
+                units = model.units.value,
+                onSyncNow = model::syncSegments,
+            )
+        }
     }
 }
 

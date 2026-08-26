@@ -110,6 +110,19 @@
     <string name="field_segment_projected">予想タイム</string>
     <string name="field_segment_ascent_left">残り獲得標高</string>
     <string name="field_segment_grade_left">残り勾配</string>
+
+    <!-- Live segments -->
+    <string name="segments_title">ライブセグメント</string>
+    <string name="segments_explain">スターを付けた Strava セグメントを、自己ベストと競います。Strava は他社アプリにリーダーボードを開放していないため、他人のタイムは表示できません。</string>
+    <string name="segments_sync_now">今すぐ同期</string>
+    <string name="segments_syncing">確認中…</string>
+    <string name="segments_updated">最新です</string>
+    <string name="segments_rate_limited">Strava から数分待つよう求められました</string>
+    <string name="segments_not_connected">先に Strava を接続してください</string>
+    <string name="segments_failed">Strava に接続できませんでした</string>
+    <string name="segments_none">スター付きセグメントがありません。Strava でスターを付けて同期してください。</string>
+    <string name="segments_best">%1$s · 自己ベスト %2$s</string>
+    <string name="segments_no_effort">%1$s · 未走行</string>
     <string name="field_segment_time_left">残り予想時間</string>
     <string name="field_segment_covered">走行距離</string>
     <string name="field_segment_ascent">セグメント獲得標高</string>

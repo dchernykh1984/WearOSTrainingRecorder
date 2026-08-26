@@ -120,6 +120,19 @@
     <string name="field_segment_projected">Projected Time</string>
     <string name="field_segment_ascent_left">Climb to Go</string>
     <string name="field_segment_grade_left">Grade to Go</string>
+
+    <!-- Live segments -->
+    <string name="segments_title">Live segments</string>
+    <string name="segments_explain">Your starred Strava segments, raced against your own best time. Strava no longer opens leaderboards to other apps, so a rival\'s time cannot be shown.</string>
+    <string name="segments_sync_now">Sync now</string>
+    <string name="segments_syncing">Checking…</string>
+    <string name="segments_updated">Up to date</string>
+    <string name="segments_rate_limited">Strava asked us to wait a few minutes</string>
+    <string name="segments_not_connected">Connect Strava first</string>
+    <string name="segments_failed">Could not reach Strava</string>
+    <string name="segments_none">No starred segments yet. Star a segment on Strava and sync.</string>
+    <string name="segments_best">%1$s · best %2$s</string>
+    <string name="segments_no_effort">%1$s · never ridden</string>
     <string name="field_segment_time_left">Time to Go</string>
     <string name="field_segment_covered">Segment Dist</string>
     <string name="field_segment_ascent">Segment Climb</string>

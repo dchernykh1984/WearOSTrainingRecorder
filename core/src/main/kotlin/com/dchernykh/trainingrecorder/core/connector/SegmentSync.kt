@@ -1,22 +1,29 @@
 package com.dchernykh.trainingrecorder.core.connector
 
 /** What prompted a refresh, which is what decides whether one is due. */
-enum class SyncTrigger {
+enum class SyncTrigger(
+    val id: String,
+) {
     /** The rider pressed the button, and the answer is always yes. */
-    MANUAL,
+    MANUAL("manual"),
 
     /**
      * A ride has just reached Strava. The best moment there is: the segments
      * the rider cares about are exactly the ones they have just been over, and
      * any new personal best is minutes old.
      */
-    AFTER_UPLOAD,
+    AFTER_UPLOAD("after_upload"),
 
     /** The phone app came to the front. */
-    APP_OPENED,
+    APP_OPENED("app_opened"),
 
     /** The daily background check, for stars added on the website. */
-    PERIODIC,
+    PERIODIC("periodic"),
+    ;
+
+    companion object {
+        fun byId(id: String?): SyncTrigger? = entries.firstOrNull { it.id == id }
+    }
 }
 
 /** A segment already on the phone, as far as deciding what to fetch is concerned. */
