@@ -45,6 +45,10 @@ object FieldFormatter {
     private const val FEET_PER_MILE = 5280
     private const val SWIM_UNIT_METERS = 100.0
 
+    /** What a gap of less than a second, or less than a metre, comes out as. */
+    private const val LEVEL = "0:00"
+    private const val NO_GROUND = "0 m"
+
     /** A pace slower than this is a stop, not a pace worth showing. */
     private const val SLOWEST_MEANINGFUL_PACE_SECONDS = 3599.0
 
@@ -158,8 +162,12 @@ object FieldFormatter {
      */
     fun signedDuration(millis: Long?): String {
         if (millis == null) return empty
-        val sign = if (millis < 0) "-" else "+"
-        return "$sign${duration(abs(millis))}"
+        val text = duration(abs(millis))
+        // Level reads as level. A gap under a second is neither ahead nor
+        // behind, and "-0:00" flickering to "+0:00" and back is the field
+        // drawing attention to a difference it cannot measure.
+        if (text == LEVEL) return text
+        return "${if (millis < 0) "-" else "+"}$text"
     }
 
     /** The same gap measured up the road rather than on the clock. */
@@ -168,8 +176,9 @@ object FieldFormatter {
         units: UnitSystem = UnitSystem.METRIC,
     ): String {
         if (meters == null) return empty
-        val sign = if (meters < 0) "-" else "+"
-        return "$sign${distance(abs(meters), units)}"
+        val text = distance(abs(meters), units)
+        if (text == NO_GROUND) return text
+        return "${if (meters < 0) "-" else "+"}$text"
     }
 
     fun integer(
