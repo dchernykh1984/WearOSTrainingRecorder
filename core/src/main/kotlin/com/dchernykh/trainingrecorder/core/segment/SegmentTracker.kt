@@ -47,24 +47,37 @@ data class SegmentState(
     val remainingGradePercent: Double? get() = ifTiming { segment.gradeAfter(coveredMeters) }
 
     /**
-     * Seconds ahead of the reference effort, negative when behind it.
+     * Seconds down on the reference effort, negative when up on it.
+     *
+     * Signed the way a cyclist reads a gap and not the way a computer would
+     * naturally write one: on every result sheet in the sport `+2:48` means two
+     * minutes forty-eight *slower*, and a rider glancing down mid-effort reads
+     * the sign long before the number. Calling the same quantity "time ahead"
+     * and showing a minus while they are losing is a field that has to be
+     * decoded, on a climb, out of breath.
      *
      * Null without a reference, which is what a segment the rider has never
      * ridden looks like: there is a segment to time, just nobody to race.
      */
-    val aheadSeconds: Double?
+    val gapSeconds: Double?
         get() =
             ifTiming {
                 val reference = segment.referenceSecondsAt(coveredMeters) ?: return@ifTiming null
-                reference - elapsedSeconds
+                elapsedSeconds - reference
             }
 
-    /** Metres ahead of where the reference effort was at this point in the effort. */
-    val aheadMeters: Double?
+    /**
+     * The same gap measured up the road: metres behind where the reference
+     * effort had reached by now, negative when in front of it.
+     *
+     * Signed to agree with [gapSeconds], because two fields describing one gap
+     * with opposite signs is worse than either convention on its own.
+     */
+    val gapMeters: Double?
         get() =
             ifTiming {
                 val reference = segment.referenceMetersAt(elapsedSeconds) ?: return@ifTiming null
-                coveredMeters - reference
+                reference - coveredMeters
             }
 
     /**

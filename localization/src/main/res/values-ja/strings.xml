@@ -209,8 +209,8 @@
     <string name="field_segment_time_left">残り予想時間</string>
     <string name="field_segment_covered">走行距離</string>
     <string name="field_segment_remaining">残り距離</string>
-    <string name="field_segment_ahead">タイム差</string>
-    <string name="field_segment_ahead_distance">距離差</string>
+    <string name="field_segment_gap">タイム差</string>
+    <string name="field_segment_gap_distance">距離差</string>
     <string name="field_segment_best">セグメント自己ベスト</string>
     <string name="field_segment_projected">予想タイム</string>
     <string name="field_segment_ascent">セグメント獲得標高</string>

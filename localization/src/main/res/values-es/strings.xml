@@ -216,8 +216,8 @@
     <string name="field_segment_time_left">Tiempo rest.</string>
     <string name="field_segment_covered">Dist. recorrida</string>
     <string name="field_segment_remaining">Dist. restante</string>
-    <string name="field_segment_ahead">Ventaja tiempo</string>
-    <string name="field_segment_ahead_distance">Ventaja dist.</string>
+    <string name="field_segment_gap">Diferencia tiempo</string>
+    <string name="field_segment_gap_distance">Diferencia dist.</string>
     <string name="field_segment_best">Récord segm.</string>
     <string name="field_segment_projected">Tiempo previsto</string>
     <string name="field_segment_ascent">Desnivel + segm.</string>

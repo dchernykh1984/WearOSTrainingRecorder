@@ -166,4 +166,23 @@ class SyncContractTest {
             assertEquals("config_level_${it.id}", SyncContract.levelLabelKey(it))
         }
     }
+
+    @Test
+    fun aLayoutSavedUnderAnOldFieldNameStillCarriesThatField() {
+        // The phone's own saved settings and the watch's copy both come back
+        // through here, so migrating a renamed field once covers both ends.
+        val payload =
+            """
+            {"version":1,"units":"metric","screens":{"default":[["segment_ahead","segment_ahead_distance"]]}}
+            """.trimIndent()
+
+        val decoded = assertNotNull(SyncContract.decode(payload))
+
+        assertEquals(
+            listOf("segment_gap", "segment_gap_distance"),
+            decoded.screens.default.screens
+                .first()
+                .slots,
+        )
+    }
 }

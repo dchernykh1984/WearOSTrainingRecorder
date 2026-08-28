@@ -216,8 +216,8 @@
     <string name="field_segment_time_left">Resterende tijd</string>
     <string name="field_segment_covered">Afstand gereden</string>
     <string name="field_segment_remaining">Resterend</string>
-    <string name="field_segment_ahead">Tijdvoorsprong</string>
-    <string name="field_segment_ahead_distance">Afstandsvoorsprong</string>
+    <string name="field_segment_gap">Tijdverschil</string>
+    <string name="field_segment_gap_distance">Afstandsverschil</string>
     <string name="field_segment_best">Segmentrecord</string>
     <string name="field_segment_projected">Verwachte tijd</string>
     <string name="field_segment_ascent">Segmentklim</string>

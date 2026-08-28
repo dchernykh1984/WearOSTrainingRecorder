@@ -4,6 +4,7 @@ import com.dchernykh.trainingrecorder.core.config.ConfigLevel
 import com.dchernykh.trainingrecorder.core.config.Screen
 import com.dchernykh.trainingrecorder.core.config.ScreenConfiguration
 import com.dchernykh.trainingrecorder.core.config.ScreenSet
+import com.dchernykh.trainingrecorder.core.field.FieldCatalogue
 import com.dchernykh.trainingrecorder.core.format.UnitSystem
 import com.dchernykh.trainingrecorder.core.race.RaceStatsConfig
 import com.dchernykh.trainingrecorder.core.sport.Discipline
@@ -157,7 +158,13 @@ object SyncContract {
             node.mapNotNull { screenNode ->
                 val slots = (screenNode as? JsonArray) ?: return@mapNotNull null
                 if (slots.isEmpty() || slots.size > Screen.MAX_SLOTS) return@mapNotNull null
-                Screen(slots.map { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content })
+                Screen(
+                    slots.map {
+                        // Through the rename map, so a layout saved before a
+                        // field was renamed still shows that field.
+                        FieldCatalogue.currentId((it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content)
+                    },
+                )
             }
         return if (screens.isEmpty()) null else ScreenSet(screens.take(ScreenSet.MAX_SCREENS))
     }

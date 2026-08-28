@@ -216,8 +216,8 @@
     <string name="field_segment_time_left">Restzeit (Prog.)</string>
     <string name="field_segment_covered">Segmentstrecke</string>
     <string name="field_segment_remaining">Reststrecke</string>
-    <string name="field_segment_ahead">Zeitvorsprung</string>
-    <string name="field_segment_ahead_distance">Distanzvorsprung</string>
+    <string name="field_segment_gap">Zeitrückstand</string>
+    <string name="field_segment_gap_distance">Distanzrückstand</string>
     <string name="field_segment_best">Segment-Bestzeit</string>
     <string name="field_segment_projected">Prognosezeit</string>
     <string name="field_segment_ascent">Segmentanstieg</string>

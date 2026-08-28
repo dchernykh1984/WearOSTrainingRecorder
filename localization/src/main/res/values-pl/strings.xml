@@ -216,8 +216,8 @@
     <string name="field_segment_time_left">Czas pozostały</string>
     <string name="field_segment_covered">Przejechany dyst.</string>
     <string name="field_segment_remaining">Pozostały dystans</string>
-    <string name="field_segment_ahead">Przewaga czasu</string>
-    <string name="field_segment_ahead_distance">Przewaga dystansu</string>
+    <string name="field_segment_gap">Strata czasu</string>
+    <string name="field_segment_gap_distance">Strata dystansu</string>
     <string name="field_segment_best">Rekord segmentu</string>
     <string name="field_segment_projected">Czas prognozowany</string>
     <string name="field_segment_ascent">Podjazd segmentu</string>

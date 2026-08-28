@@ -153,7 +153,7 @@ object FieldValues {
             "segment_time" -> FieldFormatter.duration(millis(segment.elapsedSeconds))
             "segment_time_left" -> FieldFormatter.duration(segment.estimatedRemainingSeconds?.let { millis(it) })
             "segment_projected" -> FieldFormatter.duration(segment.projectedSeconds?.let { millis(it) })
-            "segment_ahead" -> FieldFormatter.signedDuration(segment.aheadSeconds?.let { millis(it) })
+            "segment_gap" -> FieldFormatter.signedDuration(segment.gapSeconds?.let { millis(it) })
             else -> null
         }
 
@@ -166,7 +166,7 @@ object FieldValues {
         when (id) {
             "segment_covered" -> FieldFormatter.distance(segment.coveredMeters, units)
             "segment_remaining" -> FieldFormatter.distance(segment.remainingMeters, units)
-            "segment_ahead_distance" -> FieldFormatter.signedDistance(segment.aheadMeters, units)
+            "segment_gap_distance" -> FieldFormatter.signedDistance(segment.gapMeters, units)
             "segment_ascent" -> FieldFormatter.elevation(segment.ascentMeters, units)
             "segment_descent" -> FieldFormatter.elevation(segment.descentMeters, units)
             "segment_ascent_left" -> FieldFormatter.elevation(segment.remainingAscentMeters, units)

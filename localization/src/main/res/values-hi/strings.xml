@@ -209,8 +209,8 @@
     <string name="field_segment_time_left">शेष समय</string>
     <string name="field_segment_covered">तय दूरी</string>
     <string name="field_segment_remaining">शेष दूरी</string>
-    <string name="field_segment_ahead">समय बढ़त</string>
-    <string name="field_segment_ahead_distance">दूरी बढ़त</string>
+    <string name="field_segment_gap">समय अंतर</string>
+    <string name="field_segment_gap_distance">दूरी अंतर</string>
     <string name="field_segment_best">सेगमेंट रिकॉर्ड</string>
     <string name="field_segment_projected">अनुमानित समय</string>
     <string name="field_segment_ascent">सेगमेंट चढ़ाई</string>

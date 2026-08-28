@@ -66,26 +66,29 @@ class SegmentFieldValuesTest {
         assertEquals("420 m", values["segment_to_start"])
         assertEquals("2:30", values["segment_best"], "the time to beat is worth seeing on the way in")
         assertEquals(FieldCatalogue.EMPTY_VALUE, values["segment_time"], "the effort has not begun")
-        assertEquals(FieldCatalogue.EMPTY_VALUE, values["segment_ahead"])
+        assertEquals(FieldCatalogue.EMPTY_VALUE, values["segment_gap"])
     }
 
     @Test
-    fun aheadOfTheBestEffortReadsAsAPlus() {
-        // Half way in 70 s, where their best took 75.
+    fun beingUpOnTheBestEffortReadsAsAMinus() {
+        // Half way in 70 s, where their best took 75. A result sheet signs a
+        // gap the other way round from a computer: minus is quicker.
         val values =
             values(SegmentState(hill, riding = true, coveredMeters = 500.0, elapsedSeconds = 70.0))
 
-        assertEquals("+0:05", values["segment_ahead"])
+        assertEquals("-0:05", values["segment_gap"])
         assertEquals("1:10", values["segment_time"])
         assertEquals("500 m", values["segment_remaining"])
     }
 
     @Test
-    fun behindTheBestEffortReadsAsAMinus() {
+    fun beingDownOnTheBestEffortReadsAsAPlus() {
+        // Which is how every result in the sport is written: +2:48 is 2:48
+        // slower, and a rider reads the sign before the number.
         val values =
             values(SegmentState(hill, riding = true, coveredMeters = 500.0, elapsedSeconds = 83.0))
 
-        assertEquals("-0:08", values["segment_ahead"])
+        assertEquals("+0:08", values["segment_gap"])
     }
 
     @Test
@@ -95,8 +98,8 @@ class SegmentFieldValuesTest {
         val values =
             values(SegmentState(hill, riding = true, coveredMeters = 500.0, elapsedSeconds = 75.0))
 
-        assertEquals("0:00", values["segment_ahead"])
-        assertEquals("0 m", values["segment_ahead_distance"])
+        assertEquals("0:00", values["segment_gap"])
+        assertEquals("0 m", values["segment_gap_distance"])
     }
 
     @Test
@@ -105,7 +108,7 @@ class SegmentFieldValuesTest {
         val values =
             values(SegmentState(hill, riding = true, coveredMeters = 500.0, elapsedSeconds = 70.0))
 
-        assertEquals("+33 m", values["segment_ahead_distance"])
+        assertEquals("-33 m", values["segment_gap_distance"], "up the road, so up on the gap")
     }
 
     @Test
@@ -125,7 +128,7 @@ class SegmentFieldValuesTest {
             values(SegmentState(fresh, riding = true, coveredMeters = 500.0, elapsedSeconds = 70.0))
 
         assertEquals("1:10", values["segment_time"])
-        assertEquals(FieldCatalogue.EMPTY_VALUE, values["segment_ahead"], "nobody to be ahead of")
+        assertEquals(FieldCatalogue.EMPTY_VALUE, values["segment_gap"], "nobody to be ahead of")
         assertEquals(FieldCatalogue.EMPTY_VALUE, values["segment_best"])
     }
 
@@ -135,7 +138,7 @@ class SegmentFieldValuesTest {
             values(SegmentState(hill, finished = true, coveredMeters = 1000.0, elapsedSeconds = 148.0))
 
         assertEquals("2:28", values["segment_time"])
-        assertEquals("+0:02", values["segment_ahead"], "two seconds off their best")
+        assertEquals("-0:02", values["segment_gap"], "two seconds inside their best")
         assertEquals("0 m", values["segment_remaining"])
     }
 
@@ -203,6 +206,16 @@ class SegmentFieldValuesTest {
 
         assertEquals(FieldCatalogue.EMPTY_VALUE, values["segment_time_left"], "one fix predicts nothing")
         assertEquals("0:00", values["segment_time"])
+    }
+
+    @Test
+    fun aScreenBuiltBeforeTheRenameStillShowsTheField() {
+        // The rider had put this field on a screen under its old name. Renaming
+        // it must not read to them as the app quietly dropping it.
+        assertEquals("segment_gap", FieldCatalogue.currentId("segment_ahead"))
+        assertEquals("segment_gap_distance", FieldCatalogue.currentId("segment_ahead_distance"))
+        assertEquals("hr", FieldCatalogue.currentId("hr"), "everything else is left alone")
+        assertEquals(null, FieldCatalogue.currentId(null), "and an empty slot stays empty")
     }
 
     private companion object {

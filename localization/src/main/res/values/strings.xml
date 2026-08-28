@@ -231,8 +231,8 @@
     <string name="field_segment_time_left">Time to Go</string>
     <string name="field_segment_covered">Segment Dist</string>
     <string name="field_segment_remaining">Dist to Go</string>
-    <string name="field_segment_ahead">Time Ahead</string>
-    <string name="field_segment_ahead_distance">Dist Ahead</string>
+    <string name="field_segment_gap">Time Gap</string>
+    <string name="field_segment_gap_distance">Distance Gap</string>
     <string name="field_segment_best">Segment PR</string>
     <string name="field_segment_projected">Projected Time</string>
     <string name="field_segment_ascent">Segment Climb</string>

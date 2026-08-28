@@ -216,8 +216,8 @@
     <string name="field_segment_time_left">Болжам уақыт</string>
     <string name="field_segment_covered">Жүрілген</string>
     <string name="field_segment_remaining">Қалғаны</string>
-    <string name="field_segment_ahead">Уақыт айырмасы</string>
-    <string name="field_segment_ahead_distance">Қашықтық айырм.</string>
+    <string name="field_segment_gap">Уақыт айырмасы</string>
+    <string name="field_segment_gap_distance">Қашықтық айырм.</string>
     <string name="field_segment_best">Сегмент рекорды</string>
     <string name="field_segment_projected">Болжамды нәтиже</string>
     <string name="field_segment_ascent">Сегмент көтер.</string>

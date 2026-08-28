@@ -216,8 +216,8 @@
     <string name="field_segment_time_left">Прогноз время</string>
     <string name="field_segment_covered">Проехано</string>
     <string name="field_segment_remaining">Осталось</string>
-    <string name="field_segment_ahead">Отрыв, время</string>
-    <string name="field_segment_ahead_distance">Отрыв, дист.</string>
+    <string name="field_segment_gap">Разрыв, время</string>
+    <string name="field_segment_gap_distance">Разрыв, дист.</string>
     <string name="field_segment_best">Рекорд сегм.</string>
     <string name="field_segment_projected">Прогноз итога</string>
     <string name="field_segment_ascent">Набор сегм.</string>

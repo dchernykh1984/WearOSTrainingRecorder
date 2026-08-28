@@ -209,8 +209,8 @@
     <string name="field_segment_time_left">Kalan süre</string>
     <string name="field_segment_covered">Gidilen mesafe</string>
     <string name="field_segment_remaining">Kalan mesafe</string>
-    <string name="field_segment_ahead">Zaman farkı</string>
-    <string name="field_segment_ahead_distance">Mesafe farkı</string>
+    <string name="field_segment_gap">Zaman farkı</string>
+    <string name="field_segment_gap_distance">Mesafe farkı</string>
     <string name="field_segment_best">Segment rekoru</string>
     <string name="field_segment_projected">Tahmini süre</string>
     <string name="field_segment_ascent">Segment tırmanış</string>

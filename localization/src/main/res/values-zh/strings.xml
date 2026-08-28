@@ -209,8 +209,8 @@
     <string name="field_segment_time_left">预计剩余时间</string>
     <string name="field_segment_covered">已骑距离</string>
     <string name="field_segment_remaining">剩余距离</string>
-    <string name="field_segment_ahead">领先时间</string>
-    <string name="field_segment_ahead_distance">领先距离</string>
+    <string name="field_segment_gap">时间差</string>
+    <string name="field_segment_gap_distance">距离差</string>
     <string name="field_segment_best">路段最佳</string>
     <string name="field_segment_projected">预计成绩</string>
     <string name="field_segment_ascent">路段爬升</string>
