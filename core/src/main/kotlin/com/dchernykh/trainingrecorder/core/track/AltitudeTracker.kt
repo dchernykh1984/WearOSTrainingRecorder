@@ -110,7 +110,15 @@ class AltitudeTracker(
         val measured = barometricMeters ?: gnssMeters ?: return
         altitudeMeters = measured
         recent.addLast(Reading(measured, nowEpochMs))
-        while (recent.size > 1 && nowEpochMs - recent.first().atEpochMs > settleWindowMs) {
+        // One reading older than the window is kept, deliberately. Trimming to
+        // readings strictly *inside* it leaves a window that can never span it:
+        // readings arrive about a second apart, so the oldest survivor sits a
+        // second short of the edge, and a rule asking for the full half-minute
+        // is never satisfied. That is not a rounding error - it made the
+        // altitude field read empty for entire rides, because a height is only
+        // shown once the source has settled and the source could never be
+        // judged to have settled.
+        while (recent.size > 1 && nowEpochMs - recent[1].atEpochMs >= settleWindowMs) {
             recent.removeFirst()
         }
         // Nothing is counted while the source is climbing faster than anybody

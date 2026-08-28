@@ -296,4 +296,50 @@ class AltitudeTrackerTest {
         assertTrue(tracker.trustworthy)
         assertNotNull(tracker.altitudeMeters)
     }
+
+    @Test
+    fun aSteadyHeightBecomesWorthWritingDownOnARealWatch() {
+        // Every other test here spaces its readings exactly a thousand
+        // milliseconds apart, and that regularity was hiding a bug: the window
+        // was trimmed to readings *within* half a minute and then asked whether
+        // it spanned half a minute, which only a reading landing on the
+        // millisecond could ever satisfy. On a watch, where Health Services
+        // delivers when it delivers, the answer was always no - and the altitude
+        // field read empty for the whole ride.
+        val tracker = AltitudeTracker()
+        var at = start
+        (0..90).forEach { second ->
+            // A second, give or take, which is what arrives.
+            at += 990 + (second * 7) % 40
+            tracker.record(barometricMeters = 214.0 + (second % 3) * 0.4, gnssMeters = null, nowEpochMs = at)
+        }
+
+        assertTrue(tracker.trustworthy, "a barometer sitting still for a minute and a half has settled")
+        assertNotNull(tracker.altitudeMeters, "and its height is what the rider should see")
+    }
+
+    @Test
+    fun aRealClimbIsCountedWhenTheReadingsArriveLikeARealWatchs() {
+        // The same bug, and the half of it that does not show on the screen:
+        // nothing is counted until the source has settled, so a window that
+        // could never close meant total ascent stayed at zero for the whole
+        // ride. Every test that would have caught it spaced its readings
+        // exactly a second apart.
+        val tracker = AltitudeTracker()
+        var at = start
+        var height = 300.0
+        repeat(600) { second ->
+            at += 990 + (second * 7) % 40
+            // Twenty metres a minute, which is an ordinary climb.
+            height += 20.0 / 60.0
+            tracker.record(barometricMeters = height, gnssMeters = null, nowEpochMs = at)
+        }
+
+        // Two hundred metres of climbing, less the half minute spent settling.
+        assertTrue(
+            tracker.ascentMeters > 180.0,
+            "a ten minute climb of 200 m came back as ${tracker.ascentMeters} m",
+        )
+        assertTrue(tracker.descentMeters < 1.0, "and nothing went down")
+    }
 }
