@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.1](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.12.0...v0.12.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* **core:** let the altitude settle window actually close ([9edede7](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/9edede74262ceb3a37bda668fa7b0af9778f5e21))
+* **core:** sign the segment gap the way a result sheet signs one ([2e3d658](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/2e3d6583a2250fe4eb88ddca70973b8f582b9cae))
+
 ## [0.12.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.11.1...v0.12.0) (2026-08-26)
 
 
