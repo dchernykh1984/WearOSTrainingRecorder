@@ -216,8 +216,8 @@
     <string name="field_segment_time_left">Temps restant</string>
     <string name="field_segment_covered">Dist. parcourue</string>
     <string name="field_segment_remaining">Dist. restante</string>
-    <string name="field_segment_ahead">Avance temps</string>
-    <string name="field_segment_ahead_distance">Avance distance</string>
+    <string name="field_segment_gap">Écart temps</string>
+    <string name="field_segment_gap_distance">Écart distance</string>
     <string name="field_segment_best">Record segment</string>
     <string name="field_segment_projected">Temps prévu</string>
     <string name="field_segment_ascent">D+ segment</string>

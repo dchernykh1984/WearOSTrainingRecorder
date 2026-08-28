@@ -119,8 +119,8 @@ object FieldCatalogue {
             DataFieldDef("segment_time_left", SEGMENT),
             DataFieldDef("segment_covered", SEGMENT),
             DataFieldDef("segment_remaining", SEGMENT),
-            DataFieldDef("segment_ahead", SEGMENT),
-            DataFieldDef("segment_ahead_distance", SEGMENT),
+            DataFieldDef("segment_gap", SEGMENT),
+            DataFieldDef("segment_gap_distance", SEGMENT),
             DataFieldDef("segment_best", SEGMENT),
             DataFieldDef("segment_projected", SEGMENT),
             DataFieldDef("segment_ascent", SEGMENT),
@@ -166,6 +166,30 @@ object FieldCatalogue {
     val raceStatsSupportingKeys: Set<String> = setOf("qty_abs", "qty_group")
 
     fun byId(id: String): DataFieldDef? = all.firstOrNull { it.id == id }
+
+    /**
+     * Ids that have been renamed, and what they became.
+     *
+     * A field a rider has already placed on a screen must survive being renamed.
+     * Without this, changing an id is indistinguishable from deleting the field:
+     * the slot reads empty on the next ride, and the rider has to work out which
+     * of ten slots went quiet and put it back.
+     *
+     * Only for a field that is genuinely the same measurement under a better
+     * name. A field whose *meaning* changed must not be mapped here - carrying a
+     * layout across that would show the rider something they did not choose.
+     */
+    private val renames =
+        mapOf(
+            // The sign flipped to the one every result sheet in cycling uses,
+            // where a positive gap is time lost. "Ahead" was then the wrong word
+            // for it, but it is the same comparison against the same effort.
+            "segment_ahead" to "segment_gap",
+            "segment_ahead_distance" to "segment_gap_distance",
+        )
+
+    /** The current id for a field, following any rename. */
+    fun currentId(id: String?): String? = id?.let { renames[it] ?: it }
 
     fun forCategory(category: FieldCategory): List<DataFieldDef> = all.filter { it.category == category }
 

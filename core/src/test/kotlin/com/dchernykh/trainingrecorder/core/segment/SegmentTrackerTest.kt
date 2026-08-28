@@ -189,12 +189,13 @@ class SegmentTrackerTest {
         ride(tracker, segment, toMeters = 700.0, speedMps = 7.0)
 
         val state = assertNotNull(tracker.state)
-        val ahead = assertNotNull(state.aheadSeconds, "there is a reference effort to compare against")
+        val gap = assertNotNull(state.gapSeconds, "there is a reference effort to compare against")
         // 700 m at 7 m/s is 100 s; the reference took 87.5 s to the same point.
-        // Ahead is positive, so being down reads as a negative number.
-        assertTrue(ahead < -10.0, "expected to be well over ten seconds down, got $ahead")
-        val metres = assertNotNull(state.aheadMeters)
-        assertTrue(metres < -50.0, "expected to be nearly a hundred metres back, got $metres")
+        // A gap is signed the way a result sheet signs one, so being down reads
+        // as a positive number.
+        assertTrue(gap > 10.0, "expected to be well over ten seconds down, got $gap")
+        val metres = assertNotNull(state.gapMeters)
+        assertTrue(metres > 50.0, "expected to be nearly a hundred metres back, got $metres")
     }
 
     @Test
@@ -205,9 +206,9 @@ class SegmentTrackerTest {
         ride(tracker, segment, toMeters = 700.0, speedMps = 9.0)
 
         val state = assertNotNull(tracker.state)
-        val ahead = assertNotNull(state.aheadSeconds)
-        assertTrue(ahead > 5.0, "expected to be seconds up, got $ahead")
-        assertTrue(assertNotNull(state.aheadMeters) > 20.0, "expected to be metres up the road")
+        val gap = assertNotNull(state.gapSeconds)
+        assertTrue(gap < -5.0, "expected to be seconds up, got $gap")
+        assertTrue(assertNotNull(state.gapMeters) < -20.0, "expected to be metres up the road")
     }
 
     @Test
@@ -220,8 +221,8 @@ class SegmentTrackerTest {
         val state = assertNotNull(tracker.state)
         assertTrue(state.riding)
         assertTrue(state.elapsedSeconds > 60.0, "the clock still runs")
-        assertNull(state.aheadSeconds, "with no reference effort there is nothing to be ahead of")
-        assertNull(state.aheadMeters)
+        assertNull(state.gapSeconds, "with no reference effort there is nothing to be measured against")
+        assertNull(state.gapMeters)
     }
 
     @Test
