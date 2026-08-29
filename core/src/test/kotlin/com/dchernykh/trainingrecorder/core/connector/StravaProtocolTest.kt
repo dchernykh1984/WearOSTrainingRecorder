@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -179,5 +180,21 @@ class StravaProtocolTest {
         assertEquals("authorization_code", fields["grant_type"])
         assertEquals("c", fields["code"])
         assertEquals("secret", fields["client_secret"])
+    }
+
+    @Test
+    fun everyUploadSaysWhatRecordedIt() {
+        // The only field on the upload endpoint that carries free text, and so
+        // the only place this can go: Strava names the device from the FIT
+        // manufacturer id, and translating that into a name needs a mapping
+        // arranged with Strava rather than a change on our side.
+        val description = StravaProtocol.uploadFields("cycling_road", "Evening Ride")["description"]
+
+        assertNotNull(description)
+        assertTrue(description.contains("WearOSTrainingRecorder"), "the project should be named")
+        assertTrue(
+            description.contains("https://github.com/dchernykh1984/WearOSTrainingRecorder"),
+            "and reachable, which is the point of saying it at all",
+        )
     }
 }

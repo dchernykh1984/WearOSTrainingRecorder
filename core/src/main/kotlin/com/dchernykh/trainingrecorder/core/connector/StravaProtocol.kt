@@ -175,6 +175,29 @@ object StravaProtocol {
         return expiresAt != null && nowEpochSeconds >= expiresAt - EXPIRY_MARGIN_SECONDS
     }
 
+    /**
+     * Says what recorded the ride, in the one place Strava will show it.
+     *
+     * Strava names the device from the manufacturer and product ids in the FIT
+     * file, but only translates those numbers into a name through its own
+     * device database, which a project gets into by arranging a mapping with
+     * Strava directly. Ours writes 255 - the FIT "development" manufacturer -
+     * because the alternative is borrowing some vendor's id and having the ride
+     * show up as a Garmin Edge it was not recorded on.
+     *
+     * So the description, which is the only field on the upload endpoint that
+     * carries free text. It is not the device line and does not pretend to be:
+     * it reads as what it is, a note the recording app left on its own ride.
+     *
+     * Not translated, deliberately. It is a project name and a URL, it is read
+     * by whoever follows the rider rather than by the rider, and a credit that
+     * changes language with the watch's locale is a credit nobody can search
+     * for.
+     */
+    const val CREDIT =
+        "Recorded with WearOSTrainingRecorder\n" +
+            "https://github.com/dchernykh1984/WearOSTrainingRecorder"
+
     /** Strava names the sport with `sport_type`, and models indoor as a flag. */
     fun uploadFields(
         sportTypeId: String,
@@ -184,6 +207,7 @@ object StravaProtocol {
         return buildMap {
             put("data_type", "fit")
             put("name", name)
+            put("description", CREDIT)
             sport?.let {
                 put("sport_type", it.stravaSportType)
                 if (it.stravaTrainer) put("trainer", "1")
