@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.12.1...v0.13.0) (2026-08-29)
+
+
+### Features
+
+* **core:** say what recorded the ride on every strava upload ([f1193d4](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/f1193d4dce0e874fc313d722e82ef1dadc09af80))
+
 ## [0.12.1](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.12.0...v0.12.1) (2026-08-28)
 
 
