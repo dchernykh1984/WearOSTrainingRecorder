@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.1](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.13.0...v0.13.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* keep the non-ascii hook off files outside this repository ([79dbbff](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/79dbbff84fdf9f4fb0d9bf94c3538c7249bbe17d))
+
 ## [0.13.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.12.1...v0.13.0) (2026-08-29)
 
 
