@@ -2,17 +2,17 @@
 # versions. Referenced from the build scripts as `libs.<alias>`.
 
 [versions]
-agp = "8.13.2"
-kotlin = "2.2.21"
+agp = "9.4.0"
+kotlin = "2.4.10"
 junit = "4.13.2"
 ktlint-gradle = "14.2.0"
 detekt = "1.23.8"
 kover = "0.9.9"
 androidxTestJunit = "1.3.0"
 androidxTestRunner = "1.7.0"
-kotlinxSerialization = "1.9.0"
-kotlinxCoroutines = "1.10.2"
-garminFit = "21.176.0"
+kotlinxSerialization = "1.11.0"
+kotlinxCoroutines = "1.11.0"
+garminFit = "21.214.0"
 # Wear Compose 1.6.2 declares androidx.compose 1.9.0, so the compose pin follows
 # it rather than the other way round. No BOM: with two Android modules and a
 # wear-specific train, explicit versions are easier to reason about than a BOM
@@ -23,11 +23,11 @@ composeMaterial3 = "1.4.0"
 lifecycle = "2.9.4"
 activityCompose = "1.12.3"
 # 1.19.0 requires compileSdk 37; 1.18.0 is the highest that builds against 36.
-coreKtx = "1.18.0"
+coreKtx = "1.19.0"
 healthServices = "1.0.0"
 wearOngoing = "1.1.0"
 wearToolingPreview = "1.0.0"
-playServicesWearable = "19.0.0"
+playServicesWearable = "20.0.1"
 datastore = "1.1.7"
 work = "2.11.2"
 
