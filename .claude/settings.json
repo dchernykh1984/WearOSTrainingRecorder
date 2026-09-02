@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh release view:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "statusMessage": "Checking for non-ASCII characters",
+            "timeout": 10,
+            "command": "jq -r \".tool_input.file_path // .tool_response.filePath // empty\" | { read -r f || exit 0; case \"$f\" in *.kt|*.kts|*.yml|*.yaml|*.md|*.toml|*.sh|*.json) ;; *) exit 0 ;; esac; [ -f \"$f\" ] || exit 0; hits=$(LC_ALL=C grep -c \"[^ -~\t]\" \"$f\" 2>/dev/null || true); [ \"${hits:-0}\" -gt 0 ] && printf \"%s\" \"{\\\"systemMessage\\\":\\\"$f has $hits line(s) with non-ASCII characters. The pre-commit no-non-ascii hook rejects these in Kotlin, YAML, Markdown, TOML, shell and JSON. Localized text belongs in res/values-<lang>/strings.xml, which is exempt.\\\"}\"; exit 0; }"
+          }
+        ]
+      }
+    ]
+  }
+}
