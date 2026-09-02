@@ -30,8 +30,10 @@ Session.vim
 
 # ===== AI agents =====
 
-# Claude Code (Anthropic)
-.claude/
+# Claude Code (Anthropic). The project context - CLAUDE.md, skills, hooks - is
+# committed on purpose, so a fresh checkout knows how this repository works.
+# Only the per-machine overrides are ignored.
+.claude/settings.local.json
 
 # Cursor
 .cursor/
