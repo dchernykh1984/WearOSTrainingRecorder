@@ -58,6 +58,15 @@ Watch them with a polling loop rather than repeated manual checks:
 gh pr checks <N> --json name,bucket --jq '.[] | "\(.bucket)\t\(.name)"' | sort
 ```
 
+Take the verdict from the rollup rather than that list. `gh pr checks` reports a
+per-check status that lags and can still say `pending` long after the job has
+finished, which reads like a hung check:
+
+```
+gh pr view <N> --json statusCheckRollup \
+  --jq '[.statusCheckRollup[] | {name:(.name//.context), s:(.conclusion//.state)}]'
+```
+
 A run that fails on the `release-please--...` branch right after a merge is the
 branch being deleted out from under it, not a real failure. GitHub reports it as
 "This run likely failed because of a workflow file issue."

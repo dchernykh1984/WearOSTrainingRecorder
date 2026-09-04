@@ -62,6 +62,11 @@ string will fail the commit.
 values file. That is an aapt2 error, not a warning, and it otherwise surfaces
 only when a consuming module builds.
 
+**Write files as UTF-8.** On Windows a PowerShell redirect, `Set-Content` or
+`Out-File` defaults to UTF-16, and `no-non-ascii` then rejects a file whose text
+looks perfectly plain in an editor - the bytes are the problem, not the
+characters. `file <path>` says which encoding you actually wrote.
+
 ## Coverage
 
 `:core` has a Kover gate at 80%. `:wear` and `:mobile` are at 0 - logic that
