@@ -189,13 +189,18 @@ object StravaProtocol {
      * carries free text. It is not the device line and does not pretend to be:
      * it reads as what it is, a note the recording app left on its own ride.
      *
-     * Not translated, deliberately. It is a project name and a URL, it is read
-     * by whoever follows the rider rather than by the rider, and a credit that
+     * The project is named once, by the link. Spelling it out as well - "Recorded
+     * with WearOSTrainingRecorder" above a URL ending in WearOSTrainingRecorder -
+     * said the same thing twice in a description a rider's followers have to
+     * read past.
+     *
+     * Not translated, deliberately. It is two words and a URL, it is read by
+     * whoever follows the rider rather than by the rider, and a credit that
      * changes language with the watch's locale is a credit nobody can search
      * for.
      */
     const val CREDIT =
-        "Recorded with WearOSTrainingRecorder\n" +
+        "Recorded with\n" +
             "https://github.com/dchernykh1984/WearOSTrainingRecorder"
 
     /** Strava names the sport with `sport_type`, and models indoor as a flag. */
