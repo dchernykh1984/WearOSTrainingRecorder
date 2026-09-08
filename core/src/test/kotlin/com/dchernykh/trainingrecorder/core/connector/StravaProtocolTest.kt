@@ -9,6 +9,9 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class StravaProtocolTest {
+    /** The project name, which should appear in the upload credit exactly once. */
+    private val project = "WearOSTrainingRecorder"
+
     @Test
     fun theAppAsksForItsOwnCredentialsRatherThanShippingAny() {
         assertEquals(listOf("client_id", "client_secret"), StravaProtocol.credentialFields.map { it.key })
@@ -191,10 +194,19 @@ class StravaProtocolTest {
         val description = StravaProtocol.uploadFields("cycling_road", "Evening Ride")["description"]
 
         assertNotNull(description)
-        assertTrue(description.contains("WearOSTrainingRecorder"), "the project should be named")
         assertTrue(
             description.contains("https://github.com/dchernykh1984/WearOSTrainingRecorder"),
-            "and reachable, which is the point of saying it at all",
+            "the project should be reachable, which is the point of saying it at all",
+        )
+        // Once, and only in the link. Naming the project in the text as well
+        // put "Recorded with WearOSTrainingRecorder" directly above a URL
+        // ending in WearOSTrainingRecorder - the same word twice, in a
+        // description the rider's followers have to read past. A test asserting
+        // only that the name appears somewhere passed happily either way.
+        assertEquals(
+            1,
+            description.windowed(project.length).count { it == project },
+            "the project is named once, by the link: $description",
         )
     }
 }
