@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.14.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.13.2...v0.14.0) (2026-09-17)
+
+
+### Features
+
+* **core:** offer a ride again once its service is reconnected ([9419b07](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/9419b07fd180efdb4ed5a5b4988626710aef7a07))
+
+
+### Bug Fixes
+
+* **wear:** retry the rides a service refused once it is reconnected ([9ad3e17](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/9ad3e170a17f3d553dbc09a19f55d7a70019aac2))
+
 ## [0.13.2](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.13.1...v0.13.2) (2026-09-08)
 
 
