@@ -46,6 +46,12 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
+        # Only platform-tools. The action installs "tools platform-tools" by
+        # default, and Google has withdrawn the obsolete "tools" package from
+        # the SDK repository - sdkmanager exits non-zero on it, which failed
+        # every workflow here at once, releases included.
+        with:
+          packages: platform-tools
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
