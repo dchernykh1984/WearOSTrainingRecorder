@@ -83,6 +83,52 @@ object UploadQueue {
         }
 
     /**
+     * Puts back what a dead session took out.
+     *
+     * Ten refusals is how the queue decides a service is broken rather than
+     * busy, and it is the right conclusion from the evidence it had. A fresh
+     * authorization is new evidence: every one of those attempts was made
+     * against a token that had expired, so the count says nothing about whether
+     * the ride would be accepted now. A rider who reconnects a service and
+     * watches eight rides stay refused has been given a button that does not
+     * work.
+     *
+     * Only entries that ran out of attempts come back. A single refusal that
+     * stuck - a duplicate activity, a file the service will not parse - keeps a
+     * low count, and reinstating that would retry a rejection the queue was
+     * right to abandon. The attempt count is what tells the two apart, which is
+     * exactly why it is persisted.
+     *
+     * The entry is cleared rather than set back to pending: as far as this
+     * service is concerned the ride has never been offered under these
+     * credentials, so it is due immediately and the backoff starts from nothing.
+     */
+    fun reinstate(
+        workouts: List<WorkoutSummary>,
+        connectorIds: Set<String>,
+    ): List<WorkoutSummary> =
+        workouts.map { workout ->
+            val exhausted = connectorIds.filter { ranOutOfAttempts(workout, it) }
+            if (exhausted.isEmpty()) {
+                workout
+            } else {
+                workout.copy(
+                    uploads = workout.uploads - exhausted.toSet(),
+                    uploadAttempts = workout.uploadAttempts - exhausted.toSet(),
+                    uploadAttemptedAt = workout.uploadAttemptedAt - exhausted.toSet(),
+                    uploadReasons = workout.uploadReasons - exhausted.toSet(),
+                )
+            }
+        }
+
+    private fun ranOutOfAttempts(
+        workout: WorkoutSummary,
+        connectorId: String,
+    ): Boolean =
+        workout.uploads[connectorId] == UploadState.FAILED &&
+            (workout.uploadAttempts[connectorId] ?: 0) >= MAX_ATTEMPTS
+
+    /**
      * Everything still owed, whether or not its backoff has elapsed.
      *
      * The difference from [due] is the whole reason a ride can sit at "waiting
