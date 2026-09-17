@@ -24,10 +24,25 @@ class CredentialStore(
     context: Context,
     private val file: File = File(context.filesDir, "credentials.json"),
 ) {
-    fun write(payload: String) {
+    /**
+     * Stores what the phone sent, and says which services it changed anything
+     * for.
+     *
+     * The answer matters because a service coming back is what lets the upload
+     * queue offer it rides it had written off, and that must happen on a genuine
+     * reconnection and not on every delivery. The phone stamps each publish with
+     * the time, so the Data Layer hands the watch a fresh item whenever any
+     * credential is saved - identical tokens included. Reinstating on the item
+     * rather than on the contents would hand a permanently broken service ten
+     * more attempts every time the rider touched an unrelated setting, which is
+     * the retry loop the give-up rule exists to stop.
+     */
+    fun write(payload: String): Set<String> {
         // Parsed before it replaces anything: a payload we cannot read would
         // otherwise wipe working credentials and leave every upload stuck.
-        if (CredentialContract.decode(payload) == null) return
+        val incoming = CredentialContract.decode(payload) ?: return emptySet()
+        val previous = read()
+        val changed = incoming.filter { (connectorId, fields) -> previous[connectorId] != fields }.keys
         val temporary = File(file.parentFile, file.name + ".part")
         temporary.writeText(payload)
         // Narrowed before it is moved into place, so the file is never briefly
@@ -35,6 +50,7 @@ class CredentialStore(
         temporary.setReadable(false, false)
         temporary.setReadable(true, true)
         temporary.renameTo(file)
+        return changed
     }
 
     /** Per connector id, the credential map that connector expects. */

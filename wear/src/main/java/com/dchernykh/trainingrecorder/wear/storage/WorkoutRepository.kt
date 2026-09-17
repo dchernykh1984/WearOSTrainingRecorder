@@ -3,6 +3,7 @@ package com.dchernykh.trainingrecorder.wear.storage
 import android.content.Context
 import com.dchernykh.trainingrecorder.core.fit.FitActivityEncoder
 import com.dchernykh.trainingrecorder.core.fit.RecordedWorkout
+import com.dchernykh.trainingrecorder.core.sync.UploadQueue
 import com.dchernykh.trainingrecorder.core.workout.RetentionPolicy
 import com.dchernykh.trainingrecorder.core.workout.UploadState
 import com.dchernykh.trainingrecorder.core.workout.WorkoutSummary
@@ -135,6 +136,24 @@ class WorkoutRepository(
             },
         )
     }
+
+    /**
+     * Offers rides again to services that have just been reconnected.
+     *
+     * The decision of what comes back is [UploadQueue.reinstate]'s; this is the
+     * part that cannot be tested without a disk. Returns how many rides were put
+     * back, and rewrites the index only when that is not zero - a reconnection
+     * with nothing stuck is the common case and should not cost a write.
+     */
+    fun reinstate(connectorIds: Set<String>): Int =
+        synchronized(lock) {
+            if (connectorIds.isEmpty()) return@synchronized 0
+            val index = loadIndex()
+            val reinstated = UploadQueue.reinstate(index, connectorIds)
+            val changed = reinstated.indices.count { reinstated[it] != index[it] }
+            if (changed > 0) writeIndex(reinstated)
+            changed
+        }
 
     /**
      * Drops what the retention policy allows.
