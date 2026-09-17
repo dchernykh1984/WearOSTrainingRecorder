@@ -344,8 +344,17 @@ class RecordingViewModel(
     fun syncFromPhone() {
         viewModelScope.launch {
             SettingsStore.fetchExisting(getApplication())?.let { settings.write(it) }
-            CredentialStore.fetchExisting(getApplication())?.let {
-                CredentialStore(getApplication()).write(it)
+            CredentialStore.fetchExisting(getApplication())?.let { payload ->
+                // The same reinstatement the listener does, for the case it
+                // never saw: a watch whose app was not installed when the rider
+                // reconnected hears about it here instead.
+                val reconnected =
+                    withContext(Dispatchers.IO) {
+                        CredentialStore(getApplication()).write(payload).also { changed ->
+                            if (changed.isNotEmpty()) WorkoutRepository(getApplication()).reinstate(changed)
+                        }
+                    }
+                if (reconnected.isNotEmpty()) UploadWorker.schedule(getApplication())
             }
             // Segments too, and for the same reason: a watch installed after the
             // phone had already fetched them would otherwise have none until the

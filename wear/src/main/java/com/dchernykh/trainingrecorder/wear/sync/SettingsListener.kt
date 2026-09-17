@@ -6,6 +6,7 @@ import com.dchernykh.trainingrecorder.core.datalayer.SegmentContract
 import com.dchernykh.trainingrecorder.core.datalayer.SyncContract
 import com.dchernykh.trainingrecorder.core.datalayer.WatchSettings
 import com.dchernykh.trainingrecorder.wear.segment.SegmentStore
+import com.dchernykh.trainingrecorder.wear.storage.WorkoutRepository
 import com.dchernykh.trainingrecorder.wear.upload.CredentialStore
 import com.dchernykh.trainingrecorder.wear.upload.UploadWorker
 import com.google.android.gms.wearable.DataEvent
@@ -50,7 +51,10 @@ class SettingsListener : WearableListenerService() {
                     dataMap.getString(SettingsStore.KEY_PAYLOAD)?.let { SettingsStore(this).write(it) }
                 CredentialContract.PATH ->
                     dataMap.getString(CredentialContract.KEY_PAYLOAD)?.let {
-                        CredentialStore(this).write(it)
+                        // Reconnecting is also the one moment that can undo a
+                        // give-up: the rides a service refused ten times refused
+                        // them under credentials that have just been replaced.
+                        WorkoutRepository(this).reinstate(CredentialStore(this).write(it))
                         // A service the rider just connected has a backlog
                         // waiting for it: everything recorded before they got
                         // round to setting it up.
