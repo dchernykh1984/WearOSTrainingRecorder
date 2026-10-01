@@ -16,9 +16,10 @@ description: The full path from a fix to a release - branch, commits, two review
    than confirming it works.
 4. Run the local gate (see the `local-gate` skill). Do not push red.
 5. Push, open a PR, wait for all checks.
-6. Merge, then release - unless the request was for a PR only. Read the request
-   carefully: asking to roll out a *release* means merge and release; asking to
-   roll out a *pull request* means stop at the PR and let the author merge. The
+6. Merge or release only when the maintainer's request explicitly authorizes it.
+   Asking to roll out a *release* authorizes merge and release; asking to roll out
+   a *pull request* means stop at green CI and let the author merge. A request to
+   fix or implement something alone does not authorize merging or a release. The
    author writes in Russian and the distinction is one word, so re-read it.
 
 ## What the review cycles are for
