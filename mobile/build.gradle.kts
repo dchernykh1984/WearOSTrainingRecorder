@@ -132,7 +132,7 @@ dependencies {
     constraints {
         // The same transitive advisories the watch module pins out; they arrive
         // here through Play Services Wearable.
-        implementation("com.google.guava:guava:32.0.0-android") {
+        implementation("com.google.guava:guava:33.7.1-android") {
             because("GHSA-5mg8-w23w-74h3 and GHSA-7g45-4rm6-3mm3 are fixed in 32.0.0")
         }
     }
