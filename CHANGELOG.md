@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.14.0...v0.15.0) (2026-10-05)
+
+
+### Features
+
+* **core:** size a recorded ride file for a person to read ([655c6e3](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/655c6e34064774283dd4acdcfce65762b5d6969a))
+* **mobile:** open a ride from the history to see its stats and upload status ([312e436](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/312e4363049ee817b9958763a9bb6af479edb6aa))
+
+
+### Bug Fixes
+
+* **wear:** say what the upload error actually was, not just its class ([70d5896](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/70d5896f855d5dd686a1f4a63615cc335fe0e4c1))
+
 ## [0.14.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.13.2...v0.14.0) (2026-09-17)
 
 
