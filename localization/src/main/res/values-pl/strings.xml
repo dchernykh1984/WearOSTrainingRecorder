@@ -154,6 +154,13 @@
     <string name="history_failed">Wysylka odrzucona</string>
     <string name="history_attempts">proby: %1$d</string>
     <string name="history_not_sent">Nigdzie nie wyslano</string>
+    <string name="history_detail_started">Poczatek</string>
+    <string name="history_detail_duration">Czas trwania</string>
+    <string name="history_detail_distance">Dystans</string>
+    <string name="history_detail_avg_speed">Srednia predkosc</string>
+    <string name="history_detail_size">Rozmiar pliku</string>
+    <string name="history_detail_uploads">Status wysylki</string>
+    <string name="history_detail_back">Wstecz</string>
     <string name="settings_language">Język</string>
     <string name="language_system">Język systemu</string>
     <string name="language_en">English</string>

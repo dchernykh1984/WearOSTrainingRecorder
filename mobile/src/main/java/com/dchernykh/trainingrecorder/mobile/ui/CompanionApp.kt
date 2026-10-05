@@ -66,13 +66,21 @@ fun CompanionApp(
             var section by rememberSaveable { mutableStateOf(Section.SPORTS) }
             var editingId by rememberSaveable { mutableStateOf<String?>(null) }
             var picking by rememberSaveable { mutableStateOf<Pair<Int, Int>?>(null) }
+            // The ride whose detail is open. Held by id rather than by value so
+            // the ten-second refresh keeps feeding it: the rider watching a
+            // failed upload is watching for the reason to change.
+            var viewingId by rememberSaveable { mutableStateOf<String?>(null) }
             val editing = editingId?.let(ConfigTarget::byKey)
 
             // Leaving the editor with the system back gesture, so the phone
             // behaves like every other phone rather than trapping the rider on
             // a screen whose only way out is a control they have to find.
-            BackHandler(enabled = editing != null) {
-                if (picking != null) picking = null else editingId = null
+            BackHandler(enabled = editing != null || viewingId != null) {
+                when {
+                    picking != null -> picking = null
+                    editing != null -> editingId = null
+                    else -> viewingId = null
+                }
             }
 
             // The listener writes the watch's list to disk from a service the
@@ -107,6 +115,7 @@ fun CompanionApp(
                                     section = entry
                                     editingId = null
                                     picking = null
+                                    viewingId = null
                                 },
                                 icon = {},
                                 label = { Text(stringResource(entry.labelRes)) },
@@ -122,6 +131,8 @@ fun CompanionApp(
                     picking = picking,
                     onEdit = { editingId = it?.key },
                     onPick = { picking = it },
+                    viewingId = viewingId,
+                    onView = { viewingId = it },
                     onLanguageChanged = onLanguageChanged,
                     modifier = Modifier.padding(padding),
                 )
@@ -138,6 +149,8 @@ private fun SectionContent(
     picking: Pair<Int, Int>?,
     onEdit: (ConfigTarget?) -> Unit,
     onPick: (Pair<Int, Int>?) -> Unit,
+    viewingId: String?,
+    onView: (String?) -> Unit,
     onLanguageChanged: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -170,7 +183,26 @@ private fun SectionContent(
         section == Section.CONNECTIONS ->
             ConnectionList(model = model, modifier = modifier)
         section == Section.HISTORY ->
-            WorkoutHistory(workouts = model.workouts.value, units = model.units.value, modifier = modifier)
+            // Looked up fresh on every recomposition rather than captured, so
+            // the detail follows the ten-second refresh. A ride that is pruned
+            // while open falls back to the list rather than to a blank screen.
+            when (val viewing = model.workouts.value.firstOrNull { it.id == viewingId }) {
+                null ->
+                    WorkoutHistory(
+                        workouts = model.workouts.value,
+                        units = model.units.value,
+                        onSelect = { onView(it.id) },
+                        modifier = modifier,
+                    )
+
+                else ->
+                    WorkoutDetail(
+                        workout = viewing,
+                        units = model.units.value,
+                        onBack = { onView(null) },
+                        modifier = modifier,
+                    )
+            }
         section == Section.SETTINGS ->
             Column(modifier = modifier.fillMaxSize()) {
                 UnitSettings(current = model.units.value, onUnitsChosen = model::updateUnits)

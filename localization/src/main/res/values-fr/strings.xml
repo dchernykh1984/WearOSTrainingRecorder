@@ -154,6 +154,13 @@
     <string name="history_failed">Envoi refuse</string>
     <string name="history_attempts">tentatives : %1$d</string>
     <string name="history_not_sent">Non envoye</string>
+    <string name="history_detail_started">Debut</string>
+    <string name="history_detail_duration">Duree</string>
+    <string name="history_detail_distance">Distance</string>
+    <string name="history_detail_avg_speed">Vitesse moyenne</string>
+    <string name="history_detail_size">Taille du fichier</string>
+    <string name="history_detail_uploads">Etat de l\'envoi</string>
+    <string name="history_detail_back">Retour</string>
     <string name="settings_language">Langue</string>
     <string name="language_system">Langue du système</string>
     <string name="language_en">English</string>

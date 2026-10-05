@@ -154,6 +154,13 @@
     <string name="history_failed">Upload abgelehnt</string>
     <string name="history_attempts">Versuche: %1$d</string>
     <string name="history_not_sent">Nirgendwo gesendet</string>
+    <string name="history_detail_started">Start</string>
+    <string name="history_detail_duration">Dauer</string>
+    <string name="history_detail_distance">Distanz</string>
+    <string name="history_detail_avg_speed">Durchschnittstempo</string>
+    <string name="history_detail_size">Dateigroesse</string>
+    <string name="history_detail_uploads">Upload-Status</string>
+    <string name="history_detail_back">Zurueck</string>
     <string name="settings_language">Sprache</string>
     <string name="language_system">Systemsprache</string>
     <string name="language_en">English</string>

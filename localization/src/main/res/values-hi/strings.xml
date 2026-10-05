@@ -147,6 +147,13 @@
     <string name="history_failed">अपलोड अस्वीकृत</string>
     <string name="history_attempts">प्रयास: %1$d</string>
     <string name="history_not_sent">कहीं नहीं भेजा</string>
+    <string name="history_detail_started">शुरुआत</string>
+    <string name="history_detail_duration">अवधि</string>
+    <string name="history_detail_distance">दूरी</string>
+    <string name="history_detail_avg_speed">औसत गति</string>
+    <string name="history_detail_size">फ़ाइल आकार</string>
+    <string name="history_detail_uploads">अपलोड स्थिति</string>
+    <string name="history_detail_back">वापस</string>
     <string name="settings_language">भाषा</string>
     <string name="language_system">सिस्टम भाषा</string>
     <string name="language_en">English</string>

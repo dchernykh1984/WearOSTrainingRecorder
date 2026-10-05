@@ -147,6 +147,13 @@
     <string name="history_failed">アップロード拒否</string>
     <string name="history_attempts">試行回数: %1$d</string>
     <string name="history_not_sent">未送信</string>
+    <string name="history_detail_started">開始</string>
+    <string name="history_detail_duration">時間</string>
+    <string name="history_detail_distance">距離</string>
+    <string name="history_detail_avg_speed">平均速度</string>
+    <string name="history_detail_size">ファイルサイズ</string>
+    <string name="history_detail_uploads">アップロード状況</string>
+    <string name="history_detail_back">戻る</string>
     <string name="settings_language">言語</string>
     <string name="language_system">システムの言語</string>
     <string name="language_en">English</string>
