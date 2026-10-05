@@ -154,6 +154,13 @@
     <string name="history_failed">Odeslani odmitnuto</string>
     <string name="history_attempts">pokusy: %1$d</string>
     <string name="history_not_sent">Nikam neodeslano</string>
+    <string name="history_detail_started">Zacatek</string>
+    <string name="history_detail_duration">Trvani</string>
+    <string name="history_detail_distance">Vzdalenost</string>
+    <string name="history_detail_avg_speed">Prumerna rychlost</string>
+    <string name="history_detail_size">Velikost souboru</string>
+    <string name="history_detail_uploads">Stav nahravani</string>
+    <string name="history_detail_back">Zpet</string>
     <string name="settings_language">Jazyk</string>
     <string name="language_system">Jazyk systému</string>
     <string name="language_en">English</string>

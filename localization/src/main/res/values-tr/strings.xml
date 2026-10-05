@@ -147,6 +147,13 @@
     <string name="history_failed">Yukleme reddedildi</string>
     <string name="history_attempts">deneme: %1$d</string>
     <string name="history_not_sent">Hicbir yere gonderilmedi</string>
+    <string name="history_detail_started">Baslangic</string>
+    <string name="history_detail_duration">Sure</string>
+    <string name="history_detail_distance">Mesafe</string>
+    <string name="history_detail_avg_speed">Ortalama hiz</string>
+    <string name="history_detail_size">Dosya boyutu</string>
+    <string name="history_detail_uploads">Yukleme durumu</string>
+    <string name="history_detail_back">Geri</string>
     <string name="settings_language">Dil</string>
     <string name="language_system">Sistem dili</string>
     <string name="language_en">English</string>

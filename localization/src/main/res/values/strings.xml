@@ -169,6 +169,13 @@
     <string name="history_failed">Upload refused</string>
     <string name="history_attempts">attempts: %1$d</string>
     <string name="history_not_sent">Not sent anywhere</string>
+    <string name="history_detail_started">Started</string>
+    <string name="history_detail_duration">Duration</string>
+    <string name="history_detail_distance">Distance</string>
+    <string name="history_detail_avg_speed">Average speed</string>
+    <string name="history_detail_size">File size</string>
+    <string name="history_detail_uploads">Upload status</string>
+    <string name="history_detail_back">Back</string>
     <string name="settings_language">Language</string>
     <string name="language_system">System language</string>
     <string name="language_en">English</string>

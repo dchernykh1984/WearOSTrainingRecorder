@@ -154,6 +154,13 @@
     <string name="history_failed">Жіберу қабылданбады</string>
     <string name="history_attempts">әрекет саны: %1$d</string>
     <string name="history_not_sent">Ешқайда жіберілмеген</string>
+    <string name="history_detail_started">Басталуы</string>
+    <string name="history_detail_duration">Ұзақтығы</string>
+    <string name="history_detail_distance">Қашықтық</string>
+    <string name="history_detail_avg_speed">Орташа жылдамдық</string>
+    <string name="history_detail_size">Файл өлшемі</string>
+    <string name="history_detail_uploads">Жүктеу күйі</string>
+    <string name="history_detail_back">Артқа</string>
     <string name="settings_language">Тіл</string>
     <string name="language_system">Жүйе тілі</string>
     <string name="language_en">English</string>
