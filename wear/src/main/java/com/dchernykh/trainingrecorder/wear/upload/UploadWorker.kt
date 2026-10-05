@@ -149,7 +149,7 @@ class UploadWorker(
                     ),
                     stored[connector.id].orEmpty(),
                 )
-            }.getOrElse { UploadResult.Retryable(it.javaClass.simpleName) }
+            }.getOrElse { UploadResult.Retryable(describe(it)) }
 
         val attempts = if (result is UploadResult.Success) pending.attempts else pending.attempts + 1
         repository.markUploaded(
@@ -160,6 +160,32 @@ class UploadWorker(
             attemptedAtEpochMs = now(),
             reason = result.failureReason,
         )
+    }
+
+    /**
+     * What went wrong, in the few words the phone has room for.
+     *
+     * The class name alone was what the rider saw, and "IOException" does not
+     * distinguish no signal from a refused certificate from a host that does
+     * not resolve - which is the whole question they are trying to answer from
+     * the history screen. The message carries that; the class name carries the
+     * kind when the message is empty, as it is for a few.
+     *
+     * This text reaches the rider's phone screen, so nothing that handles a
+     * credential may put one in an exception message. Today none do - tokens
+     * travel in headers, and the protocol objects' own requirements report the
+     * field that was blank rather than its value.
+     *
+     * Not the stack trace. It would be the same twenty frames of the HTTP stack
+     * every time, it says nothing the top line does not, and the history travels
+     * to the phone as one Data Layer item for every ride at once - an item with
+     * a hard size limit that a few hundred frames of text would push it past,
+     * costing the rider the whole history to explain one upload.
+     */
+    private fun describe(error: Throwable): String {
+        val kind = error.javaClass.simpleName
+        val message = error.message?.trim().orEmpty()
+        return if (message.isEmpty()) kind else "$kind: $message"
     }
 
     /**
