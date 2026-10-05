@@ -44,6 +44,7 @@ object FieldFormatter {
     private const val PRECISE_DISTANCE_KM = 100.0
     private const val FEET_PER_MILE = 5280
     private const val SWIM_UNIT_METERS = 100.0
+    private const val BYTES_PER_KILOBYTE = 1024.0
 
     /** What a gap of less than a second, or less than a metre, comes out as. */
     private const val LEVEL = "0:00"
@@ -188,6 +189,20 @@ object FieldFormatter {
         if (value == null) return empty
         val text = value.roundToLong().toString()
         return if (suffix.isEmpty()) text else "$text $suffix"
+    }
+
+    /**
+     * Kilobytes or megabytes, which is the whole range a ride file covers.
+     *
+     * Shown at all because it is the one number that explains a history screen
+     * thinning out: the watch evicts by a byte budget, and a rider wondering
+     * where last month went is owed the size of what is being kept.
+     */
+    fun fileSize(bytes: Long): String {
+        if (bytes < 0) return empty
+        val kilobytes = bytes.toDouble() / BYTES_PER_KILOBYTE
+        if (kilobytes < BYTES_PER_KILOBYTE) return "${kilobytes.roundToLong()} KB"
+        return "${trim(kilobytes / BYTES_PER_KILOBYTE, 1)} MB"
     }
 
     fun percent(value: Double?): String = if (value == null) empty else "${value.roundToInt()}%"

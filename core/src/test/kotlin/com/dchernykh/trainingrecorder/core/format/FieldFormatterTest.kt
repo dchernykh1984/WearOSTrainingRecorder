@@ -137,4 +137,17 @@ class FieldFormatterTest {
         UnitSystem.entries.forEach { assertEquals(it, UnitSystem.byId(it.id)) }
         assertNull(UnitSystem.byId("furlongs"))
     }
+
+    @Test
+    fun aRideFileIsSizedInSomethingAPersonReads() {
+        assertEquals("120 KB", FieldFormatter.fileSize(123_000))
+        assertEquals("2.4 MB", FieldFormatter.fileSize(2_500_000))
+        // A six hour ride at one point a second, which is the big end.
+        assertEquals("11.4 MB", FieldFormatter.fileSize(12_000_000))
+    }
+
+    @Test
+    fun aSizeThatCannotBeRealReadsAsNothing() {
+        assertEquals(FieldFormatter.empty, FieldFormatter.fileSize(-1))
+    }
 }
