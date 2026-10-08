@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.16.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.15.0...v0.16.0) (2026-10-08)
+
+
+### Features
+
+* **core:** decide when the phone should sign in to garmin again ([8833bbe](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/8833bbeeaaf504dabb3619a6a07075d153924004))
+* **mobile:** sign in to garmin again when the watch reports a dead session ([fe85acb](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/fe85acb2fe9f2b13fa9ab9b9b64b438e3d2f42cf))
+
 ## [0.15.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.14.0...v0.15.0) (2026-10-05)
 
 
