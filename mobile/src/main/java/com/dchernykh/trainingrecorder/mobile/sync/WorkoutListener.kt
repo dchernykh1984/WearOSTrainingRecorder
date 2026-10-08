@@ -6,6 +6,7 @@ import com.dchernykh.trainingrecorder.core.connector.SyncTrigger
 import com.dchernykh.trainingrecorder.core.datalayer.WorkoutSummaryContract
 import com.dchernykh.trainingrecorder.core.workout.UploadState
 import com.dchernykh.trainingrecorder.core.workout.WorkoutSummary
+import com.dchernykh.trainingrecorder.mobile.connect.GarminReauthWorker
 import com.dchernykh.trainingrecorder.mobile.segments.SegmentSyncWorker
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
@@ -59,6 +60,10 @@ class WorkoutListener : WearableListenerService() {
                 ?.let {
                     WorkoutHistoryStore(this).write(it)
                     refreshSegmentsIfARideReachedStrava(it)
+                    // The watch cannot sign in to Garmin again - it has a token
+                    // and never the password - so a dead session is reported
+                    // here and acted on here.
+                    GarminReauthWorker.consider(this)
                 }
         }
     }

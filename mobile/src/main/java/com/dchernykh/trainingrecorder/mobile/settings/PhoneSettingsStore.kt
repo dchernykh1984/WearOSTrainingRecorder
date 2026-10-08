@@ -2,6 +2,7 @@ package com.dchernykh.trainingrecorder.mobile.settings
 
 import android.content.Context
 import com.dchernykh.trainingrecorder.core.connector.CredentialContract
+import com.dchernykh.trainingrecorder.core.connector.ReauthOutcome
 import com.dchernykh.trainingrecorder.core.datalayer.SyncContract
 import com.dchernykh.trainingrecorder.core.datalayer.WatchSettings
 import java.io.File
@@ -17,6 +18,7 @@ import java.io.File
 class PhoneSettingsStore(
     private val settingsFile: File,
     private val credentialsFile: File,
+    private val reauthFile: File = File(credentialsFile.parentFile, "garmin-reauth.txt"),
 ) {
     /**
      * The app's own directory. A second constructor rather than defaulted
@@ -26,6 +28,7 @@ class PhoneSettingsStore(
     constructor(context: Context) : this(
         File(context.filesDir, "settings.json"),
         File(context.filesDir, "credentials.json"),
+        File(context.filesDir, "garmin-reauth.txt"),
     )
 
     fun readSettings(): WatchSettings? =
@@ -44,6 +47,34 @@ class PhoneSettingsStore(
 
     fun clearCredentials() {
         credentialsFile.delete()
+    }
+
+    /**
+     * When the phone last signed in to Garmin on its own, and how that went.
+     *
+     * Two values in one small file rather than in the credentials, which the
+     * watch is sent: this is bookkeeping about the phone's own behaviour and
+     * the watch has no use for it. Zero and null mean it has never happened,
+     * which every caller reads as "go ahead".
+     */
+    fun readReauth(): Pair<Long, ReauthOutcome?> {
+        val parts = runCatching { reauthFile.readText().trim().split(" ") }.getOrNull().orEmpty()
+        return (parts.firstOrNull()?.toLongOrNull() ?: 0L) to ReauthOutcome.byId(parts.getOrNull(1))
+    }
+
+    fun writeReauth(
+        atEpochMs: Long,
+        outcome: ReauthOutcome,
+    ) {
+        runCatching { replace(reauthFile, "$atEpochMs ${outcome.id}") }
+    }
+
+    /**
+     * Forgets it, so a rider who connects by hand is not still being told about
+     * an automatic attempt that failed before they fixed it.
+     */
+    fun clearReauth() {
+        reauthFile.delete()
     }
 
     /**

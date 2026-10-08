@@ -208,6 +208,9 @@
     <string name="connect_wrong_credentials">Garmin はそのログインとパスワードを受け付けませんでした。</string>
     <string name="connect_code_label">確認コード</string>
     <string name="connect_submit_code">コードを確認</string>
+    <string name="connect_auto_signed_in">自動で再サインインしました。</string>
+    <string name="connect_auto_needs_code">Garmin が確認コードを求めています。Connect を押して再度サインインしてください。</string>
+    <string name="connect_auto_wrong_credentials">Garmin が保存済みのパスワードを受け付けなくなりました。入力し直して Connect を押してください。</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">セグメント</string>

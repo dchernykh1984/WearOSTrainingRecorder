@@ -3,8 +3,10 @@ package com.dchernykh.trainingrecorder.mobile.ui
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import com.dchernykh.trainingrecorder.core.connector.CredentialContract
 import com.dchernykh.trainingrecorder.core.connector.CredentialField
 import com.dchernykh.trainingrecorder.core.connector.GarminProtocol
+import com.dchernykh.trainingrecorder.core.connector.ReauthOutcome
 import com.dchernykh.trainingrecorder.core.connector.StravaProtocol
 import com.dchernykh.trainingrecorder.localization.R
 import com.dchernykh.trainingrecorder.mobile.connect.AuthorizationResult
@@ -71,6 +73,35 @@ class ServiceConnections(
         // Merged under what has been typed since, so a slow read cannot undo an
         // edit the rider made while it was happening.
         credentials.value = stored + credentials.value
+        reportAutomaticSignIn()
+    }
+
+    /**
+     * Says how the phone's own last Garmin sign-in went, if it made one.
+     *
+     * Automatic recovery that cannot recover has to say so somewhere, or it is
+     * worse than no recovery at all: the rider sees rides stuck for a reason
+     * the app already knows it will never fix, and nothing suggests they are
+     * the missing piece. Shown through the same status line the Connect button
+     * uses, because that is where they are being asked to act.
+     *
+     * Only the two outcomes that need them. A successful sign-in is the feature
+     * working and nothing to interrupt anyone about, and a network failure will
+     * be tried again on its own.
+     */
+    private suspend fun reportAutomaticSignIn() {
+        val recorded =
+            withContext(Dispatchers.IO) { runCatching { store.readReauth() }.getOrNull() } ?: return
+        val outcome = recorded.second
+        val message =
+            when (outcome) {
+                ReauthOutcome.NEEDS_CODE -> R.string.connect_auto_needs_code
+                ReauthOutcome.WRONG_CREDENTIALS -> R.string.connect_auto_wrong_credentials
+                else -> return
+            }
+        // Only where the rider has not just done something themselves, whose
+        // answer is newer and more relevant than this one.
+        if (_status.value == null) _status.value = GarminProtocol.ID to message
     }
 
     /**
@@ -200,6 +231,13 @@ class ServiceConnections(
         tokens: Map<String, String>,
     ) {
         tokens.forEach { (key, value) -> updateCredential(connectorId, key, value) }
+        // The rider has just signed in by hand, which answers whatever the
+        // automatic attempt was stuck on. Leaving its verdict on disk would
+        // keep telling them to do what they have now done, and would keep the
+        // automatic attempts switched off afterwards.
+        if (connectorId == GarminProtocol.ID) {
+            withContext(Dispatchers.IO) { runCatching { store.clearReauth() } }
+        }
         publish()
     }
 
@@ -207,20 +245,6 @@ class ServiceConnections(
         withContext(Dispatchers.IO) { runCatching { publisher.publishCredentials(publishable()) } }
     }
 
-    /**
-     * What the watch is allowed to see.
-     *
-     * The Garmin login and password are not part of it. The watch uploads with a
-     * token and has no use for the password, and a password copied onto a second
-     * device is a second device it can be taken from - which is the whole reason
-     * the sign-in happens on the phone.
-     */
-    private fun publishable(): Map<String, Map<String, String>> =
-        credentials.value.mapValues { (connectorId, fields) ->
-            if (connectorId == GarminProtocol.ID) {
-                fields - GarminProtocol.LOGIN - GarminProtocol.PASSWORD
-            } else {
-                fields
-            }
-        }
+    /** [CredentialContract.publishable] holds the rule; both publishers use it. */
+    private fun publishable(): Map<String, Map<String, String>> = CredentialContract.publishable(credentials.value)
 }

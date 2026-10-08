@@ -215,6 +215,9 @@
     <string name="connect_wrong_credentials">Garmin no ha aceptado ese usuario y contrasena.</string>
     <string name="connect_code_label">Codigo de verificacion</string>
     <string name="connect_submit_code">Confirmar codigo</string>
+    <string name="connect_auto_signed_in">Sesion iniciada automaticamente.</string>
+    <string name="connect_auto_needs_code">Garmin pide un codigo de verificacion. Pulsa Connect para iniciar sesion de nuevo.</string>
+    <string name="connect_auto_wrong_credentials">Garmin ya no acepta la contrasena guardada. Vuelve a escribirla y pulsa Connect.</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">Segmento</string>

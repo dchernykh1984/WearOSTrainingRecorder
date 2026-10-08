@@ -215,6 +215,9 @@
     <string name="connect_wrong_credentials">Garmin toto prihlaseni a heslo neprijal.</string>
     <string name="connect_code_label">Overovaci kod</string>
     <string name="connect_submit_code">Potvrdit kod</string>
+    <string name="connect_auto_signed_in">Prihlaseni probehlo automaticky.</string>
+    <string name="connect_auto_needs_code">Garmin zada overovaci kod. Klepnutim na Connect se prihlaste znovu.</string>
+    <string name="connect_auto_wrong_credentials">Garmin prestal prijimat ulozene heslo. Zadejte ho znovu a klepnete na Connect.</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">Segment</string>

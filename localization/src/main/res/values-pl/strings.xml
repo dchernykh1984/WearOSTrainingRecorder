@@ -215,6 +215,9 @@
     <string name="connect_wrong_credentials">Garmin nie zaakceptowal tego loginu i hasla.</string>
     <string name="connect_code_label">Kod weryfikacyjny</string>
     <string name="connect_submit_code">Potwierdz kod</string>
+    <string name="connect_auto_signed_in">Zalogowano ponownie automatycznie.</string>
+    <string name="connect_auto_needs_code">Garmin prosi o kod weryfikacyjny. Nacisnij Connect, aby zalogowac sie ponownie.</string>
+    <string name="connect_auto_wrong_credentials">Garmin przestal akceptowac zapisane haslo. Wpisz je ponownie i nacisnij Connect.</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">Segment</string>

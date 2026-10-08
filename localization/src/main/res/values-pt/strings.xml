@@ -215,6 +215,9 @@
     <string name="connect_wrong_credentials">A Garmin nao aceitou esse login e senha.</string>
     <string name="connect_code_label">Codigo de verificacao</string>
     <string name="connect_submit_code">Confirmar codigo</string>
+    <string name="connect_auto_signed_in">Sessao iniciada automaticamente.</string>
+    <string name="connect_auto_needs_code">O Garmin pede um codigo de verificacao. Toque em Connect para entrar de novo.</string>
+    <string name="connect_auto_wrong_credentials">O Garmin deixou de aceitar a senha salva. Digite-a de novo e toque em Connect.</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">Segmento</string>
