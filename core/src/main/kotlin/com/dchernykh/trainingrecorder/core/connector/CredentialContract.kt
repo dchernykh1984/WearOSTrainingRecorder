@@ -26,6 +26,28 @@ object CredentialContract {
 
     private val json = Json { ignoreUnknownKeys = true }
 
+    /**
+     * What the watch is allowed to be told.
+     *
+     * The Garmin login and password are stripped. The watch uploads with a
+     * token and has no use for a password, and a password copied onto a second
+     * device is a second device it can be taken from - which is the whole
+     * reason the sign-in happens on the phone.
+     *
+     * Here, in one place, because the phone now publishes from two: the rider
+     * pressing Connect, and the worker that signs in again on its own when a
+     * session dies. Two copies of this rule is how a third secret field gets
+     * added to one of them and leaks from the other.
+     */
+    fun publishable(credentials: Map<String, Map<String, String>>): Map<String, Map<String, String>> =
+        credentials.mapValues { (connectorId, fields) ->
+            if (connectorId == GarminProtocol.ID) {
+                fields - GarminProtocol.LOGIN - GarminProtocol.PASSWORD
+            } else {
+                fields
+            }
+        }
+
     fun encode(credentials: Map<String, Map<String, String>>): String =
         buildJsonObject {
             credentials.forEach { (connectorId, fields) ->
