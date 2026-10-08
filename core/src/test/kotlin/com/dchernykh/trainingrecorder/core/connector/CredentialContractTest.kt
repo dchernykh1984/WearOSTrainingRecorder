@@ -67,4 +67,40 @@ class CredentialContractTest {
         assertTrue(payload.startsWith("{") && payload.endsWith("}"))
         assertEquals(mapOf("strava" to mapOf("token" to "t")), CredentialContract.decode(payload))
     }
+
+    @Test
+    fun theGarminPasswordNeverReachesTheWatch() {
+        // The single most important rule in the app, and now the only copy of
+        // it: the phone publishes from two places, the rider pressing Connect
+        // and the worker that signs in again on its own.
+        val stored =
+            mapOf(
+                GarminProtocol.ID to
+                    mapOf(
+                        GarminProtocol.LOGIN to "rider@example.com",
+                        GarminProtocol.PASSWORD to "hunter2",
+                        GarminProtocol.ACCESS_TOKEN to "a-token",
+                        GarminProtocol.REFRESH_TOKEN to "a-refresh-token",
+                    ),
+            )
+
+        val published = CredentialContract.publishable(stored)
+
+        val garmin = published.getValue(GarminProtocol.ID)
+        assertNull(garmin[GarminProtocol.LOGIN])
+        assertNull(garmin[GarminProtocol.PASSWORD])
+        assertEquals("a-token", garmin[GarminProtocol.ACCESS_TOKEN], "the token is what the watch uploads with")
+        assertEquals("a-refresh-token", garmin[GarminProtocol.REFRESH_TOKEN], "and what it renews with")
+        assertFalse(CredentialContract.encode(published).contains("hunter2"), "not anywhere in the payload either")
+    }
+
+    @Test
+    fun anotherServicesSecretsAreLeftAlone() {
+        // Strava's client secret is the rider's own and the watch needs it to
+        // renew a token; only Garmin's password is withheld, and only because
+        // the watch has no use for it.
+        val stored = mapOf("strava" to mapOf("client_id" to "1234", "client_secret" to "shh"))
+
+        assertEquals(stored, CredentialContract.publishable(stored))
+    }
 }
