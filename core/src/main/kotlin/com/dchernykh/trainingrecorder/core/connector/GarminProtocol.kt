@@ -58,7 +58,7 @@ object GarminProtocol {
         when {
             statusCode in SUCCESS_RANGE -> UploadResult.Success()
             statusCode == CONFLICT -> UploadResult.Success()
-            statusCode == UNAUTHORIZED || statusCode == FORBIDDEN -> UploadResult.Retryable("session expired")
+            statusCode == UNAUTHORIZED || statusCode == FORBIDDEN -> UploadResult.Retryable(SESSION_EXPIRED)
             statusCode == TOO_MANY_REQUESTS -> UploadResult.Retryable("rate limited")
             statusCode in SERVER_ERROR_RANGE -> UploadResult.Retryable("garmin error $statusCode")
             else -> UploadResult.Rejected("garmin refused the upload: $statusCode")
@@ -100,6 +100,17 @@ object GarminProtocol {
             "X-GCExperience" to "GC5",
             "Accept-Language" to "en-US,en;q=0.9",
         )
+
+    /**
+     * What the watch writes down when even a refreshed token is refused.
+     *
+     * Named rather than spelled out twice, because the phone matches on it: a
+     * watch reporting this has a dead refresh token, and only a full sign-in
+     * with the login and password - which exist on the phone and nowhere else -
+     * can produce a new one. A literal compared in two modules is how that link
+     * breaks silently the first time the wording is improved.
+     */
+    const val SESSION_EXPIRED = "session expired"
 
     const val LOGIN = "login"
     const val PASSWORD = "password"
