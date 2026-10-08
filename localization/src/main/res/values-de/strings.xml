@@ -215,6 +215,9 @@
     <string name="connect_wrong_credentials">Garmin hat diesen Login und dieses Passwort nicht akzeptiert.</string>
     <string name="connect_code_label">Bestatigungscode</string>
     <string name="connect_submit_code">Code bestatigen</string>
+    <string name="connect_auto_signed_in">Automatisch neu angemeldet.</string>
+    <string name="connect_auto_needs_code">Garmin verlangt einen Bestaetigungscode. Auf Connect tippen, um sich neu anzumelden.</string>
+    <string name="connect_auto_wrong_credentials">Garmin akzeptiert das gespeicherte Passwort nicht mehr. Erneut eingeben und auf Connect tippen.</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">Segment</string>

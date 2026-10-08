@@ -215,6 +215,9 @@
     <string name="connect_wrong_credentials">Garmin non ha accettato queste credenziali.</string>
     <string name="connect_code_label">Codice di verifica</string>
     <string name="connect_submit_code">Conferma codice</string>
+    <string name="connect_auto_signed_in">Accesso eseguito automaticamente.</string>
+    <string name="connect_auto_needs_code">Garmin chiede un codice di verifica. Tocca Connect per accedere di nuovo.</string>
+    <string name="connect_auto_wrong_credentials">Garmin non accetta piu la password salvata. Inseriscila di nuovo e tocca Connect.</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">Segmento</string>

@@ -19,6 +19,7 @@ import com.dchernykh.trainingrecorder.core.workout.WorkoutSummary
 import com.dchernykh.trainingrecorder.localization.AppLanguage
 import com.dchernykh.trainingrecorder.localization.R
 import com.dchernykh.trainingrecorder.mobile.connect.GarminAuthorization
+import com.dchernykh.trainingrecorder.mobile.connect.GarminReauthWorker
 import com.dchernykh.trainingrecorder.mobile.connect.StravaAuthorization
 import com.dchernykh.trainingrecorder.mobile.segments.SegmentSyncWorker
 import com.dchernykh.trainingrecorder.mobile.settings.PhoneSettingsStore
@@ -112,6 +113,11 @@ class CompanionViewModel(
         // kept rather than replaced, so this costs nothing after the first run.
         SegmentSyncWorker.schedule(application)
         SegmentSyncWorker.runNow(application, SyncTrigger.APP_OPENED)
+        // Also here, not only when the watch publishes. The watch may have
+        // reported a dead session days ago and gone quiet since - there is
+        // nothing left for it to say, and the rider opening the app is the next
+        // moment anything can be done about it.
+        GarminReauthWorker.consider(application)
     }
 
     /**

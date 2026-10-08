@@ -208,6 +208,9 @@
     <string name="connect_wrong_credentials">Garmin 未接受该账号和密码。</string>
     <string name="connect_code_label">验证码</string>
     <string name="connect_submit_code">确认验证码</string>
+    <string name="connect_auto_signed_in">已自动重新登录。</string>
+    <string name="connect_auto_needs_code">Garmin 需要验证码。请点按 Connect 重新登录。</string>
+    <string name="connect_auto_wrong_credentials">Garmin 不再接受已保存的密码。请重新输入并点按 Connect。</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">路段</string>

@@ -215,6 +215,9 @@
     <string name="connect_wrong_credentials">Garmin a refuse cet identifiant et ce mot de passe.</string>
     <string name="connect_code_label">Code de verification</string>
     <string name="connect_submit_code">Confirmer le code</string>
+    <string name="connect_auto_signed_in">Reconnexion automatique effectuee.</string>
+    <string name="connect_auto_needs_code">Garmin demande un code de verification. Appuyez sur Connect pour vous reconnecter.</string>
+    <string name="connect_auto_wrong_credentials">Garmin n\'accepte plus le mot de passe enregistre. Saisissez-le a nouveau et appuyez sur Connect.</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">Segment</string>

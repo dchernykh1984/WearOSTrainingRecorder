@@ -215,6 +215,9 @@
     <string name="connect_wrong_credentials">Garmin бұл логин мен құпия сөзді қабылдамады.</string>
     <string name="connect_code_label">Растау коды</string>
     <string name="connect_submit_code">Растау</string>
+    <string name="connect_auto_signed_in">Кіру автоматты түрде орындалды.</string>
+    <string name="connect_auto_needs_code">Garmin растау кодын сұрады. Қайта кіру үшін Connect басыңыз.</string>
+    <string name="connect_auto_wrong_credentials">Garmin сақталған парольді қабылдамай қойды. Оны қайта енгізіп, Connect басыңыз.</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">Сегмент</string>

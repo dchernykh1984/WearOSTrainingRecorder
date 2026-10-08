@@ -230,6 +230,9 @@
     <string name="connect_wrong_credentials">Garmin did not accept that login and password.</string>
     <string name="connect_code_label">Verification code</string>
     <string name="connect_submit_code">Confirm code</string>
+    <string name="connect_auto_signed_in">Signed in again automatically.</string>
+    <string name="connect_auto_needs_code">Garmin wants a verification code. Press Connect to sign in again.</string>
+    <string name="connect_auto_wrong_credentials">Garmin stopped accepting the saved password. Enter it again and press Connect.</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">Segment</string>

@@ -208,6 +208,9 @@
     <string name="connect_wrong_credentials">Garmin ने यह लॉगिन और पासवर्ड स्वीकार नहीं किया।</string>
     <string name="connect_code_label">सत्यापन कोड</string>
     <string name="connect_submit_code">कोड की पुष्टि करें</string>
+    <string name="connect_auto_signed_in">अपने आप फिर से साइन इन हो गया।</string>
+    <string name="connect_auto_needs_code">Garmin को सत्यापन कोड चाहिए। फिर से साइन इन करने के लिए Connect दबाएँ।</string>
+    <string name="connect_auto_wrong_credentials">Garmin ने सहेजा गया पासवर्ड स्वीकारना बंद कर दिया। इसे फिर दर्ज करें और Connect दबाएँ।</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">सेगमेंट</string>

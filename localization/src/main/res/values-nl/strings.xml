@@ -215,6 +215,9 @@
     <string name="connect_wrong_credentials">Garmin accepteerde deze login en dit wachtwoord niet.</string>
     <string name="connect_code_label">Verificatiecode</string>
     <string name="connect_submit_code">Code bevestigen</string>
+    <string name="connect_auto_signed_in">Automatisch opnieuw aangemeld.</string>
+    <string name="connect_auto_needs_code">Garmin vraagt om een verificatiecode. Tik op Connect om opnieuw aan te melden.</string>
+    <string name="connect_auto_wrong_credentials">Garmin accepteert het opgeslagen wachtwoord niet meer. Voer het opnieuw in en tik op Connect.</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">Segment</string>

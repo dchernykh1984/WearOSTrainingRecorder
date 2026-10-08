@@ -215,6 +215,9 @@
     <string name="connect_wrong_credentials">Garmin не принял этот логин и пароль.</string>
     <string name="connect_code_label">Код подтверждения</string>
     <string name="connect_submit_code">Подтвердить</string>
+    <string name="connect_auto_signed_in">Вход выполнен автоматически.</string>
+    <string name="connect_auto_needs_code">Garmin запросил код подтверждения. Нажмите Connect, чтобы войти заново.</string>
+    <string name="connect_auto_wrong_credentials">Garmin перестал принимать сохранённый пароль. Введите его заново и нажмите Connect.</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">Сегмент</string>

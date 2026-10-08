@@ -208,6 +208,9 @@
     <string name="connect_wrong_credentials">Garmin bu kullanici adini ve sifreyi kabul etmedi.</string>
     <string name="connect_code_label">Dogrulama kodu</string>
     <string name="connect_submit_code">Kodu onayla</string>
+    <string name="connect_auto_signed_in">Otomatik olarak yeniden giris yapildi.</string>
+    <string name="connect_auto_needs_code">Garmin dogrulama kodu istiyor. Yeniden giris icin Connect\'e dokunun.</string>
+    <string name="connect_auto_wrong_credentials">Garmin kayitli parolayi artik kabul etmiyor. Tekrar girip Connect\'e dokunun.</string>
 
     <!-- Live segments -->
     <string name="field_segment_name">Segment</string>
