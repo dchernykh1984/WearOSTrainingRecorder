@@ -247,4 +247,8 @@
     <string name="segments_best">%1$s · лучшее %2$s</string>
     <string name="segments_no_effort">%1$s · ещё не проезжали</string>
 
+    <string name="field_gap_prev_pack_abs">Разрыв до группы впереди</string>
+    <string name="field_gap_next_pack_abs">Разрыв до группы позади</string>
+    <string name="field_qty_prev_pack_abs">Участников в группе впереди</string>
+    <string name="field_qty_next_pack_abs">Участников в группе позади</string>
 </resources>

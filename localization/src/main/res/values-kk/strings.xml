@@ -247,4 +247,8 @@
     <string name="segments_best">%1$s · үздігі %2$s</string>
     <string name="segments_no_effort">%1$s · әлі жүрілмеген</string>
 
+    <string name="field_gap_prev_pack_abs">Алдағы топқа дейінгі уақыт айырмасы</string>
+    <string name="field_gap_next_pack_abs">Арттағы топқа дейінгі уақыт айырмасы</string>
+    <string name="field_qty_prev_pack_abs">Алдағы топтағы қатысушылар саны</string>
+    <string name="field_qty_next_pack_abs">Арттағы топтағы қатысушылар саны</string>
 </resources>

@@ -153,6 +153,10 @@ object FieldCatalogue {
             raceField("gap_next_group_delta"),
             raceField("gap_leader_group_delta"),
             raceField("laps"),
+            raceField("gap_prev_pack_abs"),
+            raceField("gap_next_pack_abs"),
+            raceField("qty_prev_pack_abs"),
+            raceField("qty_next_pack_abs"),
         )
 
     val all: List<DataFieldDef> =
