@@ -240,8 +240,8 @@
     <string name="segments_best">%1$s · en iyi %2$s</string>
     <string name="segments_no_effort">%1$s · hiç gidilmedi</string>
 
-    <string name="field_gap_prev_pack_abs">Öndeki gruba zaman farkı</string>
-    <string name="field_gap_next_pack_abs">Arkadaki gruba zaman farkı</string>
-    <string name="field_qty_prev_pack_abs">Öndeki grubun büyüklüğü</string>
-    <string name="field_qty_next_pack_abs">Arkadaki grubun büyüklüğü</string>
+    <string name="field_gap_prev_pack_abs">Öndeki paka zaman farkı</string>
+    <string name="field_gap_next_pack_abs">Arkadaki paka zaman farkı</string>
+    <string name="field_qty_prev_pack_abs">Öndeki pakın büyüklüğü</string>
+    <string name="field_qty_next_pack_abs">Arkadaki pakın büyüklüğü</string>
 </resources>

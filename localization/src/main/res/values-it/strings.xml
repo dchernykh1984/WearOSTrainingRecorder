@@ -247,8 +247,8 @@
     <string name="segments_best">%1$s · record %2$s</string>
     <string name="segments_no_effort">%1$s · mai percorso</string>
 
-    <string name="field_gap_prev_pack_abs">Distacco dal gruppo davanti</string>
-    <string name="field_gap_next_pack_abs">Distacco dal gruppo dietro</string>
-    <string name="field_qty_prev_pack_abs">Dimensione del gruppo davanti</string>
-    <string name="field_qty_next_pack_abs">Dimensione del gruppo dietro</string>
+    <string name="field_gap_prev_pack_abs">Distacco dal pack davanti</string>
+    <string name="field_gap_next_pack_abs">Distacco dal pack dietro</string>
+    <string name="field_qty_prev_pack_abs">Dimensione del pack davanti</string>
+    <string name="field_qty_next_pack_abs">Dimensione del pack dietro</string>
 </resources>

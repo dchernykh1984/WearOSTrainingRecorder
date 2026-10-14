@@ -247,8 +247,8 @@
     <string name="segments_best">%1$s · rekord %2$s</string>
     <string name="segments_no_effort">%1$s · nikdy nejeto</string>
 
-    <string name="field_gap_prev_pack_abs">Odstup ke skupině vpředu</string>
-    <string name="field_gap_next_pack_abs">Odstup ke skupině vzadu</string>
-    <string name="field_qty_prev_pack_abs">Velikost skupiny vpředu</string>
-    <string name="field_qty_next_pack_abs">Velikost skupiny vzadu</string>
+    <string name="field_gap_prev_pack_abs">Odstup ke balíku vpředu</string>
+    <string name="field_gap_next_pack_abs">Odstup ke balíku vzadu</string>
+    <string name="field_qty_prev_pack_abs">Velikost balíku vpředu</string>
+    <string name="field_qty_next_pack_abs">Velikost balíku vzadu</string>
 </resources>
