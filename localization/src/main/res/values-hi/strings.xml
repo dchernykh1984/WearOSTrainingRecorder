@@ -240,8 +240,8 @@
     <string name="segments_best">%1$s · सर्वश्रेष्ठ %2$s</string>
     <string name="segments_no_effort">%1$s · कभी नहीं चलाया</string>
 
-    <string name="field_gap_prev_pack_abs">आगे के पैक से समय का अंतर</string>
-    <string name="field_gap_next_pack_abs">पीछे के पैक से समय का अंतर</string>
-    <string name="field_qty_prev_pack_abs">आगे के पैक का आकार</string>
-    <string name="field_qty_next_pack_abs">पीछे के पैक का आकार</string>
+    <string name="field_gap_prev_pack_abs">अंतर आगे पैक</string>
+    <string name="field_gap_next_pack_abs">अंतर पीछे पैक</string>
+    <string name="field_qty_prev_pack_abs">गिनती आगे पैक</string>
+    <string name="field_qty_next_pack_abs">गिनती पीछे पैक</string>
 </resources>

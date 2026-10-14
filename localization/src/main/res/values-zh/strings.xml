@@ -240,8 +240,8 @@
     <string name="segments_best">%1$s · 最好 %2$s</string>
     <string name="segments_no_effort">%1$s · 从未骑过</string>
 
-    <string name="field_gap_prev_pack_abs">与前方团的时间差</string>
-    <string name="field_gap_next_pack_abs">与后方团的时间差</string>
-    <string name="field_qty_prev_pack_abs">前方团人数</string>
-    <string name="field_qty_next_pack_abs">后方团人数</string>
+    <string name="field_gap_prev_pack_abs">时间差 前 团</string>
+    <string name="field_gap_next_pack_abs">时间差 后 团</string>
+    <string name="field_qty_prev_pack_abs">人数 前 团</string>
+    <string name="field_qty_next_pack_abs">人数 后 团</string>
 </resources>

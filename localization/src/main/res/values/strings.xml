@@ -262,8 +262,8 @@
     <string name="segments_best">%1$s · best %2$s</string>
     <string name="segments_no_effort">%1$s · never ridden</string>
 
-    <string name="field_gap_prev_pack_abs">Gap to pack ahead</string>
-    <string name="field_gap_next_pack_abs">Gap to pack behind</string>
-    <string name="field_qty_prev_pack_abs">Size of pack ahead</string>
-    <string name="field_qty_next_pack_abs">Size of pack behind</string>
+    <string name="field_gap_prev_pack_abs">Gap ahd pack</string>
+    <string name="field_gap_next_pack_abs">Gap bhd pack</string>
+    <string name="field_qty_prev_pack_abs">Size ahd pk</string>
+    <string name="field_qty_next_pack_abs">Size bhd pk</string>
 </resources>
