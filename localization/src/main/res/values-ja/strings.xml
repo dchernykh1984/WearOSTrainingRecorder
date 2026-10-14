@@ -240,8 +240,8 @@
     <string name="segments_best">%1$s · 自己ベスト %2$s</string>
     <string name="segments_no_effort">%1$s · 未走行</string>
 
-    <string name="field_gap_prev_pack_abs">前方集団との時間差</string>
-    <string name="field_gap_next_pack_abs">後方集団との時間差</string>
-    <string name="field_qty_prev_pack_abs">前方集団の人数</string>
-    <string name="field_qty_next_pack_abs">後方集団の人数</string>
+    <string name="field_gap_prev_pack_abs">時間差 前 集団</string>
+    <string name="field_gap_next_pack_abs">時間差 後 集団</string>
+    <string name="field_qty_prev_pack_abs">人数 前 集団</string>
+    <string name="field_qty_next_pack_abs">人数 後 集団</string>
 </resources>

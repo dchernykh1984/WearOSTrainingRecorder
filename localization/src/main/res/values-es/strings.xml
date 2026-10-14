@@ -247,8 +247,8 @@
     <string name="segments_best">%1$s · mejor %2$s</string>
     <string name="segments_no_effort">%1$s · nunca recorrido</string>
 
-    <string name="field_gap_prev_pack_abs">Diferencia con el paquete de delante</string>
-    <string name="field_gap_next_pack_abs">Diferencia con el paquete de detrás</string>
-    <string name="field_qty_prev_pack_abs">Tamaño del paquete de delante</string>
-    <string name="field_qty_next_pack_abs">Tamaño del paquete de detrás</string>
+    <string name="field_gap_prev_pack_abs">Dif del paq</string>
+    <string name="field_gap_next_pack_abs">Dif det paq</string>
+    <string name="field_qty_prev_pack_abs">Num del paq</string>
+    <string name="field_qty_next_pack_abs">Num det paq</string>
 </resources>

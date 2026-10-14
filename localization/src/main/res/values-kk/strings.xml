@@ -247,8 +247,8 @@
     <string name="segments_best">%1$s · үздігі %2$s</string>
     <string name="segments_no_effort">%1$s · әлі жүрілмеген</string>
 
-    <string name="field_gap_prev_pack_abs">Алдағы лекке дейінгі уақыт айырмасы</string>
-    <string name="field_gap_next_pack_abs">Арттағы лекке дейінгі уақыт айырмасы</string>
-    <string name="field_qty_prev_pack_abs">Алдағы лектегі қатысушылар саны</string>
-    <string name="field_qty_next_pack_abs">Арттағы лектегі қатысушылар саны</string>
+    <string name="field_gap_prev_pack_abs">Айыр ал лек</string>
+    <string name="field_gap_next_pack_abs">Айыр ар лек</string>
+    <string name="field_qty_prev_pack_abs">Саны ал лек</string>
+    <string name="field_qty_next_pack_abs">Саны ар лек</string>
 </resources>
