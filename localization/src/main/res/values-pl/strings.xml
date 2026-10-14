@@ -247,8 +247,8 @@
     <string name="segments_best">%1$s · rekord %2$s</string>
     <string name="segments_no_effort">%1$s · nigdy nie przejechany</string>
 
-    <string name="field_gap_prev_pack_abs">Odstęp do grupy z przodu</string>
-    <string name="field_gap_next_pack_abs">Odstęp do grupy z tyłu</string>
-    <string name="field_qty_prev_pack_abs">Liczebność grupy z przodu</string>
-    <string name="field_qty_next_pack_abs">Liczebność grupy z tyłu</string>
+    <string name="field_gap_prev_pack_abs">Odstęp do paczki z przodu</string>
+    <string name="field_gap_next_pack_abs">Odstęp do paczki z tyłu</string>
+    <string name="field_qty_prev_pack_abs">Liczebność paczki z przodu</string>
+    <string name="field_qty_next_pack_abs">Liczebność paczki z tyłu</string>
 </resources>

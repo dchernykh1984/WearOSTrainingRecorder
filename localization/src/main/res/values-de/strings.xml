@@ -247,8 +247,8 @@
     <string name="segments_best">%1$s · Bestzeit %2$s</string>
     <string name="segments_no_effort">%1$s · noch nie gefahren</string>
 
-    <string name="field_gap_prev_pack_abs">Abstand zur Gruppe voraus</string>
-    <string name="field_gap_next_pack_abs">Abstand zur Gruppe dahinter</string>
-    <string name="field_qty_prev_pack_abs">Größe der Gruppe voraus</string>
-    <string name="field_qty_next_pack_abs">Größe der Gruppe dahinter</string>
+    <string name="field_gap_prev_pack_abs">Abstand zur Pulk voraus</string>
+    <string name="field_gap_next_pack_abs">Abstand zur Pulk dahinter</string>
+    <string name="field_qty_prev_pack_abs">Größe der Pulk voraus</string>
+    <string name="field_qty_next_pack_abs">Größe der Pulk dahinter</string>
 </resources>
