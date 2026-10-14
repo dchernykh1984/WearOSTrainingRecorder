@@ -139,6 +139,10 @@ class FieldCatalogueTest {
         val serverKeys =
             setOf(
                 "laps",
+                "gap_prev_pack_abs",
+                "gap_next_pack_abs",
+                "qty_prev_pack_abs",
+                "qty_next_pack_abs",
                 "qty_abs",
                 "place_abs",
                 "qty_group",

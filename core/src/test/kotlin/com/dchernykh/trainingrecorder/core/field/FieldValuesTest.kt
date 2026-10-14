@@ -126,6 +126,23 @@ class FieldValuesTest {
     }
 
     @Test
+    fun neighbouringPackFieldsPassFromServerToScreenVerbatim() {
+        val snapshot =
+            RaceStatsParser.parse(
+                """{"stats": {
+                    "gap_prev_pack_abs": "+0:35.1", "gap_next_pack_abs": "-1:04.2",
+                    "qty_prev_pack_abs": "100", "qty_next_pack_abs": "1"
+                }}""",
+            )
+        val values = FieldValues.snapshot(recording(), now, race = snapshot)
+        assertEquals(4, snapshot.stats.size)
+        assertEquals("+0:35.1", values["gap_prev_pack_abs"])
+        assertEquals("-1:04.2", values["gap_next_pack_abs"])
+        assertEquals("100", values["qty_prev_pack_abs"])
+        assertEquals("1", values["qty_next_pack_abs"])
+    }
+
+    @Test
     fun aRaceFieldWithoutAPollYetIsEmptyRatherThanZero() {
         val values = FieldValues.snapshot(recording(), now)
         assertTrue(

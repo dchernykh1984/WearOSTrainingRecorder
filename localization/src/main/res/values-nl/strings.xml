@@ -247,4 +247,8 @@
     <string name="segments_best">%1$s · best %2$s</string>
     <string name="segments_no_effort">%1$s · nooit gereden</string>
 
+    <string name="field_gap_prev_pack_abs">Achterstand op groep voor</string>
+    <string name="field_gap_next_pack_abs">Voorsprong op groep achter</string>
+    <string name="field_qty_prev_pack_abs">Grootte van groep voor</string>
+    <string name="field_qty_next_pack_abs">Grootte van groep achter</string>
 </resources>
