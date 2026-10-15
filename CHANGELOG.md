@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.17.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.16.0...v0.17.0) (2026-10-15)
+
+
+### Features
+
+* **race:** display neighbouring participant group gaps and sizes ([c82a8d1](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/c82a8d12a23ddbbe6346fc1573fe5e6e4011193f))
+
+
+### Bug Fixes
+
+* **i18n:** distinguish participant packs from classification groups ([29bf077](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/29bf077e1d75957cda4ebd7b124c2597002c84f1))
+* **i18n:** keep pack field labels compact on Wear OS ([7698e2c](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/7698e2c7568534675914cacf0a4f24e1983b0a91))
+
 ## [0.16.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.15.0...v0.16.0) (2026-10-08)
 
 
