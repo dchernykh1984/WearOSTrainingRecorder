@@ -23,16 +23,37 @@ import java.net.URL
  */
 class RaceStatsPoller(
     private val fetch: suspend (String) -> String? = { httpGet(it) },
+    /** Injected for the same reason [fetch] is: a test cannot wait a minute. */
+    private val sleep: suspend (Long) -> Unit = { delay(it) },
 ) {
-    fun poll(config: RaceStatsConfig): Flow<RaceStatsSnapshot> =
+    /**
+     * Polls until cancelled, asking for the identifiers again every time round.
+     *
+     * [config] is read per tick rather than captured once, and that is the
+     * whole point of it being a function. The rider changes their bib or
+     * competition on the phone *during* a race - a number typed wrong at the
+     * start line is exactly when this happens - and a loop holding the URL it
+     * built at the start kept fetching another rider's standings for the rest
+     * of the ride, with nothing to do about it but restart the recording.
+     *
+     * Re-reading beats restarting the loop: every keystroke on the phone is
+     * published, so a restart per change would fire an immediate request per
+     * character typed at somebody else's timing server.
+     */
+    fun poll(config: () -> RaceStatsConfig): Flow<RaceStatsSnapshot> =
         flow {
-            val url = RaceStatsUrl.build(config) ?: return@flow
             while (true) {
-                fetch(url)?.let { body ->
-                    val snapshot = RaceStatsParser.parse(body)
-                    if (!snapshot.isEmpty) emit(snapshot)
+                val current = config()
+                // Null while the identifiers are incomplete - half a bib typed,
+                // or cleared mid-race. The loop idles rather than ending, so
+                // finishing the number starts the standings without a restart.
+                RaceStatsUrl.build(current)?.let { url ->
+                    fetch(url)?.let { body ->
+                        val snapshot = RaceStatsParser.parse(body)
+                        if (!snapshot.isEmpty) emit(snapshot)
+                    }
                 }
-                delay(config.refreshSeconds.toLong() * MILLIS_PER_SECOND)
+                sleep(current.refreshSeconds.toLong() * MILLIS_PER_SECOND)
             }
         }.flowOn(Dispatchers.IO)
 
