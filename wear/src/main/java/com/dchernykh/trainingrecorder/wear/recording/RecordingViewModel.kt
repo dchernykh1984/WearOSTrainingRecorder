@@ -186,6 +186,14 @@ class RecordingViewModel(
      */
     val configuration: StateFlow<ScreenConfiguration> = _configuration.asStateFlow()
     private var units: UnitSystem = UnitSystem.METRIC
+
+    /**
+     * Volatile because the poller reads it on every tick, on an IO thread, while
+     * the settings arriving from the phone write it on another. Without it a
+     * corrected bib can simply never become visible to the loop - the same bug
+     * this field was changed to fix, only intermittent.
+     */
+    @Volatile
     private var race: RaceStatsConfig = RaceStatsConfig()
 
     private val samples = mutableListOf<TrackPoint>()
@@ -377,8 +385,35 @@ class RecordingViewModel(
         settings.read()?.let {
             _configuration.value = it.screens
             units = it.units
-            race = it.race
+            useRace(it.race)
         }
+    }
+
+    /**
+     * Takes the race identifiers the phone just sent.
+     *
+     * Screen layouts reached a running ride already, because the screen reads
+     * them fresh on every frame; the race did not, because its poller captured
+     * the identifiers when the ride began. Correcting a bib on the phone then
+     * did nothing until the rider stopped and started again - which in a race
+     * is the one thing they cannot do.
+     *
+     * The running poller needs no restart, only the stale standings cleared:
+     * last place in somebody else's race is worse on a screen than nothing at
+     * all, and the next tick fills it in. A poller that never started - no bib
+     * at the start line - is started here instead.
+     */
+    private fun useRace(updated: RaceStatsConfig) {
+        if (updated == race) return
+        race = updated
+        if (!_state.value.phase.isActive) return
+        raceStats.value = RaceStatsSnapshot.EMPTY
+        // On the view model's own dispatcher, where every other change to
+        // raceJob is made. This runs on the IO thread that read the settings
+        // file, and a Job swapped from two threads is how a poller outlives the
+        // ride that started it and keeps asking a timing server about a race
+        // that has finished.
+        viewModelScope.launch { if (raceJob == null) startRacePolling() }
     }
 
     fun screensFor(sport: SportType) = _configuration.value.resolve(sport)
@@ -468,9 +503,12 @@ class RecordingViewModel(
     }
 
     private fun startRacePolling() {
-        if (!race.isComplete) return
         raceJob?.cancel()
-        raceJob = viewModelScope.launch { poller.poll(race).collect { raceStats.value = it } }
+        raceJob = null
+        if (!race.isComplete) return
+        // The poller reads this on every tick, so a bib corrected mid-race takes
+        // effect at the next one without the loop being torn down.
+        raceJob = viewModelScope.launch { poller.poll { race }.collect { raceStats.value = it } }
     }
 
     private suspend fun collectSamples() {
