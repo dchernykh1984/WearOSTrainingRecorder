@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.1](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.17.0...v0.17.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* **wear:** let a race id changed mid-ride reach the next request ([fbec522](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/fbec5220a976960ff6262e4857436c8878f54c91))
+
 ## [0.17.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.16.0...v0.17.0) (2026-10-15)
 
 
