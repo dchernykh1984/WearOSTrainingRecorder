@@ -22,7 +22,9 @@ object ServiceDiagnostics {
                     }
                 }
             }.distinct().take(MAX_CODES)
-        return (listOf("HTTP $statusCode") + codes).joinToString("; ")
+        // An HTTP success carrying a challenge page is still a protocol failure.
+        val shape = if (statusCode in 200..299 && root == null) listOf("RESPONSE_NOT_JSON") else emptyList()
+        return (listOf("HTTP $statusCode") + codes + shape).joinToString("; ")
     }
 
     /** Exception messages can contain URLs with tokens; the type still distinguishes DNS, TLS and timeout. */

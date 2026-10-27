@@ -54,4 +54,14 @@ class GarminAuthorizationTest {
                 (auth.signIn("rider", "password") as GarminAuthResult.Failed).reason,
             )
         }
+
+    @Test
+    fun anHtmlChallengeWithHttp200ExplainsWhyTheSignInStillFailed() =
+        runBlocking {
+            val auth = GarminAuthorization { _, _, _ -> GarminAuthorization.Response(200, "<html>challenge</html>") }
+            assertEquals(
+                "SSO: HTTP 200; RESPONSE_NOT_JSON",
+                (auth.signIn("rider", "password") as GarminAuthResult.Failed).reason,
+            )
+        }
 }
