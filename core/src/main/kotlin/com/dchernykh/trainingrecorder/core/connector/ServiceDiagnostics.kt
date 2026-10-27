@@ -26,7 +26,8 @@ object ServiceDiagnostics {
     }
 
     /** Exception messages can contain URLs with tokens; the type still distinguishes DNS, TLS and timeout. */
-    fun network(error: Throwable): String = error.javaClass.simpleName.ifBlank { "IOException" }
+    fun network(error: Throwable): String =
+        (error as? ServiceRequestException)?.diagnostic ?: error.javaClass.simpleName.ifBlank { "IOException" }
 
     private fun code(
         node: JsonObject,
@@ -37,3 +38,8 @@ object ServiceDiagnostics {
     private val CODE = Regex("[A-Za-z_][A-Za-z_.-]{0,63}")
     private const val MAX_CODES = 6
 }
+
+/** Carries only the bounded diagnostic produced at the service boundary. */
+class ServiceRequestException(
+    val diagnostic: String,
+) : java.io.IOException(diagnostic)

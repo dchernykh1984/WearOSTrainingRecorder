@@ -1,5 +1,7 @@
 package com.dchernykh.trainingrecorder.mobile.segments
 
+import com.dchernykh.trainingrecorder.core.connector.ServiceDiagnostics
+import com.dchernykh.trainingrecorder.core.connector.ServiceRequestException
 import com.dchernykh.trainingrecorder.core.connector.StravaProtocol
 import java.io.IOException
 import java.io.OutputStreamWriter
@@ -29,8 +31,9 @@ class StravaTokenRefresher : TokenRefresher {
         if (clientId.isBlank() || clientSecret.isBlank() || refreshToken.isBlank()) return null
         val fields = StravaProtocol.refreshRequestFields(clientId, clientSecret, refreshToken)
         val body = fields.entries.joinToString("&") { (key, value) -> "${encode(key)}=${encode(value)}" }
-        val response = runCatching { post(body) }.getOrElse { return null }
+        val response = post(body)
         return StravaProtocol.tokensFrom(response).takeIf { it[StravaProtocol.ACCESS_TOKEN] != null }
+            ?: throw ServiceRequestException("OAuth: TOKEN_MISSING")
     }
 
     @Throws(IOException::class)
@@ -43,8 +46,11 @@ class StravaTokenRefresher : TokenRefresher {
             connection.readTimeout = READ_TIMEOUT_MS
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
             OutputStreamWriter(connection.outputStream).use { it.write(body) }
-            val stream = if (connection.responseCode in SUCCESS) connection.inputStream else connection.errorStream
-            stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+            val status = connection.responseCode
+            val stream = if (status in SUCCESS) connection.inputStream else connection.errorStream
+            val response = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+            if (status !in SUCCESS) throw ServiceRequestException("OAuth: ${ServiceDiagnostics.http(status, response)}")
+            response
         } finally {
             connection.disconnect()
         }

@@ -2,6 +2,7 @@ package com.dchernykh.trainingrecorder.mobile.ui
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import com.dchernykh.trainingrecorder.core.connector.ServiceDiagnostics
 import com.dchernykh.trainingrecorder.core.connector.SyncTrigger
 import com.dchernykh.trainingrecorder.core.segment.Segment
 import com.dchernykh.trainingrecorder.localization.R
@@ -34,6 +35,9 @@ class SegmentSettings(
     private val _status = mutableStateOf<Int?>(null)
     val status: State<Int?> = _status
 
+    private val _diagnostic = mutableStateOf<String?>(null)
+    val diagnostic: State<String?> = _diagnostic
+
     /** Reads what is already on disk, off the main thread. */
     suspend fun load() {
         val stored = withContext(Dispatchers.IO) { runCatching { synchronizer.segments() }.getOrDefault(emptyList()) }
@@ -52,7 +56,19 @@ class SegmentSettings(
         if (_syncing.value) return
         _syncing.value = true
         _status.value = R.string.segments_syncing
-        val outcome = withContext(Dispatchers.IO) { runCatching { synchronizer.sync(SyncTrigger.MANUAL) }.getOrNull() }
+        _diagnostic.value = null
+        val outcome =
+            withContext(Dispatchers.IO) {
+                runCatching { synchronizer.sync(SyncTrigger.MANUAL) }
+                    .getOrElse { SyncOutcome.Failed(ServiceDiagnostics.network(it)) }
+            }
+        _diagnostic.value =
+            when (outcome) {
+                is SyncOutcome.Failed -> outcome.reason
+                is SyncOutcome.Updated -> outcome.diagnostic
+                is SyncOutcome.RateLimited -> "HTTP 429"
+                else -> null
+            }
         _status.value =
             when (outcome) {
                 is SyncOutcome.Updated -> R.string.segments_updated
