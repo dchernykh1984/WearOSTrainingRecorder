@@ -57,8 +57,11 @@ object StravaSegments {
         "$BASE_URL/segment_efforts/$effortId/streams?keys=distance,time&key_by_type=true"
 
     /** The starred list, skipping anything without a usable start. */
-    fun starredFrom(body: String): List<StarredSegment> {
-        val root = parse(body) as? JsonArray ?: return emptyList()
+    fun starredFrom(body: String): List<StarredSegment> = starredPageFrom(body).orEmpty()
+
+    /** Null distinguishes an invalid service response from a rider with no starred segments. */
+    fun starredPageFrom(body: String): List<StarredSegment>? {
+        val root = parse(body) as? JsonArray ?: return null
         return root.mapNotNull { starredSegment(it as? JsonObject ?: return@mapNotNull null) }
     }
 

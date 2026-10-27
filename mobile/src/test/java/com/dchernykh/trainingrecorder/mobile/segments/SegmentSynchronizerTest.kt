@@ -199,6 +199,8 @@ class SegmentSynchronizerTest {
             }.sync(SyncTrigger.MANUAL)
 
         assertTrue(outcome is SyncOutcome.Updated)
+        assertEquals(now, store().lastSyncEpochMs())
+        assertEquals("GET /segment_efforts/1001/streams: HTTP 403", (outcome as SyncOutcome.Updated).diagnostic)
         val segment = published.single()
         assertEquals(553.0, segment.referenceSeconds!!, 0.001)
         // Half way through an even pace is half the time.
@@ -315,8 +317,21 @@ class SegmentSynchronizerTest {
         val outcome =
             synchronizer { url ->
                 if (url.contains("/segments/starred")) ok(starred(1L to 553.0)) else ApiResponse(403, "")
-            }.sync(SyncTrigger.MANUAL) as SyncOutcome.Updated
-        assertEquals("GET /segments/1/streams: HTTP 403", outcome.diagnostic)
+            }.sync(SyncTrigger.MANUAL) as SyncOutcome.Failed
+        assertEquals("GET /segments/1/streams: HTTP 403", outcome.reason)
         assertEquals(0L, store().lastSyncEpochMs())
+    }
+
+    @Test
+    fun anHtmlErrorWithHttp200DoesNotDeleteTheStoredSegments() {
+        val store = store()
+        synchronizer(store) { url ->
+            if (url.contains("/segments/starred")) ok(starred(99L to 553.0)) else ok(streams)
+        }.sync(SyncTrigger.MANUAL)
+        removed.clear()
+        val outcome = synchronizer(store) { ok("<html>outage</html>") }.sync(SyncTrigger.MANUAL)
+        assertEquals(SyncOutcome.Failed("GET /segments/starred: HTTP 200; RESPONSE_INVALID"), outcome)
+        assertEquals(listOf(99L), store.read().map { it.id })
+        assertTrue(removed.isEmpty())
     }
 }
