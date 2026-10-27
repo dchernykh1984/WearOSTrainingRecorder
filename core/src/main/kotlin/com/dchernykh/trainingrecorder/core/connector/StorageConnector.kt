@@ -91,6 +91,18 @@ sealed interface UploadResult {
             }
 }
 
+/** Keep queue decisions while attaching evidence the history screen can show. */
+fun UploadResult.withDiagnostic(detail: String?): UploadResult =
+    if (detail.isNullOrBlank()) {
+        this
+    } else {
+        when (this) {
+            is UploadResult.Success -> this
+            is UploadResult.Rejected -> copy(reason = "$reason; $detail")
+            is UploadResult.Retryable -> copy(reason = "$reason; $detail")
+        }
+    }
+
 /**
  * A place finished workouts are sent.
  *
