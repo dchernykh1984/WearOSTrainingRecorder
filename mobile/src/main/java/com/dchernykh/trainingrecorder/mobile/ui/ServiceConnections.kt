@@ -85,9 +85,8 @@ class ServiceConnections(
      * the missing piece. Shown through the same status line the Connect button
      * uses, because that is where they are being asked to act.
      *
-     * Only the two outcomes that need them. A successful sign-in is the feature
-     * working and nothing to interrupt anyone about, and a network failure will
-     * be tried again on its own.
+     * A failed automatic attempt keeps its diagnostic here too. Retrying later
+     * must not hide why rides are waiting now.
      */
     private suspend fun reportAutomaticSignIn() {
         val recorded =
@@ -97,11 +96,16 @@ class ServiceConnections(
             when (outcome) {
                 ReauthOutcome.NEEDS_CODE -> R.string.connect_auto_needs_code
                 ReauthOutcome.WRONG_CREDENTIALS -> R.string.connect_auto_wrong_credentials
+                ReauthOutcome.FAILED -> R.string.connect_failed
                 else -> return
             }
         // Only where the rider has not just done something themselves, whose
         // answer is newer and more relevant than this one.
-        if (_status.value == null) _status.value = GarminProtocol.ID to message
+        val detail = withContext(Dispatchers.IO) { store.readReauthDiagnostic() }
+        if (_status.value == null) {
+            _status.value = GarminProtocol.ID to message
+            diagnostic.value = detail?.let { GarminProtocol.ID to it }
+        }
     }
 
     /**

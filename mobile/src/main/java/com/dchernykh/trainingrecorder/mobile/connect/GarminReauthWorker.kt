@@ -86,7 +86,7 @@ class GarminReauthWorker(
                 is GarminAuthResult.WrongCredentials -> ReauthOutcome.WRONG_CREDENTIALS
                 is GarminAuthResult.Failed -> ReauthOutcome.FAILED
             }
-        store.writeReauth(System.currentTimeMillis(), outcome)
+        store.writeReauth(System.currentTimeMillis(), outcome, (result as? GarminAuthResult.Failed)?.reason)
         if (result is GarminAuthResult.Authorized) {
             val stored = store.readCredentials()
             val merged = stored + (GarminProtocol.ID to (stored[GarminProtocol.ID].orEmpty() + result.tokens))

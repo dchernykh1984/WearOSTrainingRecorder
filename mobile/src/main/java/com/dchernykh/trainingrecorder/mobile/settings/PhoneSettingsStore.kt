@@ -52,22 +52,33 @@ class PhoneSettingsStore(
     /**
      * When the phone last signed in to Garmin on its own, and how that went.
      *
-     * Two values in one small file rather than in the credentials, which the
+     * The outcome and its diagnostic in one small file rather than in the credentials, which the
      * watch is sent: this is bookkeeping about the phone's own behaviour and
      * the watch has no use for it. Zero and null mean it has never happened,
      * which every caller reads as "go ahead".
      */
     fun readReauth(): Pair<Long, ReauthOutcome?> {
-        val parts = runCatching { reauthFile.readText().trim().split(" ") }.getOrNull().orEmpty()
+        val parts = runCatching { reauthFile.useLines { it.firstOrNull().orEmpty().split(" ") } }.getOrNull().orEmpty()
         return (parts.firstOrNull()?.toLongOrNull() ?: 0L) to ReauthOutcome.byId(parts.getOrNull(1))
     }
 
     fun writeReauth(
         atEpochMs: Long,
         outcome: ReauthOutcome,
+        diagnostic: String? = null,
     ) {
-        runCatching { replace(reauthFile, "$atEpochMs ${outcome.id}") }
+        val detail =
+            diagnostic
+                .orEmpty()
+                .lineSequence()
+                .joinToString(" ")
+                .take(MAX_DIAGNOSTIC_LENGTH)
+        runCatching { replace(reauthFile, "$atEpochMs ${outcome.id}\n$detail") }
     }
+
+    /** The last automatic failure, kept on the phone alongside its retry bookkeeping. */
+    fun readReauthDiagnostic(): String? =
+        runCatching { reauthFile.useLines { it.drop(1).firstOrNull() } }.getOrNull()?.takeIf { it.isNotBlank() }
 
     /**
      * Forgets it, so a rider who connects by hand is not still being told about
@@ -97,5 +108,9 @@ class PhoneSettingsStore(
         // looking like a successful write - and the rider's edit is then quietly
         // gone on the next launch, which is exactly what this dance prevents.
         check(temporary.renameTo(target)) { "could not replace ${target.name}" }
+    }
+
+    private companion object {
+        const val MAX_DIAGNOSTIC_LENGTH = 1000
     }
 }
