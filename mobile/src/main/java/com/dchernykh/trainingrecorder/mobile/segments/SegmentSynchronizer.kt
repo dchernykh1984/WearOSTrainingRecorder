@@ -57,7 +57,6 @@ class SegmentSynchronizer(
     private val refresher: TokenRefresher = StravaTokenRefresher(),
     private val now: () -> Long = System::currentTimeMillis,
 ) {
-    @Suppress("ReturnCount")
     fun sync(trigger: SyncTrigger): SyncOutcome =
         try {
             syncRequests(trigger)
@@ -91,20 +90,23 @@ class SegmentSynchronizer(
         // rate limit would tell the next trigger there was nothing to do, and
         // the segments left unfetched would wait a day for no reason.
         val limited = fetched.limited || starred.limited
-        if (!limited && diagnostics.isEmpty()) store.markSynced(now())
+        if (!limited && !fetched.failed) store.markSynced(now())
+        val detail =
+            diagnostics
+                .distinct()
+                .take(3)
+                .joinToString(" | ")
+                .takeIf { it.isNotEmpty() }
         return if (limited) {
             SyncOutcome.RateLimited(fetched.count)
+        } else if (fetched.failed) {
+            SyncOutcome.Failed(detail ?: "GET /segments/streams: RESPONSE_INVALID")
         } else {
             SyncOutcome.Updated(
                 segments = starred.segments.size,
                 fetched = fetched.count,
                 dropped = plan.toDrop.size,
-                diagnostic =
-                    diagnostics
-                        .distinct()
-                        .take(3)
-                        .joinToString(" | ")
-                        .takeIf { it.isNotEmpty() },
+                diagnostic = detail,
             )
         }
     }
@@ -130,7 +132,11 @@ class SegmentSynchronizer(
             // An incomplete list cannot prove anything was unstarred. Report
             // the refused page before changing the stored list.
             if (!response.ok) throw ServiceRequestException("GET /segments/starred: ${diagnostic(response)}")
-            val listed = StravaSegments.starredFrom(response.body)
+            val listed =
+                StravaSegments.starredPageFrom(response.body)
+                    ?: throw ServiceRequestException(
+                        "GET /segments/starred: HTTP ${response.statusCode}; RESPONSE_INVALID",
+                    )
             all += listed
             if (listed.size < StravaSegments.PAGE_SIZE) break
         }
@@ -143,6 +149,7 @@ class SegmentSynchronizer(
     private data class Fetched(
         val count: Int,
         val limited: Boolean,
+        val failed: Boolean,
     )
 
     /**
@@ -160,16 +167,17 @@ class SegmentSynchronizer(
     ): Fetched {
         var count = 0
         var limited = false
+        var failed = false
         (plan.linesToFetch + plan.effortsToFetch).distinct().forEach { id ->
             if (limited) return@forEach
             val listed = starred[id] ?: return@forEach
             when (refetch(listed, held[id], token, diagnostics)) {
                 Refetch.FETCHED -> count++
                 Refetch.LIMITED -> limited = true
-                Refetch.SKIPPED -> Unit
+                Refetch.SKIPPED -> failed = true
             }
         }
-        return Fetched(count, limited)
+        return Fetched(count, limited, failed)
     }
 
     private enum class Refetch { FETCHED, SKIPPED, LIMITED }
