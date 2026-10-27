@@ -27,6 +27,7 @@ class ServiceDiagnosticsTest {
         assertEquals("HTTP 502", ServiceDiagnostics.http(502, """{"error":"Bearer private-token"}"""))
         assertEquals("HTTP 400", ServiceDiagnostics.http(400, """{"error":{"token":"secret"}}"""))
         assertEquals("HTTP 503", ServiceDiagnostics.http(503, ""))
+        assertEquals("HTTP 200; RESPONSE_NOT_JSON", ServiceDiagnostics.http(200, "<html>challenge</html>"))
         assertEquals("HTTP 400", ServiceDiagnostics.http(400, """{"error":"null"}"""))
     }
 
