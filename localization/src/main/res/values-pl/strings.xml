@@ -251,4 +251,5 @@
     <string name="field_gap_next_pack_abs">Odst tył pak</string>
     <string name="field_qty_prev_pack_abs">Licz prz pak</string>
     <string name="field_qty_next_pack_abs">Licz tył pak</string>
+    <string name="service_diagnostics">Szczegóły: %1$s</string>
 </resources>

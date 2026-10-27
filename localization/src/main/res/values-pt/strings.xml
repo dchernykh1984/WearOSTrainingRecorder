@@ -251,4 +251,5 @@
     <string name="field_gap_next_pack_abs">Dif trás bl</string>
     <string name="field_qty_prev_pack_abs">Tam fr bl</string>
     <string name="field_qty_next_pack_abs">Tam trás bl</string>
+    <string name="service_diagnostics">Detalhes: %1$s</string>
 </resources>

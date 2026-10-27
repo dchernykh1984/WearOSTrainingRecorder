@@ -244,4 +244,5 @@
     <string name="field_gap_next_pack_abs">時間差 後 集団</string>
     <string name="field_qty_prev_pack_abs">人数 前 集団</string>
     <string name="field_qty_next_pack_abs">人数 後 集団</string>
+    <string name="service_diagnostics">詳細: %1$s</string>
 </resources>

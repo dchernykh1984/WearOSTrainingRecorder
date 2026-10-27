@@ -251,4 +251,5 @@
     <string name="field_gap_next_pack_abs">Dist post pk</string>
     <string name="field_qty_prev_pack_abs">Num ant pk</string>
     <string name="field_qty_next_pack_abs">Num post pk</string>
+    <string name="service_diagnostics">Dettagli: %1$s</string>
 </resources>
