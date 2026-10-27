@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.17.1](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.17.0...v0.17.1) (2026-10-27)
+
+
+### Bug Fixes
+
+* **core:** identify non-JSON service replies even with HTTP success ([1e98af6](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/1e98af63dfbb788e2b0de21c62fafe0821edb962))
+* **mobile:** distinguish partial sync failures from private effort fallbacks ([411b686](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/411b686d5e0164d59792f2513c9acc8048646ff3))
+* **mobile:** expose Strava authorization failure details ([009c61a](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/009c61a56a467b10eea29125107ae1d3633f71e5))
+* **mobile:** report Strava segment sync errors without losing cached data ([e52b990](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/e52b990b30133cc6d3ebdbe41036b5eec35eeb2c))
+* **mobile:** retain diagnostics from automatic Garmin sign-in ([58e32c0](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/58e32c094f4ffafd92bbc100284f80335ae3145f))
+* **mobile:** show Garmin sign-in failure diagnostics ([a3db648](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/a3db64857466a90ef06ffa287168166c4092e2f0))
+* **wear:** let a race id changed mid-ride reach the next request ([fbec522](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/fbec5220a976960ff6262e4857436c8878f54c91))
+* **wear:** preserve upload and token refresh failure diagnostics ([2573838](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/2573838d2982e758611224bf155fb6364ed64d31))
+* **wear:** retain refresh errors when the access token is missing ([74e3c86](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/74e3c86712781c80eb75788891284a66461f39c4))
+* **wear:** show race server errors on recording controls ([442df23](https://github.com/dchernykh1984/WearOSTrainingRecorder/commit/442df239eea7a57e60a1be721fff2e821d45ff2e))
+
 ## [0.17.0](https://github.com/dchernykh1984/WearOSTrainingRecorder/compare/v0.16.0...v0.17.0) (2026-10-15)
 
 
