@@ -1,5 +1,6 @@
 package com.dchernykh.trainingrecorder.wear.race
 
+import com.dchernykh.trainingrecorder.core.connector.ServiceRequestException
 import com.dchernykh.trainingrecorder.core.race.RaceStatsConfig
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
@@ -75,6 +76,32 @@ class RaceStatsPollerTest {
             url("34"),
             asked.first(),
         )
+    }
+
+    @Test(timeout = TIMEOUT_MS)
+    fun aFailedRequestIsShownAndTheNextSuccessfulTickClearsIt() {
+        val diagnostics = mutableListOf<String?>()
+        var requests = 0
+        val poller =
+            RaceStatsPoller(
+                fetch = {
+                    if (requests++ == 0) throw ServiceRequestException("HTTP 503")
+                    standings
+                },
+                sleep = {},
+            )
+        runBlocking { poller.poll({ config("12") }, diagnostics::add).take(1).toList() }
+        assertEquals("GET /live-stats: HTTP 503", diagnostics.first())
+        assertEquals(null, diagnostics[1])
+    }
+
+    @Test(timeout = TIMEOUT_MS)
+    fun anUnrecognisedResponseIsReportedBeforeTheNextTickRecovers() {
+        val diagnostics = mutableListOf<String?>()
+        var requests = 0
+        val poller = RaceStatsPoller(fetch = { if (requests++ == 0) "<html>outage</html>" else standings }, sleep = {})
+        runBlocking { poller.poll({ config("12") }, diagnostics::add).take(1).toList() }
+        org.junit.Assert.assertTrue(diagnostics.contains("GET /live-stats: NO_STATS"))
     }
 
     private companion object {
