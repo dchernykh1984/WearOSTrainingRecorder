@@ -20,8 +20,8 @@ import java.net.URL
  *
  * Runs only during a recording, as agreed: once a minute over the network is a
  * real battery cost, and standings are meaningless when nobody is riding. A
- * request that fails is simply not emitted - the previous snapshot stays on
- * screen rather than blanking - and the next tick tries again, which is what
+ * failed request keeps the previous snapshot and reports its diagnostic on
+ * the controls page. The next tick tries again, which is what
  * "retry when connectivity returns" amounts to on a fixed interval.
  */
 class RaceStatsPoller(
