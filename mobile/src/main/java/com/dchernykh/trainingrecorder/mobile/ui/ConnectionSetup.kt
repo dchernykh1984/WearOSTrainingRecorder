@@ -45,6 +45,7 @@ fun ConnectionSetup(
     onValueChanged: (String, String) -> Unit,
     onConnect: () -> Unit,
     status: Int? = null,
+    diagnostic: String? = null,
     codeRequested: Boolean = false,
     onCodeSubmitted: (String) -> Unit = {},
     modifier: Modifier = Modifier,
@@ -87,6 +88,13 @@ fun ConnectionSetup(
         if (status != null) {
             Text(
                 text = stringResource(status),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+        diagnostic?.let {
+            Text(
+                text = stringResource(R.string.service_diagnostics, it),
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 8.dp),
             )

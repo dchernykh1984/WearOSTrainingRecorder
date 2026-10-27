@@ -251,4 +251,5 @@
     <string name="field_gap_next_pack_abs">Отрыв сз пач</string>
     <string name="field_qty_prev_pack_abs">Число вп пач</string>
     <string name="field_qty_next_pack_abs">Число сз пач</string>
+    <string name="service_diagnostics">Диагностика: %1$s</string>
 </resources>

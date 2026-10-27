@@ -8,6 +8,8 @@ package com.dchernykh.trainingrecorder.localization
  * missing entry here is caught by the completeness test.
  */
 object Labels {
+    val serviceDiagnostics: Int = R.string.service_diagnostics
+
     private val sports =
         mapOf(
             "cycling_road" to R.string.sport_cycling_road,

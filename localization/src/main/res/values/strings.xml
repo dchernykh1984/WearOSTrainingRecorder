@@ -266,4 +266,5 @@
     <string name="field_gap_next_pack_abs">Gap bhd pack</string>
     <string name="field_qty_prev_pack_abs">Size ahd pk</string>
     <string name="field_qty_next_pack_abs">Size bhd pk</string>
+    <string name="service_diagnostics">Details: %1$s</string>
 </resources>

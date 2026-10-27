@@ -121,6 +121,10 @@ class ServiceConnections(
     private val _codeRequested = mutableStateOf(false)
     val codeRequested: State<Boolean> = _codeRequested
 
+    private val diagnostic = mutableStateOf<Pair<String, String>?>(null)
+
+    fun diagnosticFor(connectorId: String): String? = diagnostic.value?.takeIf { it.first == connectorId }?.second
+
     fun statusFor(connectorId: String): Int? = _status.value?.takeIf { it.first == connectorId }?.second
 
     fun credentialsFor(connectorId: String): Map<String, String> = credentials.value[connectorId].orEmpty()
@@ -144,6 +148,7 @@ class ServiceConnections(
      * watch would spend the typing failing to log in with the prefixes.
      */
     suspend fun connect(connectorId: String) {
+        diagnostic.value = null
         when (connectorId) {
             StravaProtocol.ID -> connectStrava()
             GarminProtocol.ID -> connectGarmin()
@@ -201,11 +206,13 @@ class ServiceConnections(
     /** The second factor, when Garmin asked for one. */
     suspend fun submitCode(code: String) {
         if (code.isBlank()) return
+        diagnostic.value = null
         _status.value = GarminProtocol.ID to R.string.connect_in_progress
         apply(garmin.submitCode(code))
     }
 
     private suspend fun apply(result: GarminAuthResult) {
+        diagnostic.value = (result as? GarminAuthResult.Failed)?.let { GarminProtocol.ID to it.reason }
         // Raised when Garmin asks, lowered only when it is finally satisfied.
         // Clearing it on a refusal would take the field away the moment the
         // rider mistyped the code, leaving them to start the whole sign-in

@@ -244,4 +244,5 @@
     <string name="field_gap_next_pack_abs">Fark arka pk</string>
     <string name="field_qty_prev_pack_abs">Sayı ön pk</string>
     <string name="field_qty_next_pack_abs">Sayı arka pk</string>
+    <string name="service_diagnostics">Ayrıntılar: %1$s</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.dchernykh.trainingrecorder.mobile.connect
 
 import com.dchernykh.trainingrecorder.core.connector.GarminSignIn
+import com.dchernykh.trainingrecorder.core.connector.ServiceDiagnostics
 import com.dchernykh.trainingrecorder.core.connector.SignInOutcome
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -48,7 +49,9 @@ sealed interface GarminAuthResult {
  * with a page that is not JSON, that is what happened, and there is nothing in
  * the response that will say so.
  */
-class GarminAuthorization {
+class GarminAuthorization(
+    private val request: ((String, Map<String, String>, ByteArray) -> Response)? = null,
+) {
     /**
      * The sign-in and its second factor are two requests that have to look like
      * one session, so whatever Garmin set on the first is sent back on the
@@ -72,8 +75,8 @@ class GarminAuthorization {
                         headers = GarminSignIn.signInHeaders(),
                         body = GarminSignIn.signInBody(login, password),
                     )
-                }.getOrElse { return@withContext GarminAuthResult.Failed("network: ${it.message}") }
-            interpret(response.body)
+                }.getOrElse { return@withContext GarminAuthResult.Failed("SSO: ${ServiceDiagnostics.network(it)}") }
+            interpret(response, "SSO")
         }
 
     /**
@@ -93,12 +96,15 @@ class GarminAuthorization {
                         headers = GarminSignIn.signInHeaders(),
                         body = GarminSignIn.mfaBody(code, mfaMethod),
                     )
-                }.getOrElse { return@withContext GarminAuthResult.Failed("network: ${it.message}") }
-            interpret(response.body)
+                }.getOrElse { return@withContext GarminAuthResult.Failed("MFA: ${ServiceDiagnostics.network(it)}") }
+            interpret(response, "MFA")
         }
 
-    private fun interpret(body: String): GarminAuthResult =
-        when (val outcome = GarminSignIn.outcomeFrom(body)) {
+    private fun interpret(
+        response: Response,
+        stage: String,
+    ): GarminAuthResult =
+        when (val outcome = GarminSignIn.outcomeFrom(response.body)) {
             is SignInOutcome.Ticket -> exchange(outcome.serviceTicketId)
             is SignInOutcome.MfaRequired -> {
                 mfaMethod = outcome.method
@@ -106,7 +112,8 @@ class GarminAuthorization {
             }
 
             is SignInOutcome.InvalidCredentials -> GarminAuthResult.WrongCredentials
-            is SignInOutcome.Refused -> GarminAuthResult.Failed(outcome.reason)
+            is SignInOutcome.Refused ->
+                GarminAuthResult.Failed("$stage: ${ServiceDiagnostics.http(response.statusCode, response.body)}")
         }
 
     /**
@@ -118,22 +125,32 @@ class GarminAuthorization {
      * turned away at the door.
      */
     private fun exchange(serviceTicketId: String): GarminAuthResult {
+        val failures = mutableListOf<String>()
         GarminSignIn.CLIENT_IDS.forEach { clientId ->
-            val body =
+            val response =
                 runCatching {
                     postForm(
                         url = GarminSignIn.TOKEN_URL,
                         headers = GarminSignIn.tokenHeaders(clientId),
                         fields = GarminSignIn.exchangeFields(clientId, serviceTicketId),
-                    ).body
-                }.getOrNull() ?: return@forEach
-            val tokens = GarminSignIn.tokensFrom(body, clientId, System.currentTimeMillis() / MILLIS_PER_SECOND)
-            if (tokens.isNotEmpty()) return GarminAuthResult.Authorized(tokens)
+                    )
+                }.getOrElse {
+                    failures += "$clientId: ${ServiceDiagnostics.network(it)}"
+                    return@forEach
+                }
+            val tokens =
+                GarminSignIn.tokensFrom(
+                    response.body,
+                    clientId,
+                    System.currentTimeMillis() / MILLIS_PER_SECOND,
+                )
+            if (response.statusCode in SUCCESS_RANGE && tokens.isNotEmpty()) return GarminAuthResult.Authorized(tokens)
+            failures += "$clientId: ${ServiceDiagnostics.http(response.statusCode, response.body)}"
         }
-        return GarminAuthResult.Failed("garmin would not issue a token")
+        return GarminAuthResult.Failed("OAuth: ${failures.joinToString(" | ")}")
     }
 
-    private data class Response(
+    data class Response(
         val statusCode: Int,
         val body: String,
     )
@@ -159,6 +176,7 @@ class GarminAuthorization {
         headers: Map<String, String>,
         body: ByteArray,
     ): Response {
+        request?.let { return it(url, headers, body) }
         val connection = URL(url).openConnection() as HttpURLConnection
         return try {
             connection.requestMethod = "POST"

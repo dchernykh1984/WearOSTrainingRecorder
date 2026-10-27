@@ -251,4 +251,5 @@
     <string name="field_gap_next_pack_abs">Айыр ар лек</string>
     <string name="field_qty_prev_pack_abs">Саны ал лек</string>
     <string name="field_qty_next_pack_abs">Саны ар лек</string>
+    <string name="service_diagnostics">Диагностика: %1$s</string>
 </resources>

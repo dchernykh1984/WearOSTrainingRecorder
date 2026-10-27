@@ -238,6 +238,7 @@ private fun ConnectionList(
                 onValueChanged = { key, value -> model.updateCredential(connector.id, key, value) },
                 onConnect = { model.connect(connector.id) },
                 status = connections.statusFor(connector.id),
+                diagnostic = connections.diagnosticFor(connector.id),
                 codeRequested = connector.id == GarminProtocol.ID && connections.codeRequested.value,
                 onCodeSubmitted = model::submitGarminCode,
             )
