@@ -1,10 +1,12 @@
 package com.dchernykh.trainingrecorder.wear.connector
 
 import com.dchernykh.trainingrecorder.core.connector.CredentialField
+import com.dchernykh.trainingrecorder.core.connector.ServiceDiagnostics
 import com.dchernykh.trainingrecorder.core.connector.StorageConnector
 import com.dchernykh.trainingrecorder.core.connector.StravaProtocol
 import com.dchernykh.trainingrecorder.core.connector.UploadResult
 import com.dchernykh.trainingrecorder.core.connector.WorkoutUpload
+import com.dchernykh.trainingrecorder.core.connector.withDiagnostic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -20,6 +22,12 @@ import kotlinx.coroutines.withContext
  * permanently failed - which the retention policy is entitled to delete.
  */
 class StravaConnector(
+    private val postRequest: (String, List<Part>, Map<String, String>) -> HttpUpload.Response = HttpUpload::post,
+    private val formRequest: (
+        String,
+        Map<String, String>,
+        Map<String, String>,
+    ) -> HttpUpload.Response = HttpUpload::form,
     /**
      * Called with the credentials to keep whenever a refresh produces new ones.
      * Strava rotates the refresh token, so the answer has to be written down or
@@ -41,7 +49,8 @@ class StravaConnector(
         credentials: Map<String, String>,
     ): UploadResult =
         withContext(Dispatchers.IO) {
-            val current = refreshed(credentials)
+            var refreshDiagnostic: String? = null
+            val current = refreshed(credentials) { refreshDiagnostic = it }
             val token = current[StravaProtocol.ACCESS_TOKEN].orEmpty()
             if (token.isBlank()) return@withContext UploadResult.Retryable("not authorized yet")
             val fields = StravaProtocol.uploadFields(upload.sportTypeId, upload.activityName)
@@ -50,29 +59,44 @@ class StravaConnector(
                     Part.File("file", upload.fileName, upload.openStream)
             val response =
                 runCatching {
-                    HttpUpload.post(
-                        url = StravaProtocol.UPLOAD_URL,
-                        parts = parts,
-                        headers = mapOf("Authorization" to "Bearer $token"),
+                    postRequest(
+                        StravaProtocol.UPLOAD_URL,
+                        parts,
+                        mapOf("Authorization" to "Bearer $token"),
                     )
-                }.getOrElse { return@withContext UploadResult.Retryable("network: ${it.message}") }
-            StravaProtocol.classify(response.statusCode, response.body)
+                }.getOrElse {
+                    return@withContext UploadResult
+                        .Retryable(
+                            ServiceDiagnostics.network(it),
+                        ).withDiagnostic(refreshDiagnostic)
+                }
+            StravaProtocol
+                .classify(response.statusCode, response.body)
+                .withDiagnostic(ServiceDiagnostics.http(response.statusCode, response.body))
+                .withDiagnostic(refreshDiagnostic)
         }
 
     /**
      * The credentials to upload with, refreshing first if the token is spent.
      *
      * Returns what it was given when a refresh is not needed or does not work -
-     * the upload then fails on its own terms, which is a clearer answer than a
-     * refresh error the rider cannot act on.
+     * the upload still has a chance to succeed. If it fails too, the history
+     * includes both answers rather than hiding the failed refresh.
      */
-    private fun refreshed(credentials: Map<String, String>): Map<String, String> =
-        newTokens(credentials)?.let { tokens ->
+    private fun refreshed(
+        credentials: Map<String, String>,
+        onFailure: (String) -> Unit,
+    ): Map<String, String> =
+        newTokens(credentials, onFailure)?.let { tokens ->
             (credentials + tokens).also(onTokensRefreshed)
         } ?: credentials
 
     /** Null whenever the refresh is unnecessary, impossible, or unsuccessful. */
-    private fun newTokens(credentials: Map<String, String>): Map<String, String>? {
+    @Suppress("ReturnCount")
+    private fun newTokens(
+        credentials: Map<String, String>,
+        onFailure: (String) -> Unit,
+    ): Map<String, String>? {
         if (!StravaProtocol.needsRefresh(credentials, System.currentTimeMillis() / MILLIS_PER_SECOND)) return null
         val fields =
             StravaProtocol.refreshRequestFields(
@@ -81,10 +105,17 @@ class StravaConnector(
                 refreshToken = credentials[StravaProtocol.REFRESH_TOKEN].orEmpty(),
             )
         if (fields.values.any { it.isBlank() }) return null
-        return runCatching { HttpUpload.form(StravaProtocol.TOKEN_URL, fields) }
-            .getOrNull()
-            ?.let { StravaProtocol.tokensFrom(it) }
-            ?.takeIf { it.isNotEmpty() }
+        val response =
+            runCatching { formRequest(StravaProtocol.TOKEN_URL, fields, emptyMap()) }.getOrElse {
+                onFailure("OAuth: ${ServiceDiagnostics.network(it)}")
+                return null
+            }
+        val tokens = StravaProtocol.tokensFrom(response.body)
+        if (response.statusCode !in 200..299 || tokens.isEmpty()) {
+            onFailure("OAuth: ${ServiceDiagnostics.http(response.statusCode, response.body)}")
+            return null
+        }
+        return tokens
     }
 
     private companion object {

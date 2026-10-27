@@ -64,7 +64,7 @@ object GarminReauthorization {
     /** True when the watch is reporting a session only a sign-in can replace. */
     fun watchReportsDeadSession(workouts: List<WorkoutSummary>): Boolean =
         workouts.any {
-            it.uploadReasons[GarminProtocol.ID] == GarminProtocol.SESSION_EXPIRED &&
+            it.uploadReasons[GarminProtocol.ID]?.substringBefore("; ") == GarminProtocol.SESSION_EXPIRED &&
                 it.uploads[GarminProtocol.ID] != UploadState.UPLOADED
         }
 

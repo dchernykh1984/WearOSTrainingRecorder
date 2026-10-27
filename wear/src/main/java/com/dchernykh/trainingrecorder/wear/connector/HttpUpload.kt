@@ -48,7 +48,7 @@ object HttpUpload {
         url: String,
         fields: Map<String, String>,
         headers: Map<String, String> = emptyMap(),
-    ): String {
+    ): Response {
         val body =
             fields.entries.joinToString("&") { (key, value) ->
                 "${encode(key)}=${encode(value)}"
@@ -66,13 +66,14 @@ object HttpUpload {
             // an authorization header gets the one it asked for.
             headers.forEach { (name, value) -> connection.setRequestProperty(name, value) }
             connection.outputStream.use { it.write(body.toByteArray()) }
+            val status = connection.responseCode
             val stream =
-                if (connection.responseCode in SUCCESS) {
+                if (status in SUCCESS) {
                     connection.inputStream
                 } else {
                     connection.errorStream
                 }
-            stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+            Response(status, stream?.bufferedReader()?.use { it.readText() }.orEmpty())
         } finally {
             connection.disconnect()
         }

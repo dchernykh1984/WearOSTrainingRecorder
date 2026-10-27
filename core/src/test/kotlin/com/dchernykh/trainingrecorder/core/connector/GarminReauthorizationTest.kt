@@ -59,6 +59,11 @@ class GarminReauthorizationTest {
     }
 
     @Test
+    fun aDeadSessionWithHttpDiagnosticsStillTriggersRecovery() {
+        assertTrue(shouldSignIn(listOf(ride(reason = "session expired; HTTP 401; OAuth: HTTP 400; invalid_grant"))))
+    }
+
+    @Test
     fun anotherKindOfFailureIsLeftAlone() {
         // Signing in again fixes an expired session and nothing else. A file
         // Garmin will not parse is refused just as firmly by a fresh token.
