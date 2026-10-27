@@ -3,6 +3,7 @@ package com.dchernykh.trainingrecorder.mobile.connect
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import com.dchernykh.trainingrecorder.core.connector.ServiceDiagnostics
 import com.dchernykh.trainingrecorder.core.connector.StravaProtocol
 import com.dchernykh.trainingrecorder.localization.R
 import kotlinx.coroutines.Dispatchers
@@ -24,8 +25,8 @@ sealed interface AuthorizationResult {
     data class Failed(
         val reason: String,
         /**
-         * What to put on screen. Most failures are indistinguishable to a rider
-         * and share one line; the browser never coming back is not one of them -
+         * What to put on screen alongside the diagnostic. The browser never
+         * coming back needs its own instructions -
          * it has a cause the rider can actually do something about, and saying
          * only "failed" leaves them retrying the same thing forever.
          */
@@ -77,22 +78,22 @@ class StravaAuthorization(
             // whatever else on the phone happens to be listening.
             val redirect =
                 LoopbackRedirect.open()
-                    ?: return@withContext AuthorizationResult.Failed("could not open a local port")
+                    ?: return@withContext AuthorizationResult.Failed("LOOPBACK_UNAVAILABLE")
             redirect.use {
                 // Bound to the request so a redirect the rider did not start -
                 // an old link, another app - cannot inject a code of its own.
                 val state = Random.nextLong().toString(RADIX)
                 val opened = openBrowser(StravaProtocol.authorizeUrl(clientId, it.port, state))
-                if (!opened) return@withContext AuthorizationResult.Failed("no browser to open")
+                if (!opened) return@withContext AuthorizationResult.Failed("BROWSER_UNAVAILABLE")
                 val callback =
                     it.awaitTarget(TIMEOUT_MS)
                         ?: return@withContext AuthorizationResult.Failed(
-                            reason = "the browser did not return",
+                            reason = "CALLBACK_TIMEOUT",
                             statusRes = R.string.connect_no_callback,
                         )
                 val code =
                     StravaProtocol.codeFrom(callback, state)
-                        ?: return@withContext AuthorizationResult.Failed("authorization was declined")
+                        ?: return@withContext AuthorizationResult.Failed("CALLBACK_DECLINED")
                 exchange(clientId, clientSecret, code)
             }
         }
@@ -123,19 +124,25 @@ class StravaAuthorization(
                 connection.readTimeout = READ_TIMEOUT_MS
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
                 connection.use { it.write(body) }
-            }.getOrElse { return AuthorizationResult.Failed("the token exchange failed: ${it.message}") }
-        val tokens = StravaProtocol.tokensFrom(response)
-        if (tokens[StravaProtocol.ACCESS_TOKEN].isNullOrBlank()) {
-            return AuthorizationResult.Failed("Strava did not return a token")
+            }.getOrElse { return AuthorizationResult.Failed("OAuth: ${ServiceDiagnostics.network(it)}") }
+        val tokens = StravaProtocol.tokensFrom(response.body)
+        if (response.statusCode !in SUCCESS_RANGE || tokens[StravaProtocol.ACCESS_TOKEN].isNullOrBlank()) {
+            return AuthorizationResult.Failed("OAuth: ${ServiceDiagnostics.http(response.statusCode, response.body)}")
         }
         return AuthorizationResult.Authorized(tokens)
     }
 
-    private fun HttpURLConnection.use(write: (OutputStreamWriter) -> Unit): String =
+    private data class Response(
+        val statusCode: Int,
+        val body: String,
+    )
+
+    private fun HttpURLConnection.use(write: (OutputStreamWriter) -> Unit): Response =
         try {
             OutputStreamWriter(outputStream).use(write)
-            val stream = if (responseCode in SUCCESS_RANGE) inputStream else errorStream
-            stream?.bufferedReader()?.use(BufferedReader::readText).orEmpty()
+            val status = responseCode
+            val stream = if (status in SUCCESS_RANGE) inputStream else errorStream
+            Response(status, stream?.bufferedReader()?.use(BufferedReader::readText).orEmpty())
         } finally {
             disconnect()
         }
