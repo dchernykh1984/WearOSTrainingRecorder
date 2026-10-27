@@ -54,6 +54,13 @@ fun SegmentPanel(
                 )
             }
         }
+        settings.diagnostic.value?.let {
+            Text(
+                text = stringResource(R.string.service_diagnostics, it),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
         if (segments.isEmpty()) {
             Text(
                 text = stringResource(R.string.segments_none),

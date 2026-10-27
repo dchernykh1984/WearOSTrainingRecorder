@@ -1,5 +1,6 @@
 package com.dchernykh.trainingrecorder.mobile.segments
 
+import com.dchernykh.trainingrecorder.core.connector.ServiceDiagnostics
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -65,11 +66,7 @@ class HttpStravaReader : StravaReader {
             val stream = if (status in SUCCESS) connection.inputStream else connection.errorStream
             ApiResponse(status, stream?.bufferedReader()?.use { it.readText() }.orEmpty())
         } catch (error: IOException) {
-            // A refresh that cannot reach the network is not a failure worth
-            // reporting to the rider: it is a phone on a train. Nothing is
-            // stored, the last sync time stays where it was, and the next
-            // trigger tries again.
-            ApiResponse(NO_NETWORK, error.message.orEmpty())
+            ApiResponse(NO_NETWORK, ServiceDiagnostics.network(error))
         } finally {
             connection.disconnect()
         }

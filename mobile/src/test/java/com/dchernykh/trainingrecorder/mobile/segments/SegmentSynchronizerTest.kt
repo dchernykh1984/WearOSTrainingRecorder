@@ -284,4 +284,39 @@ class SegmentSynchronizerTest {
 
         assertEquals(StravaSegments.starredUrl(), asked.first())
     }
+
+    @Test
+    fun aRefusedListingReportsTheStatusAndServiceCode() {
+        val outcome =
+            synchronizer { ApiResponse(401, """{"errors":[{"code":"invalid"}]}""") }
+                .sync(SyncTrigger.MANUAL) as SyncOutcome.Failed
+        assertEquals("GET /segments/starred: HTTP 401; invalid", outcome.reason)
+    }
+
+    @Test
+    fun aFailureOnTheSecondPageKeepsTheStoredSegmentsAndReportsTheError() {
+        val store = store()
+        synchronizer(store) { url ->
+            if (url.contains("/segments/starred")) ok(starred(99L to 553.0)) else ok(streams)
+        }.sync(SyncTrigger.MANUAL)
+        removed.clear()
+        val firstPage = starred(*(1L..30L).map { it to 500.0 }.toTypedArray())
+        val outcome =
+            synchronizer(store) { url ->
+                if (url.contains("?page=1&")) ok(firstPage) else ApiResponse(503, "")
+            }.sync(SyncTrigger.MANUAL)
+        assertTrue(outcome is SyncOutcome.Failed)
+        assertEquals(listOf(99L), store.read().map { it.id })
+        assertTrue(removed.isEmpty())
+    }
+
+    @Test
+    fun aRefusedSegmentStreamIsReportedEvenWhenOtherSegmentsSucceed() {
+        val outcome =
+            synchronizer { url ->
+                if (url.contains("/segments/starred")) ok(starred(1L to 553.0)) else ApiResponse(403, "")
+            }.sync(SyncTrigger.MANUAL) as SyncOutcome.Updated
+        assertEquals("GET /segments/1/streams: HTTP 403", outcome.diagnostic)
+        assertEquals(0L, store().lastSyncEpochMs())
+    }
 }

@@ -2,6 +2,8 @@ package com.dchernykh.trainingrecorder.mobile.segments
 
 import com.dchernykh.trainingrecorder.core.connector.SegmentPlan
 import com.dchernykh.trainingrecorder.core.connector.SegmentSync
+import com.dchernykh.trainingrecorder.core.connector.ServiceDiagnostics
+import com.dchernykh.trainingrecorder.core.connector.ServiceRequestException
 import com.dchernykh.trainingrecorder.core.connector.StarredSegment
 import com.dchernykh.trainingrecorder.core.connector.StoredSegment
 import com.dchernykh.trainingrecorder.core.connector.StravaProtocol
@@ -24,6 +26,7 @@ sealed interface SyncOutcome {
         val segments: Int,
         val fetched: Int,
         val dropped: Int,
+        val diagnostic: String? = null,
     ) : SyncOutcome
 
     /** Strava asked us to slow down; what was fetched before that still stands. */
@@ -55,17 +58,26 @@ class SegmentSynchronizer(
     private val now: () -> Long = System::currentTimeMillis,
 ) {
     @Suppress("ReturnCount")
-    fun sync(trigger: SyncTrigger): SyncOutcome {
+    fun sync(trigger: SyncTrigger): SyncOutcome =
+        try {
+            syncRequests(trigger)
+        } catch (error: java.io.IOException) {
+            SyncOutcome.Failed(ServiceDiagnostics.network(error))
+        }
+
+    @Suppress("ReturnCount")
+    private fun syncRequests(trigger: SyncTrigger): SyncOutcome {
         val credentials = settings.readCredentials()[StravaProtocol.ID].orEmpty()
         if (credentials[StravaProtocol.ACCESS_TOKEN].isNullOrBlank()) return SyncOutcome.NotConnected
         if (!SegmentSync.isDue(trigger, store.lastSyncEpochMs(), now())) return SyncOutcome.TooSoon
         val token = freshToken(credentials) ?: return SyncOutcome.Failed("the Strava token could not be renewed")
 
-        val starred = starred(token) ?: return SyncOutcome.Failed("Strava would not list the starred segments")
+        val starred = starred(token)
+        val diagnostics = mutableListOf<String>()
 
         val held = store.read().associateBy { it.id }
         val plan = SegmentSync.plan(held.values.map(::asStored), starred.segments)
-        val fetched = fetchAll(plan, starred.segments.associateBy { it.id }, held, token)
+        val fetched = fetchAll(plan, starred.segments.associateBy { it.id }, held, token, diagnostics)
         // Nothing is dropped from a listing that was cut short: a segment the
         // rate limit stopped us reading is not a segment the rider unstarred,
         // and deleting it would take a climb off the watch for no reason.
@@ -79,11 +91,21 @@ class SegmentSynchronizer(
         // rate limit would tell the next trigger there was nothing to do, and
         // the segments left unfetched would wait a day for no reason.
         val limited = fetched.limited || starred.limited
-        if (!limited) store.markSynced(now())
+        if (!limited && diagnostics.isEmpty()) store.markSynced(now())
         return if (limited) {
             SyncOutcome.RateLimited(fetched.count)
         } else {
-            SyncOutcome.Updated(segments = starred.segments.size, fetched = fetched.count, dropped = plan.toDrop.size)
+            SyncOutcome.Updated(
+                segments = starred.segments.size,
+                fetched = fetched.count,
+                dropped = plan.toDrop.size,
+                diagnostic =
+                    diagnostics
+                        .distinct()
+                        .take(3)
+                        .joinToString(" | ")
+                        .takeIf { it.isNotEmpty() },
+            )
         }
     }
 
@@ -100,14 +122,14 @@ class SegmentSynchronizer(
      * "my climb is missing and nothing says why" is the worst kind of bug to
      * have in a feature that is quiet by design.
      */
-    private fun starred(token: String): Starred? {
+    private fun starred(token: String): Starred {
         val all = mutableListOf<StarredSegment>()
         for (page in 1..StravaSegments.MAX_PAGES) {
             val response = reader.get(StravaSegments.starredUrl(page), token)
             if (response.rateLimited) return Starred(all, limited = true)
-            // A failure on the first page is a failure; on a later one it is a
-            // partial answer, and the segments already listed are still good.
-            if (!response.ok) return if (page == 1) null else Starred(all, limited = false)
+            // An incomplete list cannot prove anything was unstarred. Report
+            // the refused page before changing the stored list.
+            if (!response.ok) throw ServiceRequestException("GET /segments/starred: ${diagnostic(response)}")
             val listed = StravaSegments.starredFrom(response.body)
             all += listed
             if (listed.size < StravaSegments.PAGE_SIZE) break
@@ -134,13 +156,14 @@ class SegmentSynchronizer(
         starred: Map<Long, StarredSegment>,
         held: Map<Long, Segment>,
         token: String,
+        diagnostics: MutableList<String>,
     ): Fetched {
         var count = 0
         var limited = false
         (plan.linesToFetch + plan.effortsToFetch).distinct().forEach { id ->
             if (limited) return@forEach
             val listed = starred[id] ?: return@forEach
-            when (refetch(listed, held[id], token)) {
+            when (refetch(listed, held[id], token, diagnostics)) {
                 Refetch.FETCHED -> count++
                 Refetch.LIMITED -> limited = true
                 Refetch.SKIPPED -> Unit
@@ -163,6 +186,7 @@ class SegmentSynchronizer(
         starred: StarredSegment,
         held: Segment?,
         token: String,
+        diagnostics: MutableList<String>,
     ): Refetch {
         val line =
             if (held != null && held.points.size >= 2) {
@@ -171,10 +195,13 @@ class SegmentSynchronizer(
             } else {
                 val streams = reader.get(StravaSegments.streamsUrl(starred.id), token)
                 if (streams.rateLimited) return Refetch.LIMITED
-                if (!streams.ok) return Refetch.SKIPPED
+                if (!streams.ok) {
+                    diagnostics += "GET /segments/${starred.id}/streams: ${diagnostic(streams)}"
+                    return Refetch.SKIPPED
+                }
                 StravaSegments.lineFrom(streams.body)
             }
-        val reference = referenceFor(starred, token) ?: return Refetch.LIMITED
+        val reference = referenceFor(starred, token, diagnostics) ?: return Refetch.LIMITED
         val segment = StravaSegments.segment(starred, line, reference) ?: return Refetch.SKIPPED
         store.write(segment)
         publisher.publish(segment)
@@ -194,11 +221,15 @@ class SegmentSynchronizer(
     private fun referenceFor(
         starred: StarredSegment,
         token: String,
+        diagnostics: MutableList<String>,
     ): List<EffortPoint>? {
         val effortId = starred.bestEffortId ?: return emptyList()
         val streams = reader.get(StravaSegments.effortStreamsUrl(effortId), token)
         if (streams.rateLimited) return null
-        if (!streams.ok) return emptyList()
+        if (!streams.ok) {
+            diagnostics += "GET /segment_efforts/$effortId/streams: ${diagnostic(streams)}"
+            return emptyList()
+        }
         return StravaSegments.effortCurveFrom(streams.body)
     }
 
@@ -219,6 +250,9 @@ class SegmentSynchronizer(
         settings.writeCredentials(merged)
         return renewed[StravaProtocol.ACCESS_TOKEN]
     }
+
+    private fun diagnostic(response: ApiResponse): String =
+        if (response.statusCode == 0) response.body else ServiceDiagnostics.http(response.statusCode, response.body)
 
     /** Every segment the phone holds, for the screen that lists them. */
     fun segments(): List<Segment> = store.read()
