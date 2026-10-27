@@ -177,7 +177,10 @@ class ServiceConnections(
                     R.string.connect_done
                 }
 
-                is AuthorizationResult.Failed -> result.statusRes
+                is AuthorizationResult.Failed -> {
+                    diagnostic.value = StravaProtocol.ID to result.reason
+                    result.statusRes
+                }
             }
     }
 
