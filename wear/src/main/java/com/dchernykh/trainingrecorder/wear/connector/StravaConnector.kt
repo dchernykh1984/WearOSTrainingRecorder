@@ -52,7 +52,9 @@ class StravaConnector(
             var refreshDiagnostic: String? = null
             val current = refreshed(credentials) { refreshDiagnostic = it }
             val token = current[StravaProtocol.ACCESS_TOKEN].orEmpty()
-            if (token.isBlank()) return@withContext UploadResult.Retryable("not authorized yet")
+            if (token.isBlank()) {
+                return@withContext UploadResult.Retryable("not authorized yet").withDiagnostic(refreshDiagnostic)
+            }
             val fields = StravaProtocol.uploadFields(upload.sportTypeId, upload.activityName)
             val parts =
                 fields.map { (name, value) -> Part.Text(name, value) } +
