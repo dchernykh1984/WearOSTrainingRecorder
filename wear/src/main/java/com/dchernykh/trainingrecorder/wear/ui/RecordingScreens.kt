@@ -65,6 +65,7 @@ fun RecordingPager(
     @StringRes sportLabelRes: Int = 0,
     /** Null for a ride with nothing to track, which shows no indicator at all. */
     fix: FixStatus? = null,
+    diagnostic: String? = null,
 ) {
     // The controls sit to the RIGHT of the data screens. Wear OS reserves the
     // left-to-right swipe for dismissing an app, so putting them on the left
@@ -77,7 +78,7 @@ fun RecordingPager(
     val vertical = rememberPagerState(initialPage = 0) { screens.screens.size }
     HorizontalPager(state = horizontal, modifier = modifier.fillMaxSize()) { page ->
         if (page == CONTROLS_PAGE) {
-            ControlsPage(sportLabelRes = sportLabelRes, actions = actions, onAction = onAction)
+            ControlsPage(sportLabelRes = sportLabelRes, actions = actions, onAction = onAction, diagnostic = diagnostic)
         } else {
             // A strip of its own rather than an overlay. Laid over the data
             // the indicator sat against the last field's descenders, which on a
@@ -385,6 +386,7 @@ private fun ControlsPage(
     actions: List<RecordingAction>,
     onAction: (RecordingAction) -> Unit,
     modifier: Modifier = Modifier,
+    diagnostic: String? = null,
 ) {
     Column(
         // Scrollable as insurance, not as a feature: the column is centred and
@@ -406,6 +408,14 @@ private fun ControlsPage(
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp),
+            )
+        }
+        diagnostic?.let {
+            Text(
+                text = stringResource(Labels.serviceDiagnostics, it),
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
             )
         }
         // Discard sits apart from the two large controls whenever there are

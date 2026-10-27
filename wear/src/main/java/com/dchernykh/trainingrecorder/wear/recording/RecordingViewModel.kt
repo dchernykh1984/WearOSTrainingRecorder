@@ -135,6 +135,8 @@ class RecordingViewModel(
 
     private val sensors = MutableStateFlow(SensorSnapshot())
     private val raceStats = MutableStateFlow(RaceStatsSnapshot.EMPTY)
+    private val _raceDiagnostic = MutableStateFlow<String?>(null)
+    val raceDiagnostic: StateFlow<String?> = _raceDiagnostic.asStateFlow()
     private val history = MutableStateFlow(settings.readHistory())
 
     /**
@@ -408,6 +410,7 @@ class RecordingViewModel(
         race = updated
         if (!_state.value.phase.isActive) return
         raceStats.value = RaceStatsSnapshot.EMPTY
+        _raceDiagnostic.value = null
         // On the view model's own dispatcher, where every other change to
         // raceJob is made. This runs on the IO thread that read the settings
         // file, and a Job swapped from two threads is how a poller outlives the
@@ -505,10 +508,16 @@ class RecordingViewModel(
     private fun startRacePolling() {
         raceJob?.cancel()
         raceJob = null
+        _raceDiagnostic.value = null
         if (!race.isComplete) return
         // The poller reads this on every tick, so a bib corrected mid-race takes
         // effect at the next one without the loop being torn down.
-        raceJob = viewModelScope.launch { poller.poll { race }.collect { raceStats.value = it } }
+        raceJob =
+            viewModelScope.launch {
+                poller
+                    .poll(config = { race }, onError = { _raceDiagnostic.value = it })
+                    .collect { raceStats.value = it }
+            }
     }
 
     private suspend fun collectSamples() {

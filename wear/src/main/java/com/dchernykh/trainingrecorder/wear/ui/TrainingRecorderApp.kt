@@ -66,6 +66,7 @@ fun TrainingRecorderApp(
                 // failing to find satellites, it never asked for any, and a red
                 // GPS on a turbo trainer is a bug report waiting to be filed.
                 val fix by model.fix.collectAsStateWithLifecycle(FixStatus.NONE)
+                val raceDiagnostic by model.raceDiagnostic.collectAsStateWithLifecycle()
                 RecordingPager(
                     screens = configuration.resolve(requireNotNull(sport)),
                     shape = currentShape(),
@@ -74,6 +75,7 @@ fun TrainingRecorderApp(
                     onAction = model::onAction,
                     sportLabelRes = Labels.sport(sport.id),
                     fix = fix.takeIf { model.tracksPosition(requireNotNull(sport)) },
+                    diagnostic = raceDiagnostic,
                 )
             }
         }

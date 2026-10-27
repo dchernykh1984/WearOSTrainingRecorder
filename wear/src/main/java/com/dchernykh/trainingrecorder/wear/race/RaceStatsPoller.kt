@@ -1,5 +1,7 @@
 package com.dchernykh.trainingrecorder.wear.race
 
+import com.dchernykh.trainingrecorder.core.connector.ServiceDiagnostics
+import com.dchernykh.trainingrecorder.core.connector.ServiceRequestException
 import com.dchernykh.trainingrecorder.core.race.RaceStatsConfig
 import com.dchernykh.trainingrecorder.core.race.RaceStatsParser
 import com.dchernykh.trainingrecorder.core.race.RaceStatsSnapshot
@@ -9,6 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -40,7 +43,10 @@ class RaceStatsPoller(
      * published, so a restart per change would fire an immediate request per
      * character typed at somebody else's timing server.
      */
-    fun poll(config: () -> RaceStatsConfig): Flow<RaceStatsSnapshot> =
+    fun poll(
+        config: () -> RaceStatsConfig,
+        onError: (String?) -> Unit = {},
+    ): Flow<RaceStatsSnapshot> =
         flow {
             while (true) {
                 val current = config()
@@ -48,11 +54,19 @@ class RaceStatsPoller(
                 // or cleared mid-race. The loop idles rather than ending, so
                 // finishing the number starts the standings without a restart.
                 RaceStatsUrl.build(current)?.let { url ->
-                    fetch(url)?.let { body ->
-                        val snapshot = RaceStatsParser.parse(body)
-                        if (!snapshot.isEmpty) emit(snapshot)
+                    val body =
+                        try {
+                            fetch(url).also { onError(if (it == null) "GET /live-stats: NO_RESPONSE" else null) }
+                        } catch (error: IOException) {
+                            onError("GET /live-stats: ${ServiceDiagnostics.network(error)}")
+                            null
+                        }
+                    body?.let {
+                        val snapshot = RaceStatsParser.parse(it)
+                        if (snapshot.isEmpty) onError("GET /live-stats: NO_STATS") else emit(snapshot)
                     }
                 }
+                if (!current.isComplete) onError(null)
                 sleep(current.refreshSeconds.toLong() * MILLIS_PER_SECOND)
             }
         }.flowOn(Dispatchers.IO)
@@ -67,18 +81,20 @@ class RaceStatsPoller(
          * Plain HttpURLConnection: one unauthenticated GET of a few hundred
          * bytes does not justify pulling an HTTP client into the watch APK.
          */
-        fun httpGet(url: String): String? =
-            runCatching {
-                val connection = URL(url).openConnection() as HttpURLConnection
-                try {
-                    connection.connectTimeout = CONNECT_TIMEOUT_MS
-                    connection.readTimeout = READ_TIMEOUT_MS
-                    connection.requestMethod = "GET"
-                    if (connection.responseCode != HTTP_OK) return null
-                    connection.inputStream.bufferedReader().use { it.readText() }
-                } finally {
-                    connection.disconnect()
-                }
-            }.getOrNull()
+        fun httpGet(url: String): String {
+            val connection = URL(url).openConnection() as HttpURLConnection
+            return try {
+                connection.connectTimeout = CONNECT_TIMEOUT_MS
+                connection.readTimeout = READ_TIMEOUT_MS
+                connection.requestMethod = "GET"
+                val status = connection.responseCode
+                val stream = if (status == HTTP_OK) connection.inputStream else connection.errorStream
+                val body = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+                if (status != HTTP_OK) throw ServiceRequestException(ServiceDiagnostics.http(status, body))
+                body
+            } finally {
+                connection.disconnect()
+            }
+        }
     }
 }
