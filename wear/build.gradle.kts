@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
@@ -26,7 +25,7 @@ val wearVersionCodeOffset = 2
 
 android {
     namespace = "com.dchernykh.trainingrecorder.wear"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         // The watch and phone APKs must share one applicationId (and one signing
